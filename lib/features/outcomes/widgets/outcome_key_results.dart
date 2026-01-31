@@ -5,6 +5,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
 import '../providers/outcomes_providers.dart';
+import 'add_key_result_dialog.dart';
 import 'key_result_card.dart';
 
 class OutcomeKeyResults extends ConsumerWidget {
@@ -35,9 +36,11 @@ class OutcomeKeyResults extends ConsumerWidget {
                 const Spacer(),
                 if (outcome.status.isEditable)
                   TextButton.icon(
-                    onPressed: () {
-                      // TODO: Add key result dialog
-                    },
+                    onPressed: () => showAddKeyResultDialog(
+                      context,
+                      outcomeId: outcome.id,
+                      outcomeTitle: outcome.title,
+                    ),
                     icon: const Icon(Icons.add, size: 16),
                     label: const Text('Add'),
                   ),

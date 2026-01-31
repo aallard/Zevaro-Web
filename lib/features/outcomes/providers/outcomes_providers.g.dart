@@ -401,5 +401,22 @@ final updateKeyResultProgressProvider =
 );
 
 typedef _$UpdateKeyResultProgress = AutoDisposeAsyncNotifier<void>;
+String _$addKeyResultHash() => r'75c09739980d6da23293eb57249885e531ed7545';
+
+/// Add key result to an outcome
+///
+/// Copied from [AddKeyResult].
+@ProviderFor(AddKeyResult)
+final addKeyResultProvider =
+    AutoDisposeAsyncNotifierProvider<AddKeyResult, void>.internal(
+  AddKeyResult.new,
+  name: r'addKeyResultProvider',
+  debugGetCreateSourceHash:
+      const bool.fromEnvironment('dart.vm.product') ? null : _$addKeyResultHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef _$AddKeyResult = AutoDisposeAsyncNotifier<void>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

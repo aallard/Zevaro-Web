@@ -186,3 +186,27 @@ class UpdateKeyResultProgress extends _$UpdateKeyResultProgress {
     }
   }
 }
+
+/// Add key result to an outcome
+@riverpod
+class AddKeyResult extends _$AddKeyResult {
+  @override
+  FutureOr<void> build() {}
+
+  Future<KeyResult?> add(String outcomeId, CreateKeyResultRequest request) async {
+    state = const AsyncValue.loading();
+
+    try {
+      final outcomeService = ref.read(outcomeServiceProvider);
+      final keyResult = await outcomeService.addKeyResult(outcomeId, request);
+
+      ref.invalidate(outcomeDetailProvider(outcomeId));
+
+      state = const AsyncValue.data(null);
+      return keyResult;
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+      return null;
+    }
+  }
+}

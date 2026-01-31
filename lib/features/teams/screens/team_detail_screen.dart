@@ -9,6 +9,7 @@ import '../../../core/theme/app_typography.dart';
 import '../../../shared/widgets/common/loading_indicator.dart';
 import '../../../shared/widgets/common/error_view.dart';
 import '../providers/teams_providers.dart';
+import '../widgets/invite_member_dialog.dart';
 import '../widgets/team_member_card.dart';
 
 class TeamDetailScreen extends ConsumerWidget {
@@ -123,9 +124,11 @@ class TeamDetailScreen extends ConsumerWidget {
                         Text('Members', style: AppTypography.h4),
                         const Spacer(),
                         TextButton.icon(
-                          onPressed: () {
-                            // TODO: Show invite dialog
-                          },
+                          onPressed: () => showInviteMemberDialog(
+                            context,
+                            teamId: team.id,
+                            teamName: team.name,
+                          ),
                           icon: const Icon(Icons.person_add, size: 16),
                           label: const Text('Invite'),
                         ),

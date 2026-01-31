@@ -120,3 +120,15 @@ class CreateTeam extends _$CreateTeam {
     }
   }
 }
+
+/// Users available to invite (not already team members)
+@riverpod
+Future<List<User>> availableUsers(AvailableUsersRef ref, String teamId) async {
+  final userService = ref.watch(userServiceProvider);
+  final team = await ref.watch(teamDetailProvider(teamId).future);
+
+  final allUsers = await userService.listUsers();
+  final memberUserIds = team.members?.map((m) => m.userId).toSet() ?? {};
+
+  return allUsers.content.where((u) => !memberUserIds.contains(u.id)).toList();
+}

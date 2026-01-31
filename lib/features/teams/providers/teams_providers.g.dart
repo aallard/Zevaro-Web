@@ -183,6 +183,147 @@ class _TeamDetailProviderElement extends AutoDisposeFutureProviderElement<Team>
   String get id => (origin as TeamDetailProvider).id;
 }
 
+String _$availableUsersHash() => r'71c112eef8e503324e49bb7adc4fd26cf647fda9';
+
+/// Users available to invite (not already team members)
+///
+/// Copied from [availableUsers].
+@ProviderFor(availableUsers)
+const availableUsersProvider = AvailableUsersFamily();
+
+/// Users available to invite (not already team members)
+///
+/// Copied from [availableUsers].
+class AvailableUsersFamily extends Family<AsyncValue<List<User>>> {
+  /// Users available to invite (not already team members)
+  ///
+  /// Copied from [availableUsers].
+  const AvailableUsersFamily();
+
+  /// Users available to invite (not already team members)
+  ///
+  /// Copied from [availableUsers].
+  AvailableUsersProvider call(
+    String teamId,
+  ) {
+    return AvailableUsersProvider(
+      teamId,
+    );
+  }
+
+  @override
+  AvailableUsersProvider getProviderOverride(
+    covariant AvailableUsersProvider provider,
+  ) {
+    return call(
+      provider.teamId,
+    );
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'availableUsersProvider';
+}
+
+/// Users available to invite (not already team members)
+///
+/// Copied from [availableUsers].
+class AvailableUsersProvider extends AutoDisposeFutureProvider<List<User>> {
+  /// Users available to invite (not already team members)
+  ///
+  /// Copied from [availableUsers].
+  AvailableUsersProvider(
+    String teamId,
+  ) : this._internal(
+          (ref) => availableUsers(
+            ref as AvailableUsersRef,
+            teamId,
+          ),
+          from: availableUsersProvider,
+          name: r'availableUsersProvider',
+          debugGetCreateSourceHash:
+              const bool.fromEnvironment('dart.vm.product')
+                  ? null
+                  : _$availableUsersHash,
+          dependencies: AvailableUsersFamily._dependencies,
+          allTransitiveDependencies:
+              AvailableUsersFamily._allTransitiveDependencies,
+          teamId: teamId,
+        );
+
+  AvailableUsersProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.teamId,
+  }) : super.internal();
+
+  final String teamId;
+
+  @override
+  Override overrideWith(
+    FutureOr<List<User>> Function(AvailableUsersRef provider) create,
+  ) {
+    return ProviderOverride(
+      origin: this,
+      override: AvailableUsersProvider._internal(
+        (ref) => create(ref as AvailableUsersRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        teamId: teamId,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeFutureProviderElement<List<User>> createElement() {
+    return _AvailableUsersProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is AvailableUsersProvider && other.teamId == teamId;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, teamId.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+mixin AvailableUsersRef on AutoDisposeFutureProviderRef<List<User>> {
+  /// The parameter `teamId` of this provider.
+  String get teamId;
+}
+
+class _AvailableUsersProviderElement
+    extends AutoDisposeFutureProviderElement<List<User>>
+    with AvailableUsersRef {
+  _AvailableUsersProviderElement(super.provider);
+
+  @override
+  String get teamId => (origin as AvailableUsersProvider).teamId;
+}
+
 String _$addTeamMemberHash() => r'e9b59e0554ffc9440b259e1074ae5cbe4dccb14b';
 
 /// Add team member
