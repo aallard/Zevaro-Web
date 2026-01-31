@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
+import 'features/settings/providers/settings_providers.dart';
 
 class ZevaroApp extends ConsumerWidget {
   const ZevaroApp({super.key});
@@ -10,13 +11,14 @@ class ZevaroApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(appRouterProvider);
+    final themeMode = ref.watch(themeModeSettingProvider);
 
     return MaterialApp.router(
       title: 'Zevaro',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
-      themeMode: ThemeMode.light, // TODO: User preference
+      themeMode: themeMode,
       routerConfig: router,
     );
   }

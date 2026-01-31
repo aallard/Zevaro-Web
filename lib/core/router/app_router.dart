@@ -12,6 +12,7 @@ import '../../features/settings/settings.dart';
 import '../../features/stakeholders/stakeholders.dart';
 import '../../features/teams/teams.dart';
 import '../../shared/widgets/app_shell/app_shell.dart';
+import '../../shared/widgets/common/error_screen.dart';
 import 'guards/auth_guard.dart';
 import 'routes.dart';
 
@@ -184,6 +185,8 @@ GoRouter appRouter(Ref ref) {
         ],
       ),
     ],
-    errorBuilder: (context, state) => const Placeholder(), // TODO: ErrorScreen
+    errorBuilder: (context, state) => NotFoundScreen(
+      path: state.uri.toString(),
+    ),
   );
 }
