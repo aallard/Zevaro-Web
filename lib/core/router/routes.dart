@@ -18,6 +18,7 @@ abstract class Routes {
   static const stakeholders = '/stakeholders';
   static const stakeholderDetail = '/stakeholders/:id';
   static const settings = '/settings';
+  static const organizationSettings = '/settings/organization';
   static const profile = '/profile';
 
   // Helpers

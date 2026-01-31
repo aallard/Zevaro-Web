@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:zevaro_flutter_sdk/zevaro_flutter_sdk.dart';
 import '../../../core/router/routes.dart';
 import '../../../core/theme/app_colors.dart';
@@ -10,6 +11,7 @@ import '../widgets/settings_section.dart';
 import '../widgets/settings_tile.dart';
 import '../widgets/theme_selector.dart';
 import '../widgets/notification_settings.dart';
+import '../widgets/feedback_dialog.dart';
 import '../providers/settings_providers.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -74,9 +76,7 @@ class SettingsScreen extends ConsumerWidget {
                           icon: Icons.business_outlined,
                           title: 'Organization Settings',
                           subtitle: 'Manage your organization',
-                          onTap: () {
-                            // TODO: Navigate to org settings
-                          },
+                          onTap: () => context.go(Routes.organizationSettings),
                         ),
                         SettingsTile(
                           icon: Icons.people_outline,
@@ -107,16 +107,17 @@ class SettingsScreen extends ConsumerWidget {
               SettingsTile(
                 icon: Icons.description_outlined,
                 title: 'Documentation',
-                onTap: () {
-                  // TODO: Open docs URL
+                onTap: () async {
+                  final uri = Uri.parse('https://docs.zevaro.com');
+                  if (await canLaunchUrl(uri)) {
+                    await launchUrl(uri, mode: LaunchMode.externalApplication);
+                  }
                 },
               ),
               SettingsTile(
                 icon: Icons.feedback_outlined,
                 title: 'Send Feedback',
-                onTap: () {
-                  // TODO: Open feedback form
-                },
+                onTap: () => showFeedbackDialog(context),
               ),
             ],
           ),

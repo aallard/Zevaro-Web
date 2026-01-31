@@ -176,6 +176,13 @@ GoRouter appRouter(Ref ref) {
             builder: (context, state) => const SettingsScreen(),
           ),
 
+          // Organization Settings
+          GoRoute(
+            path: Routes.organizationSettings,
+            name: 'organizationSettings',
+            builder: (context, state) => const OrganizationSettingsScreen(),
+          ),
+
           // Profile
           GoRoute(
             path: Routes.profile,
