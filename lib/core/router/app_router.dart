@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../features/auth/auth.dart';
+import '../../shared/widgets/app_shell/app_shell.dart';
 import 'guards/auth_guard.dart';
 import 'routes.dart';
 
@@ -45,8 +46,28 @@ GoRouter appRouter(Ref ref) {
 
       // Main app shell with navigation
       ShellRoute(
-        builder: (context, state, child) =>
-            const Placeholder(), // TODO: AppShell
+        builder: (context, state, child) {
+          // Determine title based on route
+          String title = 'Dashboard';
+          final location = state.matchedLocation;
+          if (location.startsWith('/decisions')) {
+            title = 'Decisions';
+          } else if (location.startsWith('/outcomes')) {
+            title = 'Outcomes';
+          } else if (location.startsWith('/hypotheses')) {
+            title = 'Hypotheses';
+          } else if (location.startsWith('/teams')) {
+            title = 'Teams';
+          } else if (location.startsWith('/stakeholders')) {
+            title = 'Stakeholders';
+          } else if (location.startsWith('/settings')) {
+            title = 'Settings';
+          } else if (location.startsWith('/profile')) {
+            title = 'Profile';
+          }
+
+          return AppShell(title: title, child: child);
+        },
         routes: [
           // Dashboard
           GoRoute(
