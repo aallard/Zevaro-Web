@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../features/auth/auth.dart';
+import '../../features/dashboard/dashboard.dart';
 import '../../shared/widgets/app_shell/app_shell.dart';
 import 'guards/auth_guard.dart';
 import 'routes.dart';
@@ -73,8 +74,7 @@ GoRouter appRouter(Ref ref) {
           GoRoute(
             path: Routes.dashboard,
             name: 'dashboard',
-            builder: (context, state) =>
-                const Placeholder(), // TODO: DashboardScreen
+            builder: (context, state) => const DashboardScreen(),
           ),
 
           // Decisions (CORE)
