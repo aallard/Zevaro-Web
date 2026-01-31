@@ -6,28 +6,37 @@ import 'app.dart';
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Configure SDK for environment
+  const config = SdkConfig(
+    baseUrl: String.fromEnvironment(
+      'API_BASE_URL',
+      defaultValue: 'http://localhost:8080/api',
+    ),
+    enableLogging: bool.fromEnvironment(
+      'ENABLE_LOGGING',
+      defaultValue: true,
+    ),
+  );
+
   runApp(
     ProviderScope(
       overrides: [
-        // Configure SDK for environment
-        // In production, read from environment variables
+        // Override the SDK config with our environment config
         sdkConfigNotifierProvider.overrideWith(
-          () => SdkConfigNotifier()
-            ..setConfig(
-              const SdkConfig(
-                baseUrl: String.fromEnvironment(
-                  'API_BASE_URL',
-                  defaultValue: 'http://localhost:8080/api',
-                ),
-                enableLogging: bool.fromEnvironment(
-                  'ENABLE_LOGGING',
-                  defaultValue: true,
-                ),
-              ),
-            ),
+          () => _ConfiguredSdkConfigNotifier(config),
         ),
       ],
       child: const ZevaroApp(),
     ),
   );
+}
+
+/// Custom notifier that returns the configured SDK config in build()
+class _ConfiguredSdkConfigNotifier extends SdkConfigNotifier {
+  final SdkConfig _config;
+
+  _ConfiguredSdkConfigNotifier(this._config);
+
+  @override
+  SdkConfig build() => _config;
 }
