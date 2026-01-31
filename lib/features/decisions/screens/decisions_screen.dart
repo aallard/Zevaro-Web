@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../providers/decisions_providers.dart';
+import '../widgets/create_decision_dialog.dart';
 import '../widgets/decision_board.dart';
 import '../widgets/decision_list.dart';
 import '../widgets/decision_filters.dart';
@@ -59,9 +60,7 @@ class DecisionsScreen extends ConsumerWidget {
 
               // Add decision button
               FilledButton.icon(
-                onPressed: () {
-                  // TODO: Show create decision dialog
-                },
+                onPressed: () => showCreateDecisionDialog(context),
                 icon: const Icon(Icons.add, size: 18),
                 label: const Text('New Decision'),
               ),

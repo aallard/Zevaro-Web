@@ -3,6 +3,7 @@ export 'screens/hypotheses_screen.dart';
 export 'screens/hypothesis_detail_screen.dart';
 
 // Widgets
+export 'widgets/create_hypothesis_dialog.dart';
 export 'widgets/hypothesis_card.dart';
 export 'widgets/hypothesis_list.dart';
 export 'widgets/hypothesis_filters.dart';

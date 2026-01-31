@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../widgets/create_outcome_dialog.dart';
 import '../widgets/outcome_list.dart';
 import '../widgets/outcome_filters.dart';
 
@@ -27,9 +28,7 @@ class OutcomesScreen extends ConsumerWidget {
               const Expanded(child: OutcomeFiltersBar()),
               const SizedBox(width: AppSpacing.md),
               FilledButton.icon(
-                onPressed: () {
-                  // TODO: Show create outcome dialog
-                },
+                onPressed: () => showCreateOutcomeDialog(context),
                 icon: const Icon(Icons.add, size: 18),
                 label: const Text('New Outcome'),
               ),

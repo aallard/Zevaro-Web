@@ -3,6 +3,7 @@ export 'screens/outcomes_screen.dart';
 export 'screens/outcome_detail_screen.dart';
 
 // Widgets
+export 'widgets/create_outcome_dialog.dart';
 export 'widgets/outcome_card.dart';
 export 'widgets/outcome_list.dart';
 export 'widgets/outcome_filters.dart';

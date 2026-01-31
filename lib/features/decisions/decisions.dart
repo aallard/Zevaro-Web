@@ -3,6 +3,7 @@ export 'screens/decisions_screen.dart';
 export 'screens/decision_detail_screen.dart';
 
 // Widgets
+export 'widgets/create_decision_dialog.dart';
 export 'widgets/decision_board.dart';
 export 'widgets/decision_column.dart';
 export 'widgets/decision_card.dart';

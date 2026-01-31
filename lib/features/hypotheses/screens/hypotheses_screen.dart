@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../widgets/create_hypothesis_dialog.dart';
 import '../widgets/hypothesis_list.dart';
 import '../widgets/hypothesis_filters.dart';
 
@@ -29,9 +30,7 @@ class HypothesesScreen extends ConsumerWidget {
               const Expanded(child: HypothesisFiltersBar()),
               const SizedBox(width: AppSpacing.md),
               FilledButton.icon(
-                onPressed: () {
-                  // TODO: Show create hypothesis dialog
-                },
+                onPressed: () => showCreateHypothesisDialog(context),
                 icon: const Icon(Icons.add, size: 18),
                 label: const Text('New Hypothesis'),
               ),
