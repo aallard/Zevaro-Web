@@ -8,6 +8,8 @@ import '../../features/dashboard/dashboard.dart';
 import '../../features/decisions/decisions.dart';
 import '../../features/hypotheses/hypotheses.dart';
 import '../../features/outcomes/outcomes.dart';
+import '../../features/stakeholders/stakeholders.dart';
+import '../../features/teams/teams.dart';
 import '../../shared/widgets/app_shell/app_shell.dart';
 import 'guards/auth_guard.dart';
 import 'routes.dart';
@@ -135,15 +137,14 @@ GoRouter appRouter(Ref ref) {
           GoRoute(
             path: Routes.teams,
             name: 'teams',
-            builder: (context, state) =>
-                const Placeholder(), // TODO: TeamsScreen
+            builder: (context, state) => const TeamsScreen(),
             routes: [
               GoRoute(
                 path: ':id',
                 name: 'teamDetail',
                 builder: (context, state) {
-                  // final id = state.pathParameters['id']!;
-                  return const Placeholder(); // TODO: TeamDetailScreen(id: id)
+                  final id = state.pathParameters['id']!;
+                  return TeamDetailScreen(id: id);
                 },
               ),
             ],
@@ -153,15 +154,14 @@ GoRouter appRouter(Ref ref) {
           GoRoute(
             path: Routes.stakeholders,
             name: 'stakeholders',
-            builder: (context, state) =>
-                const Placeholder(), // TODO: StakeholdersScreen
+            builder: (context, state) => const StakeholdersScreen(),
             routes: [
               GoRoute(
                 path: ':id',
                 name: 'stakeholderDetail',
                 builder: (context, state) {
-                  // final id = state.pathParameters['id']!;
-                  return const Placeholder(); // TODO: StakeholderDetailScreen(id: id)
+                  final id = state.pathParameters['id']!;
+                  return const Placeholder(); // TODO: StakeholderDetailScreen
                 },
               ),
             ],
