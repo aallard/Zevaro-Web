@@ -6,6 +6,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../features/auth/auth.dart';
 import '../../features/dashboard/dashboard.dart';
 import '../../features/decisions/decisions.dart';
+import '../../features/outcomes/outcomes.dart';
 import '../../shared/widgets/app_shell/app_shell.dart';
 import 'guards/auth_guard.dart';
 import 'routes.dart';
@@ -99,15 +100,14 @@ GoRouter appRouter(Ref ref) {
           GoRoute(
             path: Routes.outcomes,
             name: 'outcomes',
-            builder: (context, state) =>
-                const Placeholder(), // TODO: OutcomesScreen
+            builder: (context, state) => const OutcomesScreen(),
             routes: [
               GoRoute(
                 path: ':id',
                 name: 'outcomeDetail',
                 builder: (context, state) {
-                  // final id = state.pathParameters['id']!;
-                  return const Placeholder(); // TODO: OutcomeDetailScreen(id: id)
+                  final id = state.pathParameters['id']!;
+                  return OutcomeDetailScreen(id: id);
                 },
               ),
             ],
