@@ -50,3 +50,31 @@ class SendReminder extends _$SendReminder {
     }
   }
 }
+
+/// Stakeholder's pending responses
+@riverpod
+Future<List<StakeholderResponse>> stakeholderPendingResponses(
+  StakeholderPendingResponsesRef ref,
+  String stakeholderId,
+) async {
+  final stakeholderService = ref.watch(stakeholderServiceProvider);
+  final response = await stakeholderService.getResponseHistory(
+    stakeholderId,
+    pending: true,
+  );
+  return response.content;
+}
+
+/// Stakeholder's response history (completed)
+@riverpod
+Future<List<StakeholderResponse>> stakeholderResponseHistory(
+  StakeholderResponseHistoryRef ref,
+  String stakeholderId,
+) async {
+  final stakeholderService = ref.watch(stakeholderServiceProvider);
+  final response = await stakeholderService.getResponseHistory(
+    stakeholderId,
+    pending: false,
+  );
+  return response.content;
+}

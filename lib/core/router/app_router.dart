@@ -163,7 +163,7 @@ GoRouter appRouter(Ref ref) {
                 name: 'stakeholderDetail',
                 builder: (context, state) {
                   final id = state.pathParameters['id']!;
-                  return const Placeholder(); // TODO: StakeholderDetailScreen
+                  return StakeholderDetailScreen(id: id);
                 },
               ),
             ],

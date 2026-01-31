@@ -187,6 +187,304 @@ final myStakeholderProfileProvider =
 );
 
 typedef MyStakeholderProfileRef = AutoDisposeFutureProviderRef<Stakeholder>;
+String _$stakeholderPendingResponsesHash() =>
+    r'da4f07c96b93773568d3cee7763d1816b21267a6';
+
+/// Stakeholder's pending responses
+///
+/// Copied from [stakeholderPendingResponses].
+@ProviderFor(stakeholderPendingResponses)
+const stakeholderPendingResponsesProvider = StakeholderPendingResponsesFamily();
+
+/// Stakeholder's pending responses
+///
+/// Copied from [stakeholderPendingResponses].
+class StakeholderPendingResponsesFamily
+    extends Family<AsyncValue<List<StakeholderResponse>>> {
+  /// Stakeholder's pending responses
+  ///
+  /// Copied from [stakeholderPendingResponses].
+  const StakeholderPendingResponsesFamily();
+
+  /// Stakeholder's pending responses
+  ///
+  /// Copied from [stakeholderPendingResponses].
+  StakeholderPendingResponsesProvider call(
+    String stakeholderId,
+  ) {
+    return StakeholderPendingResponsesProvider(
+      stakeholderId,
+    );
+  }
+
+  @override
+  StakeholderPendingResponsesProvider getProviderOverride(
+    covariant StakeholderPendingResponsesProvider provider,
+  ) {
+    return call(
+      provider.stakeholderId,
+    );
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'stakeholderPendingResponsesProvider';
+}
+
+/// Stakeholder's pending responses
+///
+/// Copied from [stakeholderPendingResponses].
+class StakeholderPendingResponsesProvider
+    extends AutoDisposeFutureProvider<List<StakeholderResponse>> {
+  /// Stakeholder's pending responses
+  ///
+  /// Copied from [stakeholderPendingResponses].
+  StakeholderPendingResponsesProvider(
+    String stakeholderId,
+  ) : this._internal(
+          (ref) => stakeholderPendingResponses(
+            ref as StakeholderPendingResponsesRef,
+            stakeholderId,
+          ),
+          from: stakeholderPendingResponsesProvider,
+          name: r'stakeholderPendingResponsesProvider',
+          debugGetCreateSourceHash:
+              const bool.fromEnvironment('dart.vm.product')
+                  ? null
+                  : _$stakeholderPendingResponsesHash,
+          dependencies: StakeholderPendingResponsesFamily._dependencies,
+          allTransitiveDependencies:
+              StakeholderPendingResponsesFamily._allTransitiveDependencies,
+          stakeholderId: stakeholderId,
+        );
+
+  StakeholderPendingResponsesProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.stakeholderId,
+  }) : super.internal();
+
+  final String stakeholderId;
+
+  @override
+  Override overrideWith(
+    FutureOr<List<StakeholderResponse>> Function(
+            StakeholderPendingResponsesRef provider)
+        create,
+  ) {
+    return ProviderOverride(
+      origin: this,
+      override: StakeholderPendingResponsesProvider._internal(
+        (ref) => create(ref as StakeholderPendingResponsesRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        stakeholderId: stakeholderId,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeFutureProviderElement<List<StakeholderResponse>> createElement() {
+    return _StakeholderPendingResponsesProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is StakeholderPendingResponsesProvider &&
+        other.stakeholderId == stakeholderId;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, stakeholderId.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+mixin StakeholderPendingResponsesRef
+    on AutoDisposeFutureProviderRef<List<StakeholderResponse>> {
+  /// The parameter `stakeholderId` of this provider.
+  String get stakeholderId;
+}
+
+class _StakeholderPendingResponsesProviderElement
+    extends AutoDisposeFutureProviderElement<List<StakeholderResponse>>
+    with StakeholderPendingResponsesRef {
+  _StakeholderPendingResponsesProviderElement(super.provider);
+
+  @override
+  String get stakeholderId =>
+      (origin as StakeholderPendingResponsesProvider).stakeholderId;
+}
+
+String _$stakeholderResponseHistoryHash() =>
+    r'a5dc98faea5b4648893959e283f535ce7ed065fb';
+
+/// Stakeholder's response history (completed)
+///
+/// Copied from [stakeholderResponseHistory].
+@ProviderFor(stakeholderResponseHistory)
+const stakeholderResponseHistoryProvider = StakeholderResponseHistoryFamily();
+
+/// Stakeholder's response history (completed)
+///
+/// Copied from [stakeholderResponseHistory].
+class StakeholderResponseHistoryFamily
+    extends Family<AsyncValue<List<StakeholderResponse>>> {
+  /// Stakeholder's response history (completed)
+  ///
+  /// Copied from [stakeholderResponseHistory].
+  const StakeholderResponseHistoryFamily();
+
+  /// Stakeholder's response history (completed)
+  ///
+  /// Copied from [stakeholderResponseHistory].
+  StakeholderResponseHistoryProvider call(
+    String stakeholderId,
+  ) {
+    return StakeholderResponseHistoryProvider(
+      stakeholderId,
+    );
+  }
+
+  @override
+  StakeholderResponseHistoryProvider getProviderOverride(
+    covariant StakeholderResponseHistoryProvider provider,
+  ) {
+    return call(
+      provider.stakeholderId,
+    );
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'stakeholderResponseHistoryProvider';
+}
+
+/// Stakeholder's response history (completed)
+///
+/// Copied from [stakeholderResponseHistory].
+class StakeholderResponseHistoryProvider
+    extends AutoDisposeFutureProvider<List<StakeholderResponse>> {
+  /// Stakeholder's response history (completed)
+  ///
+  /// Copied from [stakeholderResponseHistory].
+  StakeholderResponseHistoryProvider(
+    String stakeholderId,
+  ) : this._internal(
+          (ref) => stakeholderResponseHistory(
+            ref as StakeholderResponseHistoryRef,
+            stakeholderId,
+          ),
+          from: stakeholderResponseHistoryProvider,
+          name: r'stakeholderResponseHistoryProvider',
+          debugGetCreateSourceHash:
+              const bool.fromEnvironment('dart.vm.product')
+                  ? null
+                  : _$stakeholderResponseHistoryHash,
+          dependencies: StakeholderResponseHistoryFamily._dependencies,
+          allTransitiveDependencies:
+              StakeholderResponseHistoryFamily._allTransitiveDependencies,
+          stakeholderId: stakeholderId,
+        );
+
+  StakeholderResponseHistoryProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.stakeholderId,
+  }) : super.internal();
+
+  final String stakeholderId;
+
+  @override
+  Override overrideWith(
+    FutureOr<List<StakeholderResponse>> Function(
+            StakeholderResponseHistoryRef provider)
+        create,
+  ) {
+    return ProviderOverride(
+      origin: this,
+      override: StakeholderResponseHistoryProvider._internal(
+        (ref) => create(ref as StakeholderResponseHistoryRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        stakeholderId: stakeholderId,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeFutureProviderElement<List<StakeholderResponse>> createElement() {
+    return _StakeholderResponseHistoryProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is StakeholderResponseHistoryProvider &&
+        other.stakeholderId == stakeholderId;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, stakeholderId.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+mixin StakeholderResponseHistoryRef
+    on AutoDisposeFutureProviderRef<List<StakeholderResponse>> {
+  /// The parameter `stakeholderId` of this provider.
+  String get stakeholderId;
+}
+
+class _StakeholderResponseHistoryProviderElement
+    extends AutoDisposeFutureProviderElement<List<StakeholderResponse>>
+    with StakeholderResponseHistoryRef {
+  _StakeholderResponseHistoryProviderElement(super.provider);
+
+  @override
+  String get stakeholderId =>
+      (origin as StakeholderResponseHistoryProvider).stakeholderId;
+}
+
 String _$leaderboardPeriodHash() => r'c1fd36f7766a4025ad52f3c3455c67c7f9911039';
 
 /// Leaderboard view mode
