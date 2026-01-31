@@ -9,6 +9,7 @@ import '../../../core/theme/app_typography.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../shared/widgets/common/loading_indicator.dart';
 import '../../../shared/widgets/common/error_view.dart';
+import '../../hypotheses/widgets/create_hypothesis_dialog.dart';
 import '../providers/outcomes_providers.dart';
 import '../widgets/outcome_status_badge.dart';
 import '../widgets/outcome_key_results.dart';
@@ -58,7 +59,10 @@ class OutcomeDetailScreen extends ConsumerWidget {
                       children: [
                         OutcomeKeyResults(outcome: outcome),
                         const SizedBox(height: AppSpacing.lg),
-                        _OutcomeHypotheses(hypothesesAsync: hypothesesAsync),
+                        _OutcomeHypotheses(
+                          hypothesesAsync: hypothesesAsync,
+                          outcomeId: outcome.id,
+                        ),
                       ],
                     ),
                   ),
@@ -73,7 +77,10 @@ class OutcomeDetailScreen extends ConsumerWidget {
               const SizedBox(height: AppSpacing.lg),
               _OutcomeMetadata(outcome: outcome),
               const SizedBox(height: AppSpacing.lg),
-              _OutcomeHypotheses(hypothesesAsync: hypothesesAsync),
+              _OutcomeHypotheses(
+                hypothesesAsync: hypothesesAsync,
+                outcomeId: outcome.id,
+              ),
             ],
 
             const SizedBox(height: AppSpacing.xl),
@@ -241,8 +248,12 @@ class _MetadataRow extends StatelessWidget {
 
 class _OutcomeHypotheses extends StatelessWidget {
   final AsyncValue<List<Hypothesis>> hypothesesAsync;
+  final String outcomeId;
 
-  const _OutcomeHypotheses({required this.hypothesesAsync});
+  const _OutcomeHypotheses({
+    required this.hypothesesAsync,
+    required this.outcomeId,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -257,9 +268,10 @@ class _OutcomeHypotheses extends StatelessWidget {
                 Text('Hypotheses', style: AppTypography.h4),
                 const Spacer(),
                 TextButton.icon(
-                  onPressed: () {
-                    // TODO: Create hypothesis for this outcome
-                  },
+                  onPressed: () => showCreateHypothesisDialog(
+                    context,
+                    outcomeId: outcomeId,
+                  ),
                   icon: const Icon(Icons.add, size: 16),
                   label: const Text('Add'),
                 ),
