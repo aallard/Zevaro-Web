@@ -5,6 +5,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../features/auth/auth.dart';
 import '../../features/dashboard/dashboard.dart';
+import '../../features/decisions/decisions.dart';
 import '../../shared/widgets/app_shell/app_shell.dart';
 import 'guards/auth_guard.dart';
 import 'routes.dart';
@@ -81,15 +82,14 @@ GoRouter appRouter(Ref ref) {
           GoRoute(
             path: Routes.decisions,
             name: 'decisions',
-            builder: (context, state) =>
-                const Placeholder(), // TODO: DecisionsScreen
+            builder: (context, state) => const DecisionsScreen(),
             routes: [
               GoRoute(
                 path: ':id',
                 name: 'decisionDetail',
                 builder: (context, state) {
                   // final id = state.pathParameters['id']!;
-                  return const Placeholder(); // TODO: DecisionDetailScreen(id: id)
+                  return const Placeholder(); // TODO: DecisionDetailScreen (ZW-006)
                 },
               ),
             ],
