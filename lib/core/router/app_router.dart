@@ -8,6 +8,7 @@ import '../../features/dashboard/dashboard.dart';
 import '../../features/decisions/decisions.dart';
 import '../../features/hypotheses/hypotheses.dart';
 import '../../features/outcomes/outcomes.dart';
+import '../../features/settings/settings.dart';
 import '../../features/stakeholders/stakeholders.dart';
 import '../../features/teams/teams.dart';
 import '../../shared/widgets/app_shell/app_shell.dart';
@@ -171,16 +172,14 @@ GoRouter appRouter(Ref ref) {
           GoRoute(
             path: Routes.settings,
             name: 'settings',
-            builder: (context, state) =>
-                const Placeholder(), // TODO: SettingsScreen
+            builder: (context, state) => const SettingsScreen(),
           ),
 
           // Profile
           GoRoute(
             path: Routes.profile,
             name: 'profile',
-            builder: (context, state) =>
-                const Placeholder(), // TODO: ProfileScreen
+            builder: (context, state) => const ProfileScreen(),
           ),
         ],
       ),
