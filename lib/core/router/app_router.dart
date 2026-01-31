@@ -6,6 +6,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../features/auth/auth.dart';
 import '../../features/dashboard/dashboard.dart';
 import '../../features/decisions/decisions.dart';
+import '../../features/hypotheses/hypotheses.dart';
 import '../../features/outcomes/outcomes.dart';
 import '../../shared/widgets/app_shell/app_shell.dart';
 import 'guards/auth_guard.dart';
@@ -117,15 +118,14 @@ GoRouter appRouter(Ref ref) {
           GoRoute(
             path: Routes.hypotheses,
             name: 'hypotheses',
-            builder: (context, state) =>
-                const Placeholder(), // TODO: HypothesesScreen
+            builder: (context, state) => const HypothesesScreen(),
             routes: [
               GoRoute(
                 path: ':id',
                 name: 'hypothesisDetail',
                 builder: (context, state) {
-                  // final id = state.pathParameters['id']!;
-                  return const Placeholder(); // TODO: HypothesisDetailScreen(id: id)
+                  final id = state.pathParameters['id']!;
+                  return HypothesisDetailScreen(id: id);
                 },
               ),
             ],
