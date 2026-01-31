@@ -142,3 +142,90 @@ class CreateDecision extends _$CreateDecision {
     }
   }
 }
+
+/// Selected decision for detail view
+@riverpod
+Future<Decision> decisionDetail(DecisionDetailRef ref, String id) async {
+  final decisionService = ref.watch(decisionServiceProvider);
+  return decisionService.getDecisionWithDetails(id);
+}
+
+/// Vote on a decision
+@riverpod
+class VoteOnDecision extends _$VoteOnDecision {
+  @override
+  FutureOr<void> build() {}
+
+  Future<bool> vote(String decisionId, String voteValue,
+      {String? comment}) async {
+    state = const AsyncValue.loading();
+
+    try {
+      final actions = ref.read(decisionActionsProvider.notifier);
+      await actions.vote(decisionId, voteValue, comment: comment);
+
+      // Invalidate to refresh
+      ref.invalidate(decisionDetailProvider(decisionId));
+      ref.invalidate(decisionQueueProvider);
+
+      state = const AsyncValue.data(null);
+      return true;
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+      return false;
+    }
+  }
+}
+
+/// Resolve a decision
+@riverpod
+class ResolveDecisionAction extends _$ResolveDecisionAction {
+  @override
+  FutureOr<void> build() {}
+
+  Future<bool> resolve(
+      String decisionId, ResolveDecisionRequest request) async {
+    state = const AsyncValue.loading();
+
+    try {
+      final actions = ref.read(decisionActionsProvider.notifier);
+      await actions.resolveDecision(decisionId, request);
+
+      // Invalidate to refresh
+      ref.invalidate(decisionDetailProvider(decisionId));
+      ref.invalidate(decisionQueueProvider);
+      ref.invalidate(decisionsByStatusProvider);
+
+      state = const AsyncValue.data(null);
+      return true;
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+      return false;
+    }
+  }
+}
+
+/// Add comment to a decision
+@riverpod
+class AddDecisionComment extends _$AddDecisionComment {
+  @override
+  FutureOr<void> build() {}
+
+  Future<bool> addComment(String decisionId, String content,
+      {String? parentId}) async {
+    state = const AsyncValue.loading();
+
+    try {
+      final decisionService = ref.read(decisionServiceProvider);
+      await decisionService.addComment(decisionId, content, parentId: parentId);
+
+      ref.invalidate(decisionDetailProvider(decisionId));
+
+      state = const AsyncValue.data(null);
+      return true;
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+      return false;
+    }
+  }
+}

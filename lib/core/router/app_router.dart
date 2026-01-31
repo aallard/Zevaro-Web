@@ -88,8 +88,8 @@ GoRouter appRouter(Ref ref) {
                 path: ':id',
                 name: 'decisionDetail',
                 builder: (context, state) {
-                  // final id = state.pathParameters['id']!;
-                  return const Placeholder(); // TODO: DecisionDetailScreen (ZW-006)
+                  final id = state.pathParameters['id']!;
+                  return DecisionDetailScreen(id: id);
                 },
               ),
             ],
