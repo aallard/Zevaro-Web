@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../features/auth/auth.dart';
 import 'guards/auth_guard.dart';
 import 'routes.dart';
 
@@ -21,18 +22,25 @@ GoRouter appRouter(Ref ref) {
       GoRoute(
         path: Routes.login,
         name: 'login',
-        builder: (context, state) => const Placeholder(), // TODO: LoginScreen
+        builder: (context, state) => const LoginScreen(),
       ),
       GoRoute(
         path: Routes.register,
         name: 'register',
-        builder: (context, state) => const Placeholder(), // TODO: RegisterScreen
+        builder: (context, state) => const RegisterScreen(),
       ),
       GoRoute(
         path: Routes.forgotPassword,
         name: 'forgotPassword',
-        builder: (context, state) =>
-            const Placeholder(), // TODO: ForgotPasswordScreen
+        builder: (context, state) => const ForgotPasswordScreen(),
+      ),
+      GoRoute(
+        path: Routes.resetPassword,
+        name: 'resetPassword',
+        builder: (context, state) {
+          final token = state.uri.queryParameters['token'];
+          return ResetPasswordScreen(token: token);
+        },
       ),
 
       // Main app shell with navigation
