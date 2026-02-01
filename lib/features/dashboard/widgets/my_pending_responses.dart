@@ -13,6 +13,7 @@ class MyPendingResponses extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
     final responsesAsync = ref.watch(myPendingResponsesProvider);
 
     return Card(
@@ -28,7 +29,9 @@ class MyPendingResponses extends ConsumerWidget {
                   color: AppColors.warning,
                 ),
                 const SizedBox(width: AppSpacing.sm),
-                Text('Awaiting Your Input', style: AppTypography.h4),
+                Text('Awaiting Your Input', style: AppTypography.h4.copyWith(
+                  color: theme.colorScheme.onSurface,
+                )),
                 const Spacer(),
                 TextButton(
                   onPressed: () => context.go(Routes.stakeholders),
@@ -40,7 +43,7 @@ class MyPendingResponses extends ConsumerWidget {
             responsesAsync.when(
               data: (responses) {
                 if (responses.isEmpty) {
-                  return _buildEmptyState();
+                  return _buildEmptyState(context);
                 }
                 final pending = responses.take(5).toList();
                 return Column(
@@ -58,7 +61,8 @@ class MyPendingResponses extends ConsumerWidget {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
       child: Column(
@@ -71,11 +75,13 @@ class MyPendingResponses extends ConsumerWidget {
           const SizedBox(height: AppSpacing.sm),
           Text(
             "You're responsive!",
-            style: AppTypography.labelLarge,
+            style: AppTypography.labelLarge.copyWith(
+              color: theme.colorScheme.onSurface,
+            ),
           ),
-          const Text(
+          Text(
             'No pending responses needed',
-            style: TextStyle(color: AppColors.textSecondary),
+            style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.6)),
           ),
         ],
       ),
@@ -83,6 +89,7 @@ class MyPendingResponses extends ConsumerWidget {
   }
 
   Widget _buildResponseItem(BuildContext context, StakeholderResponse response) {
+    final theme = Theme.of(context);
     return InkWell(
       onTap: () => context.go(Routes.decisionById(response.decisionId)),
       borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
@@ -96,7 +103,7 @@ class MyPendingResponses extends ConsumerWidget {
             Icon(
               response.withinSla ? Icons.schedule : Icons.warning_amber,
               color:
-                  response.withinSla ? AppColors.textSecondary : AppColors.error,
+                  response.withinSla ? theme.colorScheme.onSurface.withOpacity(0.6) : theme.colorScheme.error,
               size: 20,
             ),
             const SizedBox(width: AppSpacing.sm),
@@ -106,7 +113,9 @@ class MyPendingResponses extends ConsumerWidget {
                 children: [
                   Text(
                     response.decisionTitle ?? 'Decision',
-                    style: AppTypography.labelMedium,
+                    style: AppTypography.labelMedium.copyWith(
+                      color: theme.colorScheme.onSurface,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -114,16 +123,16 @@ class MyPendingResponses extends ConsumerWidget {
                     'Waiting ${response.responseTimeDisplay}',
                     style: AppTypography.bodySmall.copyWith(
                       color: response.withinSla
-                          ? AppColors.textTertiary
-                          : AppColors.error,
+                          ? theme.colorScheme.onSurface.withOpacity(0.5)
+                          : theme.colorScheme.error,
                     ),
                   ),
                 ],
               ),
             ),
-            const Icon(
+            Icon(
               Icons.chevron_right,
-              color: AppColors.textTertiary,
+              color: theme.colorScheme.onSurface.withOpacity(0.5),
             ),
           ],
         ),

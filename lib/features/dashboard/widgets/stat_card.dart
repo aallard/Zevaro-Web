@@ -25,7 +25,8 @@ class StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cardColor = color ?? AppColors.primary;
+    final theme = Theme.of(context);
+    final cardColor = color ?? theme.colorScheme.primary;
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -34,10 +35,10 @@ class StatCard extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(AppSpacing.lg),
           decoration: isUrgent
-              ? const BoxDecoration(
+              ? BoxDecoration(
                   border: Border(
                     left: BorderSide(
-                      color: AppColors.error,
+                      color: theme.colorScheme.error,
                       width: 4,
                     ),
                   ),
@@ -58,9 +59,9 @@ class StatCard extends StatelessWidget {
                   ),
                   const Spacer(),
                   if (onTap != null)
-                    const Icon(
+                    Icon(
                       Icons.arrow_forward,
-                      color: AppColors.textTertiary,
+                      color: theme.colorScheme.onSurface.withOpacity(0.5),
                       size: 20,
                     ),
                 ],
@@ -69,14 +70,14 @@ class StatCard extends StatelessWidget {
               Text(
                 value,
                 style: AppTypography.h1.copyWith(
-                  color: isUrgent ? AppColors.error : AppColors.textPrimary,
+                  color: isUrgent ? theme.colorScheme.error : theme.colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: AppSpacing.xxs),
               Text(
                 title,
                 style: AppTypography.bodyMedium.copyWith(
-                  color: AppColors.textSecondary,
+                  color: theme.colorScheme.onSurface.withOpacity(0.7),
                 ),
               ),
               if (subtitle != null) ...[
@@ -84,7 +85,7 @@ class StatCard extends StatelessWidget {
                 Text(
                   subtitle!,
                   style: AppTypography.bodySmall.copyWith(
-                    color: isUrgent ? AppColors.error : AppColors.textTertiary,
+                    color: isUrgent ? theme.colorScheme.error : theme.colorScheme.onSurface.withOpacity(0.5),
                   ),
                 ),
               ],

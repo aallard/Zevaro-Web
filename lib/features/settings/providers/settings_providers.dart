@@ -15,7 +15,7 @@ class ThemeModeSetting extends _$ThemeModeSetting {
   @override
   ThemeMode build() {
     _loadFromPrefs();
-    return ThemeMode.system;
+    return ThemeMode.light;
   }
 
   Future<void> _loadFromPrefs() async {
@@ -24,7 +24,7 @@ class ThemeModeSetting extends _$ThemeModeSetting {
     if (value != null) {
       state = ThemeMode.values.firstWhere(
         (m) => m.name == value,
-        orElse: () => ThemeMode.system,
+        orElse: () => ThemeMode.light,
       );
     }
   }

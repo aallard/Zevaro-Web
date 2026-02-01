@@ -13,6 +13,7 @@ class DecisionQueuePreview extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
     final decisionsAsync = ref.watch(decisionQueueProvider());
 
     return Card(
@@ -23,12 +24,14 @@ class DecisionQueuePreview extends ConsumerWidget {
           children: [
             Row(
               children: [
-                const Icon(
+                Icon(
                   Icons.how_to_vote_outlined,
-                  color: AppColors.primary,
+                  color: theme.colorScheme.primary,
                 ),
                 const SizedBox(width: AppSpacing.sm),
-                Text('Decision Queue', style: AppTypography.h4),
+                Text('Decision Queue', style: AppTypography.h4.copyWith(
+                  color: theme.colorScheme.onSurface,
+                )),
                 const Spacer(),
                 TextButton(
                   onPressed: () => context.go(Routes.decisions),
@@ -40,7 +43,7 @@ class DecisionQueuePreview extends ConsumerWidget {
             decisionsAsync.when(
               data: (decisions) {
                 if (decisions.isEmpty) {
-                  return _buildEmptyState();
+                  return _buildEmptyState(context);
                 }
                 // Show top 5 most urgent
                 final urgent = decisions.take(5).toList();
@@ -58,7 +61,8 @@ class DecisionQueuePreview extends ConsumerWidget {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
       child: Column(
@@ -71,11 +75,13 @@ class DecisionQueuePreview extends ConsumerWidget {
           const SizedBox(height: AppSpacing.sm),
           Text(
             'All caught up!',
-            style: AppTypography.labelLarge,
+            style: AppTypography.labelLarge.copyWith(
+              color: theme.colorScheme.onSurface,
+            ),
           ),
-          const Text(
+          Text(
             'No pending decisions',
-            style: TextStyle(color: AppColors.textSecondary),
+            style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.6)),
           ),
         ],
       ),
@@ -83,6 +89,7 @@ class DecisionQueuePreview extends ConsumerWidget {
   }
 
   Widget _buildDecisionItem(BuildContext context, Decision decision) {
+    final theme = Theme.of(context);
     final urgencyColor =
         Color(int.parse(decision.urgency.color.replaceFirst('#', '0xFF')));
 
@@ -111,7 +118,9 @@ class DecisionQueuePreview extends ConsumerWidget {
                 children: [
                   Text(
                     decision.title,
-                    style: AppTypography.labelMedium,
+                    style: AppTypography.labelMedium.copyWith(
+                      color: theme.colorScheme.onSurface,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -119,8 +128,8 @@ class DecisionQueuePreview extends ConsumerWidget {
                     decision.slaStatusDisplay,
                     style: AppTypography.bodySmall.copyWith(
                       color: decision.isSlaBreached
-                          ? AppColors.error
-                          : AppColors.textTertiary,
+                          ? theme.colorScheme.error
+                          : theme.colorScheme.onSurface.withOpacity(0.5),
                     ),
                   ),
                 ],
