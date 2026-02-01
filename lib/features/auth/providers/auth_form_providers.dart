@@ -16,8 +16,8 @@ class LoginFormState extends _$LoginFormState {
     state = const AsyncValue.loading();
 
     state = await AsyncValue.guard(() async {
-      final authService = ref.read(authServiceProvider);
-      await authService.login(LoginRequest(
+      // Use AuthState.login() which properly sets auth state for the router guard
+      await ref.read(authStateProvider.notifier).login(LoginRequest(
         email: email,
         password: password,
       ));

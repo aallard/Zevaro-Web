@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:zevaro_flutter_sdk/zevaro_flutter_sdk.dart';
 
 import '../../features/auth/auth.dart';
 import '../../features/dashboard/dashboard.dart';
@@ -18,11 +19,25 @@ import 'routes.dart';
 
 part 'app_router.g.dart';
 
+/// Notifier that triggers router refresh when auth state changes.
+class AuthChangeNotifier extends ChangeNotifier {
+  AuthChangeNotifier(this._ref) {
+    _ref.listen(authStateProvider, (_, __) {
+      notifyListeners();
+    });
+  }
+  final Ref _ref;
+}
+
 @riverpod
 GoRouter appRouter(Ref ref) {
   final authGuard = AuthGuard(ref);
+  final authNotifier = AuthChangeNotifier(ref);
+
+  ref.onDispose(() => authNotifier.dispose());
 
   return GoRouter(
+    refreshListenable: authNotifier,
     initialLocation: Routes.dashboard,
     debugLogDiagnostics: true,
     redirect: authGuard.redirect,

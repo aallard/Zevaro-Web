@@ -6,7 +6,7 @@ part of 'auth_form_providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$loginFormStateHash() => r'f226675cde773773cc415aecd3ded4c29e156396';
+String _$loginFormStateHash() => r'2466ca5ae478ad37cd993f064b0a793431a8c27a';
 
 /// Login form state
 ///
