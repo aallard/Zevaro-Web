@@ -42,7 +42,7 @@ class TeamMemberCard extends StatelessWidget {
                   style: AppTypography.labelMedium,
                 ),
                 Text(
-                  member.userEmail ?? '',
+                  member.user.title ?? '',
                   style: AppTypography.bodySmall.copyWith(
                     color: AppColors.textSecondary,
                   ),
@@ -56,13 +56,13 @@ class TeamMemberCard extends StatelessWidget {
               vertical: AppSpacing.xxs,
             ),
             decoration: BoxDecoration(
-              color: _getRoleColor(member.role).withOpacity(0.1),
+              color: _getRoleColor(member.teamRole).withOpacity(0.1),
               borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
             ),
             child: Text(
-              member.role.displayName,
+              member.teamRole.displayName,
               style: AppTypography.labelSmall.copyWith(
-                color: _getRoleColor(member.role),
+                color: _getRoleColor(member.teamRole),
               ),
             ),
           ),

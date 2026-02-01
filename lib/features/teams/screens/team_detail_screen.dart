@@ -186,7 +186,7 @@ class TeamDetailScreen extends ConsumerWidget {
           children: TeamMemberRole.values
               .map((role) => ListTile(
                     title: Text(role.displayName),
-                    selected: member.role == role,
+                    selected: member.teamRole == role,
                     onTap: () async {
                       await ref
                           .read(updateMemberRoleProvider.notifier)

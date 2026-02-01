@@ -128,7 +128,7 @@ Future<List<User>> availableUsers(AvailableUsersRef ref, String teamId) async {
   final team = await ref.watch(teamDetailProvider(teamId).future);
 
   final allUsers = await userService.listUsers();
-  final memberUserIds = team.members?.map((m) => m.userId).toSet() ?? {};
+  final memberUserIds = team.members?.map((m) => m.user.id).toSet() ?? {};
 
   return allUsers.content.where((u) => !memberUserIds.contains(u.id)).toList();
 }

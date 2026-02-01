@@ -245,7 +245,7 @@ class _CreateDecisionDialogState extends ConsumerState<CreateDecisionDialog> {
                                     children: team.members!.map((member) {
                                       final isSelected =
                                           _selectedStakeholderIds
-                                              .contains(member.userId);
+                                              .contains(member.user.id);
                                       return FilterChip(
                                         label: Text(member.userFullName),
                                         selected: isSelected,
@@ -253,10 +253,10 @@ class _CreateDecisionDialogState extends ConsumerState<CreateDecisionDialog> {
                                           setState(() {
                                             if (selected) {
                                               _selectedStakeholderIds
-                                                  .add(member.userId);
+                                                  .add(member.user.id);
                                             } else {
                                               _selectedStakeholderIds
-                                                  .remove(member.userId);
+                                                  .remove(member.user.id);
                                             }
                                           });
                                         },
