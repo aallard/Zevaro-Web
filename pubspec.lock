@@ -1040,11 +1040,9 @@ packages:
   zevaro_flutter_sdk:
     dependency: "direct main"
     description:
-      path: "."
-      ref: "v1.0.0"
-      resolved-ref: "17919b9c5719ffbf42823853c99c9aa58b694062"
-      url: "https://github.com/aallard/Zevaro-Flutter-SDK.git"
-    source: git
+      path: "../Zevaro-Flutter-SDK"
+      relative: true
+    source: path
     version: "1.0.0"
 sdks:
   dart: ">=3.2.0 <4.0.0"

@@ -10,11 +10,9 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # Zevaro SDK
+  # Zevaro SDK (local for development)
   zevaro_flutter_sdk:
-    git:
-      url: https://github.com/aallard/Zevaro-Flutter-SDK.git
-      ref: v1.0.0
+    path: ../Zevaro-Flutter-SDK
 
   # State Management (re-exported by SDK, but explicit for clarity)
   flutter_riverpod: ^2.4.10

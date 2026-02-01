@@ -52,12 +52,16 @@ class OutcomeStatusBadge extends StatelessWidget {
     switch (status) {
       case OutcomeStatus.DRAFT:
         return Icons.edit_outlined;
-      case OutcomeStatus.ACTIVE:
+      case OutcomeStatus.NOT_STARTED:
+        return Icons.hourglass_empty;
+      case OutcomeStatus.IN_PROGRESS:
         return Icons.play_circle_outline;
-      case OutcomeStatus.ON_HOLD:
-        return Icons.pause_circle_outline;
-      case OutcomeStatus.ACHIEVED:
+      case OutcomeStatus.VALIDATING:
+        return Icons.pending_outlined;
+      case OutcomeStatus.VALIDATED:
         return Icons.check_circle_outline;
+      case OutcomeStatus.INVALIDATED:
+        return Icons.cancel;
       case OutcomeStatus.ABANDONED:
         return Icons.cancel_outlined;
     }

@@ -67,6 +67,8 @@ class HypothesisStatusBadge extends StatelessWidget {
         return Icons.verified;
       case HypothesisStatus.INVALIDATED:
         return Icons.cancel;
+      case HypothesisStatus.ABANDONED:
+        return Icons.cancel_outlined;
     }
   }
 }

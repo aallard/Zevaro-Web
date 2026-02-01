@@ -109,6 +109,12 @@ class DecisionColumn extends StatelessWidget {
         return AppColors.warning;
       case DecisionStatus.DECIDED:
         return AppColors.success;
+      case DecisionStatus.IMPLEMENTED:
+        return AppColors.success;
+      case DecisionStatus.DEFERRED:
+        return AppColors.surfaceVariant;
+      case DecisionStatus.CANCELLED:
+        return AppColors.surfaceVariant;
     }
   }
 
@@ -120,6 +126,12 @@ class DecisionColumn extends StatelessWidget {
         return 'Under Discussion';
       case DecisionStatus.DECIDED:
         return 'Decided';
+      case DecisionStatus.IMPLEMENTED:
+        return 'Implemented';
+      case DecisionStatus.DEFERRED:
+        return 'Deferred';
+      case DecisionStatus.CANCELLED:
+        return 'Cancelled';
     }
   }
 
@@ -131,6 +143,12 @@ class DecisionColumn extends StatelessWidget {
         return Icons.forum_outlined;
       case DecisionStatus.DECIDED:
         return Icons.check_circle_outline;
+      case DecisionStatus.IMPLEMENTED:
+        return Icons.rocket_launch_outlined;
+      case DecisionStatus.DEFERRED:
+        return Icons.pause_circle_outline;
+      case DecisionStatus.CANCELLED:
+        return Icons.cancel_outlined;
     }
   }
 
@@ -142,6 +160,12 @@ class DecisionColumn extends StatelessWidget {
         return 'No active discussions';
       case DecisionStatus.DECIDED:
         return 'No recent decisions';
+      case DecisionStatus.IMPLEMENTED:
+        return 'No implemented decisions';
+      case DecisionStatus.DEFERRED:
+        return 'No deferred decisions';
+      case DecisionStatus.CANCELLED:
+        return 'No cancelled decisions';
     }
   }
 }

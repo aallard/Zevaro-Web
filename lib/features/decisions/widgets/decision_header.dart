@@ -115,6 +115,12 @@ class DecisionHeader extends StatelessWidget {
         return AppColors.warning;
       case DecisionStatus.DECIDED:
         return AppColors.success;
+      case DecisionStatus.IMPLEMENTED:
+        return AppColors.success;
+      case DecisionStatus.DEFERRED:
+        return AppColors.surfaceVariant;
+      case DecisionStatus.CANCELLED:
+        return AppColors.surfaceVariant;
     }
   }
 
@@ -126,6 +132,12 @@ class DecisionHeader extends StatelessWidget {
         return Icons.forum_outlined;
       case DecisionStatus.DECIDED:
         return Icons.check_circle_outline;
+      case DecisionStatus.IMPLEMENTED:
+        return Icons.rocket_launch_outlined;
+      case DecisionStatus.DEFERRED:
+        return Icons.pause_circle_outline;
+      case DecisionStatus.CANCELLED:
+        return Icons.cancel_outlined;
     }
   }
 }

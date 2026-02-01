@@ -75,9 +75,9 @@ class DecisionCard extends StatelessWidget {
                 const SizedBox(height: AppSpacing.xs),
 
                 // Description preview
-                if (decision.description.isNotEmpty)
+                if (decision.description?.isNotEmpty ?? false)
                   Text(
-                    decision.description,
+                    decision.description!,
                     style: AppTypography.bodySmall.copyWith(
                       color: AppColors.textSecondary,
                     ),

@@ -10,7 +10,7 @@ void main() {
   const config = SdkConfig(
     baseUrl: String.fromEnvironment(
       'API_BASE_URL',
-      defaultValue: 'http://localhost:8080/api',
+      defaultValue: 'http://localhost:8080/api/v1',
     ),
     enableLogging: bool.fromEnvironment(
       'ENABLE_LOGGING',

@@ -23,11 +23,11 @@ class DecisionDescription extends StatelessWidget {
             Text('Description', style: AppTypography.h4),
             const SizedBox(height: AppSpacing.md),
             Text(
-              decision.description.isNotEmpty
-                  ? decision.description
+              (decision.description?.isNotEmpty ?? false)
+                  ? decision.description!
                   : 'No description provided.',
               style: AppTypography.bodyMedium.copyWith(
-                color: decision.description.isNotEmpty
+                color: (decision.description?.isNotEmpty ?? false)
                     ? AppColors.textPrimary
                     : AppColors.textTertiary,
               ),

@@ -80,6 +80,12 @@ class DecisionListItem extends StatelessWidget {
         return AppColors.warning;
       case DecisionStatus.DECIDED:
         return AppColors.success;
+      case DecisionStatus.IMPLEMENTED:
+        return AppColors.success;
+      case DecisionStatus.DEFERRED:
+        return AppColors.surfaceVariant;
+      case DecisionStatus.CANCELLED:
+        return AppColors.surfaceVariant;
     }
   }
 }

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:zevaro_flutter_sdk/zevaro_flutter_sdk.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/constants/app_constants.dart';
 import '../widgets/stakeholder_leaderboard.dart';

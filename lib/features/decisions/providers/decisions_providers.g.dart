@@ -6,7 +6,7 @@ part of 'decisions_providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$decisionsByStatusHash() => r'73fa585c5caf663a519280539ff8653ecb1fd172';
+String _$decisionsByStatusHash() => r'25eda2e8437a01357dfc1959dafe43b8c305ddfd';
 
 /// Filtered decisions grouped by status (for board view)
 ///

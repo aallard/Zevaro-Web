@@ -98,7 +98,7 @@ Future<Map<DecisionStatus, List<Decision>>> decisionsByStatus(
     if (filters.search != null && filters.search!.isNotEmpty) {
       final searchLower = filters.search!.toLowerCase();
       if (!d.title.toLowerCase().contains(searchLower) &&
-          !d.description.toLowerCase().contains(searchLower)) {
+          !(d.description?.toLowerCase().contains(searchLower) ?? false)) {
         return false;
       }
     }

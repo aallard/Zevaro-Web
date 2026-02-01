@@ -111,7 +111,7 @@ class _DecisionResolutionDialogState
 
     final request = ResolveDecisionRequest(
       selectedOption: _optionController.text.trim(),
-      rationale: _rationaleController.text.trim(),
+      decisionRationale: _rationaleController.text.trim(),
     );
 
     final success = await ref

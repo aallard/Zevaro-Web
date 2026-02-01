@@ -18,7 +18,7 @@ Future<DashboardStats> dashboardStats(DashboardStatsRef ref) async {
     blockingDecisions: blockingDecisions.length,
     myPendingResponses: myResponses.length,
     activeOutcomes:
-        myOutcomes.where((o) => o.status == OutcomeStatus.ACTIVE).length,
+        myOutcomes.where((o) => o.status.isActive).length,
     activeHypotheses: myHypotheses.where((h) => h.status.isActive).length,
     blockedHypotheses: blockedHypotheses.length,
   );
