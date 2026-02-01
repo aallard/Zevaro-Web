@@ -60,12 +60,13 @@ class HypothesisDetailScreen extends ConsumerWidget {
                       children: [
                         HypothesisStatusBadge(status: hypothesis.status),
                         const Spacer(),
-                        TextButton.icon(
-                          onPressed: () =>
-                              context.go(Routes.outcomeById(hypothesis.outcomeId)),
-                          icon: const Icon(Icons.flag_outlined, size: 16),
-                          label: const Text('View Outcome'),
-                        ),
+                        if (hypothesis.outcomeId != null)
+                          TextButton.icon(
+                            onPressed: () =>
+                                context.go(Routes.outcomeById(hypothesis.outcomeId!)),
+                            icon: const Icon(Icons.flag_outlined, size: 16),
+                            label: const Text('View Outcome'),
+                          ),
                       ],
                     ),
                     const SizedBox(height: AppSpacing.md),

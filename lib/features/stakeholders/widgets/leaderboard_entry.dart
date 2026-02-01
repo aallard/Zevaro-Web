@@ -27,7 +27,9 @@ class LeaderboardEntryWidget extends StatelessWidget {
         border: isCurrentUser ? Border.all(color: AppColors.primary) : null,
       ),
       child: InkWell(
-        onTap: () => context.go(Routes.stakeholderById(entry.userId)),
+        onTap: entry.userId != null
+            ? () => context.go(Routes.stakeholderById(entry.userId!))
+            : null,
         child: Row(
           children: [
             // Rank
