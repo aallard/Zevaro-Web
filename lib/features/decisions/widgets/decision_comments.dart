@@ -32,6 +32,18 @@ class _DecisionCommentsState extends ConsumerState<DecisionComments> {
     final isLoading = commentState.isLoading;
     final comments = widget.decision.comments ?? [];
 
+    // Show error if comment submission failed
+    ref.listen(addDecisionCommentProvider, (previous, next) {
+      if (next.hasError && !previous!.hasError) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to add comment: ${next.error}'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    });
+
     // Build threaded structure
     final topLevelComments =
         comments.where((c) => c.parentId == null).toList();
@@ -169,12 +181,13 @@ class _DecisionCommentsState extends ConsumerState<DecisionComments> {
   }
 
   Future<void> _submitComment() async {
-    if (_controller.text.trim().isEmpty) return;
+    final text = _controller.text.trim();
+    if (text.isEmpty) return;
 
     final success =
         await ref.read(addDecisionCommentProvider.notifier).addComment(
               widget.decision.id,
-              _controller.text.trim(),
+              text,
               parentId: _replyingTo,
             );
 
