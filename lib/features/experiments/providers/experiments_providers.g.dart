@@ -27,6 +27,26 @@ final filteredExperimentsProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef FilteredExperimentsRef = AutoDisposeFutureProviderRef<List<Experiment>>;
+String _$allExperimentsHash() => r'9f007b6df4f37c8e2d4a7907aa48a4405061d381';
+
+/// All experiments (for summary stats)
+///
+/// Copied from [allExperiments].
+@ProviderFor(allExperiments)
+final allExperimentsProvider =
+    AutoDisposeFutureProvider<List<Experiment>>.internal(
+  allExperiments,
+  name: r'allExperimentsProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$allExperimentsHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef AllExperimentsRef = AutoDisposeFutureProviderRef<List<Experiment>>;
 String _$experimentDetailHash() => r'9d34a6bfe99cf3554dc4c93c23ec07a95e238561';
 
 /// Copied from Dart SDK

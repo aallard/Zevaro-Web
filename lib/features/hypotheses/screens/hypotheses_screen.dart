@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:zevaro_flutter_sdk/zevaro_flutter_sdk.dart';
+import 'package:zevaro_flutter_sdk/zevaro_flutter_sdk.dart' hide hypothesisListProvider;
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -150,8 +150,8 @@ class HypothesesScreen extends ConsumerWidget {
         // Content - Kanban Board
         Expanded(
           child: hypothesesAsync.when(
-            data: (response) => HypothesisKanban(
-              hypotheses: response.content,
+            data: (hypotheses) => HypothesisKanban(
+              hypotheses: hypotheses,
             ),
             loading: () =>
                 const LoadingIndicator(message: 'Loading hypotheses...'),

@@ -104,9 +104,9 @@ class DecisionSidebarPanel extends StatelessWidget {
                 if (decision.timeToSla != null) ...[
                   const SizedBox(height: AppSpacing.xs),
                   Text(
-                    decision.timeToSla!,
+                    _formatDuration(decision.timeToSla!),
                     style: AppTypography.bodySmall.copyWith(
-                      color: decision.slaColor,
+                      color: _parseHexColor(decision.slaColor),
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -231,6 +231,16 @@ class DecisionSidebarPanel extends StatelessWidget {
     final urgencyColor =
         Color(int.parse(decision.urgency.color.replaceFirst('#', '0xFF')));
     return urgencyColor;
+  }
+
+  static Color _parseHexColor(String hex) {
+    return Color(int.parse(hex.replaceFirst('#', '0xFF')));
+  }
+
+  static String _formatDuration(Duration duration) {
+    if (duration.inDays > 0) return '${duration.inDays}d ${duration.inHours % 24}h remaining';
+    if (duration.inHours > 0) return '${duration.inHours}h ${duration.inMinutes % 60}m remaining';
+    return '${duration.inMinutes}m remaining';
   }
 }
 

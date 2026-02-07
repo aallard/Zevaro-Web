@@ -38,7 +38,7 @@ class TeamsScreen extends ConsumerWidget {
                   // Calculate pending decisions across team
                   int totalPendingDecisions = 0;
                   for (final stakeholder in stakeholders) {
-                    totalPendingDecisions += stakeholder.pendingDecisionCount;
+                    totalPendingDecisions += stakeholder.pendingDecisionCount as int;
                   }
 
                   return Text(

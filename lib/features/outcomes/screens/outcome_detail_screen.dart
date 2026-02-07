@@ -489,7 +489,7 @@ class _HypothesesSection extends ConsumerWidget {
             children: [
               Text('Hypotheses', style: AppTypography.h4),
               TextButton.icon(
-                onPressed: () => showCreateHypothesisDialog(context, outcome.id),
+                onPressed: () => showCreateHypothesisDialog(context, outcomeId: outcome.id),
                 icon: const Icon(Icons.add, size: 18),
                 label: const Text('Add Hypothesis'),
               ),

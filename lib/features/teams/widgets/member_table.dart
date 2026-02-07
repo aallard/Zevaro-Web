@@ -109,11 +109,11 @@ class _MemberRow extends StatelessWidget {
 
   Color _getRoleColor(TeamMemberRole role) {
     switch (role) {
-      case TeamMemberRole.lead:
+      case TeamMemberRole.LEAD:
         return AppColors.primary;
-      case TeamMemberRole.owner:
+      case TeamMemberRole.OWNER:
         return AppColors.secondary;
-      case TeamMemberRole.member:
+      case TeamMemberRole.MEMBER:
         return AppColors.textSecondary;
     }
   }

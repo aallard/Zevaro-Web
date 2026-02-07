@@ -191,8 +191,9 @@ class _ScorecardCard extends StatelessWidget {
                   stakeholder.stats?.slaComplianceDisplay ?? 'N/A',
                   style: AppTypography.labelMedium.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: stakeholder.stats?.performanceColor ??
-                        AppColors.textSecondary,
+                    color: stakeholder.stats != null
+                        ? Color(int.parse(stakeholder.stats!.performanceColor.replaceFirst('#', '0xFF')))
+                        : AppColors.textSecondary,
                   ),
                 ),
               ],

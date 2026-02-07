@@ -330,6 +330,48 @@ class _AvailableUsersProviderElement
   String get teamId => (origin as AvailableUsersProvider).teamId;
 }
 
+String _$teamMembersWithStatsHash() =>
+    r'c60d9948c63619695f2ddc0e147d355a8f4f471c';
+
+/// Team members with their statistics (for Team & People screen)
+///
+/// Copied from [teamMembersWithStats].
+@ProviderFor(teamMembersWithStats)
+final teamMembersWithStatsProvider =
+    AutoDisposeFutureProvider<List<TeamMember>>.internal(
+  teamMembersWithStats,
+  name: r'teamMembersWithStatsProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$teamMembersWithStatsHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef TeamMembersWithStatsRef
+    = AutoDisposeFutureProviderRef<List<TeamMember>>;
+String _$teamStakeholdersHash() => r'00adcabe095e93abf2d775287bd52ce7c2356a89';
+
+/// Team stakeholders (for Team & People screen)
+///
+/// Copied from [teamStakeholders].
+@ProviderFor(teamStakeholders)
+final teamStakeholdersProvider =
+    AutoDisposeFutureProvider<List<Stakeholder>>.internal(
+  teamStakeholders,
+  name: r'teamStakeholdersProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$teamStakeholdersHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef TeamStakeholdersRef = AutoDisposeFutureProviderRef<List<Stakeholder>>;
 String _$addTeamMemberHash() => r'e9b59e0554ffc9440b259e1074ae5cbe4dccb14b';
 
 /// Add team member
