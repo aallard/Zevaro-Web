@@ -105,4 +105,29 @@ abstract class AppTypography {
     fontWeight: FontWeight.w400,
     height: 1.5,
   );
+
+  // Additional styles for the redesign
+  static const caption = TextStyle(
+    fontFamily: _fontFamily,
+    fontSize: 11,
+    fontWeight: FontWeight.w400,
+    height: 1.4,
+    color: AppColors.textTertiary,
+  );
+
+  static const metric = TextStyle(
+    fontFamily: _fontFamily,
+    fontSize: 28,
+    fontWeight: FontWeight.w700,
+    height: 1.2,
+    color: AppColors.textPrimary,
+  );
+
+  static const metricSmall = TextStyle(
+    fontFamily: _fontFamily,
+    fontSize: 20,
+    fontWeight: FontWeight.w600,
+    height: 1.2,
+    color: AppColors.textPrimary,
+  );
 }

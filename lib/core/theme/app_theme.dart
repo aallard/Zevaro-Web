@@ -40,7 +40,7 @@ abstract class AppTheme {
 
         // Colors
         colorScheme: ColorScheme.light(
-          primary: AppColors.primary,
+          primary: const Color(0xFF4F46E5),  // Deep indigo accent
           onPrimary: AppColors.textOnPrimary,
           secondary: AppColors.secondary,
           onSecondary: AppColors.textOnPrimary,
@@ -86,7 +86,7 @@ abstract class AppTheme {
         // Buttons
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.primary,
+            backgroundColor: const Color(0xFF4F46E5),  // Deep indigo accent
             foregroundColor: AppColors.textOnPrimary,
             elevation: 0,
             padding: const EdgeInsets.symmetric(
@@ -102,7 +102,7 @@ abstract class AppTheme {
 
         outlinedButtonTheme: OutlinedButtonThemeData(
           style: OutlinedButton.styleFrom(
-            foregroundColor: AppColors.primary,
+            foregroundColor: const Color(0xFF4F46E5),  // Deep indigo accent
             side: const BorderSide(color: AppColors.border),
             padding: const EdgeInsets.symmetric(
               horizontal: AppSpacing.md,
@@ -117,7 +117,7 @@ abstract class AppTheme {
 
         textButtonTheme: TextButtonThemeData(
           style: TextButton.styleFrom(
-            foregroundColor: AppColors.primary,
+            foregroundColor: const Color(0xFF4F46E5),  // Deep indigo accent
             padding: const EdgeInsets.symmetric(
               horizontal: AppSpacing.sm,
               vertical: AppSpacing.xs,
@@ -144,7 +144,7 @@ abstract class AppTheme {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-            borderSide: const BorderSide(color: AppColors.primary, width: 2),
+            borderSide: const BorderSide(color: Color(0xFF4F46E5), width: 2),
           ),
           errorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
@@ -184,7 +184,7 @@ abstract class AppTheme {
 
         // Colors
         colorScheme: ColorScheme.dark(
-          primary: AppColors.primary,
+          primary: const Color(0xFF4F46E5),  // Deep indigo accent
           onPrimary: Colors.white,
           secondary: AppColors.secondary,
           onSecondary: Colors.white,
@@ -229,7 +229,7 @@ abstract class AppTheme {
         // Buttons
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.primary,
+            backgroundColor: const Color(0xFF4F46E5),  // Deep indigo accent
             foregroundColor: Colors.white,
             elevation: 0,
             padding: const EdgeInsets.symmetric(
@@ -245,8 +245,8 @@ abstract class AppTheme {
 
         outlinedButtonTheme: OutlinedButtonThemeData(
           style: OutlinedButton.styleFrom(
-            foregroundColor: AppColors.primary,
-            side: BorderSide(color: AppColors.primary),
+            foregroundColor: const Color(0xFF4F46E5),  // Deep indigo accent
+            side: const BorderSide(color: Color(0xFF4F46E5)),
             padding: const EdgeInsets.symmetric(
               horizontal: AppSpacing.lg,
               vertical: AppSpacing.md,
@@ -260,7 +260,7 @@ abstract class AppTheme {
 
         textButtonTheme: TextButtonThemeData(
           style: TextButton.styleFrom(
-            foregroundColor: AppColors.primary,
+            foregroundColor: const Color(0xFF4F46E5),  // Deep indigo accent
             padding: const EdgeInsets.symmetric(
               horizontal: AppSpacing.sm,
               vertical: AppSpacing.xs,
@@ -287,7 +287,7 @@ abstract class AppTheme {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-            borderSide: BorderSide(color: AppColors.primary, width: 2),
+            borderSide: const BorderSide(color: Color(0xFF4F46E5), width: 2),
           ),
           errorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
@@ -325,13 +325,13 @@ abstract class AppTheme {
         switchTheme: SwitchThemeData(
           thumbColor: MaterialStateProperty.resolveWith((states) {
             if (states.contains(MaterialState.selected)) {
-              return AppColors.primary;
+              return const Color(0xFF4F46E5);
             }
             return const Color(0xFF9E9E9E);
           }),
           trackColor: MaterialStateProperty.resolveWith((states) {
             if (states.contains(MaterialState.selected)) {
-              return AppColors.primary.withOpacity(0.5);
+              return const Color(0xFF4F46E5).withOpacity(0.5);
             }
             return const Color(0xFF3C3C3C);
           }),

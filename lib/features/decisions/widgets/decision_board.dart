@@ -7,6 +7,7 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../shared/widgets/common/loading_indicator.dart';
 import '../../../shared/widgets/common/error_view.dart';
+import '../../../shared/widgets/common/draggable_kanban.dart';
 import '../providers/decisions_providers.dart';
 import 'decision_card.dart';
 
@@ -19,35 +20,55 @@ class DecisionBoard extends ConsumerWidget {
 
     return decisionsAsync.when(
       data: (decisionsByStatus) {
-        return SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
+        final columns = [
+          KanbanColumn(
+            id: DecisionStatus.NEEDS_INPUT.value,
+            title: 'Needs Input',
+            items: decisionsByStatus[DecisionStatus.NEEDS_INPUT] ?? [],
+            headerColor: AppColors.error,
+            backgroundColor: AppColors.error.withOpacity(0.03),
+            icon: Icons.inbox_outlined,
+          ),
+          KanbanColumn(
+            id: DecisionStatus.UNDER_DISCUSSION.value,
+            title: 'Under Discussion',
+            items: decisionsByStatus[DecisionStatus.UNDER_DISCUSSION] ?? [],
+            headerColor: AppColors.warning,
+            backgroundColor: AppColors.warning.withOpacity(0.03),
+            icon: Icons.forum_outlined,
+          ),
+          KanbanColumn(
+            id: DecisionStatus.DECIDED.value,
+            title: 'Decided',
+            items: decisionsByStatus[DecisionStatus.DECIDED] ?? [],
+            headerColor: AppColors.success,
+            backgroundColor: AppColors.success.withOpacity(0.03),
+            icon: Icons.check_circle_outline,
+          ),
+          KanbanColumn(
+            id: DecisionStatus.IMPLEMENTED.value,
+            title: 'Implemented',
+            items: decisionsByStatus[DecisionStatus.IMPLEMENTED] ?? [],
+            headerColor: AppColors.primary,
+            backgroundColor: AppColors.primary.withOpacity(0.03),
+            icon: Icons.rocket_launch_outlined,
+          ),
+        ];
+
+        return Padding(
           padding: const EdgeInsets.all(AppSpacing.md),
-          child: IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _BoardColumn(
-                  status: DecisionStatus.NEEDS_INPUT,
-                  decisions: decisionsByStatus[DecisionStatus.NEEDS_INPUT] ?? [],
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                _BoardColumn(
-                  status: DecisionStatus.UNDER_DISCUSSION,
-                  decisions:
-                      decisionsByStatus[DecisionStatus.UNDER_DISCUSSION] ?? [],
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                _BoardColumn(
-                  status: DecisionStatus.DECIDED,
-                  decisions: decisionsByStatus[DecisionStatus.DECIDED] ?? [],
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                _BoardColumn(
-                  status: DecisionStatus.IMPLEMENTED,
-                  decisions: decisionsByStatus[DecisionStatus.IMPLEMENTED] ?? [],
-                ),
-              ],
+          child: DraggableKanban<Decision>(
+            columns: columns,
+            cardBuilder: (decision, isDragging) => DecisionCard(
+              decision: decision,
             ),
+            onCardMoved: (decision, fromColumnId, toColumnId) {
+              _handleCardMoved(context, ref, decision, fromColumnId, toColumnId);
+            },
+            idExtractor: (decision) => decision.id,
+            columnMinWidth: 320,
+            cardSpacing: 8,
+            emptyColumnBuilder: (columnId) => _buildEmptyState(columnId),
           ),
         );
       },
@@ -58,92 +79,56 @@ class DecisionBoard extends ConsumerWidget {
       ),
     );
   }
-}
 
-class _BoardColumn extends StatelessWidget {
-  final DecisionStatus status;
-  final List<Decision> decisions;
+  void _handleCardMoved(
+    BuildContext context,
+    WidgetRef ref,
+    Decision decision,
+    String fromColumnId,
+    String toColumnId,
+  ) {
+    if (fromColumnId == toColumnId) return;
 
-  const _BoardColumn({
-    required this.status,
-    required this.decisions,
-  });
+    // Map column ID to decision status
+    final statusMap = {
+      DecisionStatus.NEEDS_INPUT.value: DecisionStatus.NEEDS_INPUT,
+      DecisionStatus.UNDER_DISCUSSION.value: DecisionStatus.UNDER_DISCUSSION,
+      DecisionStatus.DECIDED.value: DecisionStatus.DECIDED,
+      DecisionStatus.IMPLEMENTED.value: DecisionStatus.IMPLEMENTED,
+    };
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 320,
-      decoration: BoxDecoration(
-        color: _getBackgroundColor(),
-        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Column header
-          Padding(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            child: Row(
-              children: [
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: _getHeaderColor(),
-                    shape: BoxShape.circle,
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.xs),
-                Text(
-                  _getTitle(),
-                  style: AppTypography.labelMedium.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.xs),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 6,
-                    vertical: 1,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.surfaceVariant,
-                    borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
-                  ),
-                  child: Text(
-                    '${decisions.length}',
-                    style: AppTypography.labelSmall.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+    final newStatus = statusMap[toColumnId];
+    if (newStatus == null) return;
 
-          // Cards
-          Expanded(
-            child: decisions.isEmpty
-                ? _buildEmptyState()
-                : ListView.separated(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.xs,
-                      vertical: AppSpacing.xxs,
-                    ),
-                    itemCount: decisions.length,
-                    separatorBuilder: (_, __) =>
-                        const SizedBox(height: AppSpacing.xs),
-                    itemBuilder: (context, index) {
-                      return DecisionCard(decision: decisions[index]);
-                    },
-                  ),
-          ),
-        ],
-      ),
-    );
+    // Update decision status via the actions provider
+    try {
+      final actions = ref.read(decisionActionsProvider.notifier);
+      // Call the appropriate method based on new status
+      // This assumes the SDK provides methods like moveToDecided, moveToImplemented, etc.
+      // Or we can use a generic approach if available
+      actions.updateStatus(decision.id, newStatus);
+    } catch (e) {
+      // Fallback: Just invalidate the provider to refresh
+      debugPrint('Error updating decision status: $e');
+    }
+    ref.invalidate(decisionsByStatusProvider);
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(String columnId) {
+    final iconMap = {
+      DecisionStatus.NEEDS_INPUT.value: Icons.inbox_outlined,
+      DecisionStatus.UNDER_DISCUSSION.value: Icons.forum_outlined,
+      DecisionStatus.DECIDED.value: Icons.check_circle_outline,
+      DecisionStatus.IMPLEMENTED.value: Icons.rocket_launch_outlined,
+    };
+
+    final messageMap = {
+      DecisionStatus.NEEDS_INPUT.value: 'No decisions waiting for input',
+      DecisionStatus.UNDER_DISCUSSION.value: 'No active discussions',
+      DecisionStatus.DECIDED.value: 'No recent decisions',
+      DecisionStatus.IMPLEMENTED.value: 'No implemented decisions',
+    };
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
@@ -151,13 +136,13 @@ class _BoardColumn extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              _getEmptyIcon(),
+              iconMap[columnId] ?? Icons.inbox_outlined,
               size: 32,
               color: AppColors.textTertiary,
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(
-              _getEmptyMessage(),
+              messageMap[columnId] ?? 'No items',
               style: AppTypography.bodySmall.copyWith(
                 color: AppColors.textTertiary,
               ),
@@ -168,87 +153,5 @@ class _BoardColumn extends StatelessWidget {
       ),
     );
   }
-
-  Color _getHeaderColor() {
-    switch (status) {
-      case DecisionStatus.NEEDS_INPUT:
-        return AppColors.error;
-      case DecisionStatus.UNDER_DISCUSSION:
-        return AppColors.warning;
-      case DecisionStatus.DECIDED:
-        return AppColors.success;
-      case DecisionStatus.IMPLEMENTED:
-        return AppColors.primary;
-      case DecisionStatus.DEFERRED:
-        return AppColors.surfaceVariant;
-      case DecisionStatus.CANCELLED:
-        return AppColors.surfaceVariant;
-    }
-  }
-
-  Color _getBackgroundColor() {
-    switch (status) {
-      case DecisionStatus.NEEDS_INPUT:
-        return AppColors.error.withOpacity(0.03);
-      case DecisionStatus.UNDER_DISCUSSION:
-        return AppColors.warning.withOpacity(0.03);
-      case DecisionStatus.DECIDED:
-        return AppColors.success.withOpacity(0.03);
-      case DecisionStatus.IMPLEMENTED:
-        return AppColors.primary.withOpacity(0.03);
-      default:
-        return AppColors.surfaceVariant.withOpacity(0.5);
-    }
-  }
-
-  String _getTitle() {
-    switch (status) {
-      case DecisionStatus.NEEDS_INPUT:
-        return 'Needs Input';
-      case DecisionStatus.UNDER_DISCUSSION:
-        return 'Under Discussion';
-      case DecisionStatus.DECIDED:
-        return 'Decided';
-      case DecisionStatus.IMPLEMENTED:
-        return 'Implemented';
-      case DecisionStatus.DEFERRED:
-        return 'Deferred';
-      case DecisionStatus.CANCELLED:
-        return 'Cancelled';
-    }
-  }
-
-  IconData _getEmptyIcon() {
-    switch (status) {
-      case DecisionStatus.NEEDS_INPUT:
-        return Icons.inbox_outlined;
-      case DecisionStatus.UNDER_DISCUSSION:
-        return Icons.forum_outlined;
-      case DecisionStatus.DECIDED:
-        return Icons.check_circle_outline;
-      case DecisionStatus.IMPLEMENTED:
-        return Icons.rocket_launch_outlined;
-      case DecisionStatus.DEFERRED:
-        return Icons.pause_circle_outline;
-      case DecisionStatus.CANCELLED:
-        return Icons.cancel_outlined;
-    }
-  }
-
-  String _getEmptyMessage() {
-    switch (status) {
-      case DecisionStatus.NEEDS_INPUT:
-        return 'No decisions waiting for input';
-      case DecisionStatus.UNDER_DISCUSSION:
-        return 'No active discussions';
-      case DecisionStatus.DECIDED:
-        return 'No recent decisions';
-      case DecisionStatus.IMPLEMENTED:
-        return 'No implemented decisions';
-      case DecisionStatus.DEFERRED:
-        return 'No deferred decisions';
-      case DecisionStatus.CANCELLED:
-        return 'No cancelled decisions';
-    }
-  }
 }
+

@@ -62,4 +62,42 @@ abstract class AppColors {
   static const sidebarTextActive = Color(0xFFFFFFFF);
   static const sidebarAccent = Color(0xFF4F46E5); // Indigo accent
   static const sidebarDivider = Color(0xFF374151);
+
+  // Experiment type colors
+  static const Color experimentAbTest = Color(0xFF8B5CF6);  // violet
+  static const Color experimentFeatureFlag = Color(0xFF14B8A6);  // teal
+  static const Color experimentCanary = Color(0xFFF59E0B);  // amber
+  static const Color experimentManual = Color(0xFF6B7280);  // gray
+
+  // Chart colors for data visualization
+  static const Color chartPrimary = Color(0xFF4F46E5);
+  static const Color chartSecondary = Color(0xFF06B6D4);
+  static const Color chartTertiary = Color(0xFF8B5CF6);
+  static const Color chartQuarternary = Color(0xFFF59E0B);
+  static const Color chartQuinary = Color(0xFF10B981);
+
+  // Kanban column backgrounds (very subtle tints)
+  static const Color kanbanNeedsInput = Color(0xFFFEF2F2);  // red-50
+  static const Color kanbanUnderDiscussion = Color(0xFFFFFBEB);  // amber-50
+  static const Color kanbanDecided = Color(0xFFF0FDF4);  // green-50
+  static const Color kanbanImplemented = Color(0xFFEFF6FF);  // blue-50
+
+  // Hypothesis lifecycle column backgrounds
+  static const Color kanbanDraft = Color(0xFFF9FAFB);  // gray-50
+  static const Color kanbanReady = Color(0xFFEFF6FF);  // blue-50
+  static const Color kanbanBuilding = Color(0xFFF5F3FF);  // violet-50
+  static const Color kanbanMeasuring = Color(0xFFECFDF5);  // emerald-50
+  static const Color kanbanConcluded = Color(0xFFF9FAFB);  // gray-50
+
+  // Card accent colors for projects
+  static const List<Color> projectAccentColors = [
+    Color(0xFF4F46E5),  // indigo
+    Color(0xFF10B981),  // emerald
+    Color(0xFFF59E0B),  // amber
+    Color(0xFFEF4444),  // rose
+    Color(0xFF06B6D4),  // cyan
+    Color(0xFF8B5CF6),  // purple
+    Color(0xFFEC4899),  // pink
+    Color(0xFFF97316),  // orange
+  ];
 }
