@@ -95,7 +95,6 @@ class Sidebar extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Always visible
                   _SidebarNavItem(
                     icon: Icons.folder_outlined,
                     label: 'Projects',
@@ -104,70 +103,70 @@ class Sidebar extends ConsumerWidget {
                     onTap: () => context.go(Routes.projects),
                   ),
 
-                  // Project-scoped items (only when project selected)
-                  if (selectedProjectId != null) ...[
-                    const SizedBox(height: AppSpacing.xs),
-                    if (!isCollapsed)
-                      Padding(
-                        padding: const EdgeInsets.only(
-                          left: AppSpacing.sm,
-                          top: AppSpacing.xs,
-                          bottom: AppSpacing.xxs,
-                        ),
-                        child: Text(
-                          'PROJECT',
-                          style: TextStyle(
-                            color: AppColors.sidebarText.withOpacity(0.5),
-                            fontSize: 10,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 1.2,
-                          ),
-                        ),
+                  const SizedBox(height: AppSpacing.xs),
+                  if (!isCollapsed && selectedProjectId != null)
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        left: AppSpacing.sm,
+                        top: AppSpacing.xs,
+                        bottom: AppSpacing.xxs,
                       ),
-                    _SidebarNavItem(
-                      icon: Icons.dashboard_outlined,
-                      label: 'Dashboard',
-                      isSelected: currentRoute == Routes.dashboard ||
-                          currentRoute.startsWith('/dashboard'),
-                      isCollapsed: isCollapsed,
-                      onTap: () => context.go(Routes.dashboard),
+                      child: Text(
+                        (selectedProject.valueOrNull?.name ?? 'PROJECT')
+                            .toUpperCase(),
+                        style: TextStyle(
+                          color: AppColors.sidebarText.withOpacity(0.5),
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 1.2,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                    _SidebarNavItem(
-                      icon: Icons.how_to_vote_outlined,
-                      label: 'Decision Queue',
-                      isSelected: currentRoute.startsWith('/decisions'),
-                      isCollapsed: isCollapsed,
-                      onTap: () => context.go(Routes.decisions),
-                    ),
-                    _SidebarNavItem(
-                      icon: Icons.flag_outlined,
-                      label: 'Outcomes',
-                      isSelected: currentRoute.startsWith('/outcomes'),
-                      isCollapsed: isCollapsed,
-                      onTap: () => context.go(Routes.outcomes),
-                    ),
-                    _SidebarNavItem(
-                      icon: Icons.science_outlined,
-                      label: 'Hypotheses',
-                      isSelected: currentRoute.startsWith('/hypotheses'),
-                      isCollapsed: isCollapsed,
-                      onTap: () => context.go(Routes.hypotheses),
-                    ),
-                    _SidebarNavItem(
-                      icon: Icons.biotech_outlined,
-                      label: 'Experiments',
-                      isSelected: currentRoute.startsWith('/experiments'),
-                      isCollapsed: isCollapsed,
-                      onTap: () => context.go(Routes.experiments),
-                    ),
-                    _SidebarNavItem(
-                      icon: Icons.groups_outlined,
-                      label: 'Team',
-                      isSelected: currentRoute.startsWith('/teams'),
-                      isCollapsed: isCollapsed,
-                      onTap: () => context.go(Routes.teams),
-                    ),
-                  ],
+                  _SidebarNavItem(
+                    icon: Icons.dashboard_outlined,
+                    label: 'Dashboard',
+                    isSelected: currentRoute == Routes.dashboard ||
+                        currentRoute.startsWith('/dashboard'),
+                    isCollapsed: isCollapsed,
+                    onTap: () => context.go(Routes.dashboard),
+                  ),
+                  _SidebarNavItem(
+                    icon: Icons.how_to_vote_outlined,
+                    label: 'Decision Queue',
+                    isSelected: currentRoute.startsWith('/decisions'),
+                    isCollapsed: isCollapsed,
+                    onTap: () => context.go(Routes.decisions),
+                  ),
+                  _SidebarNavItem(
+                    icon: Icons.flag_outlined,
+                    label: 'Outcomes',
+                    isSelected: currentRoute.startsWith('/outcomes'),
+                    isCollapsed: isCollapsed,
+                    onTap: () => context.go(Routes.outcomes),
+                  ),
+                  _SidebarNavItem(
+                    icon: Icons.science_outlined,
+                    label: 'Hypotheses',
+                    isSelected: currentRoute.startsWith('/hypotheses'),
+                    isCollapsed: isCollapsed,
+                    onTap: () => context.go(Routes.hypotheses),
+                  ),
+                  _SidebarNavItem(
+                    icon: Icons.biotech_outlined,
+                    label: 'Experiments',
+                    isSelected: currentRoute.startsWith('/experiments'),
+                    isCollapsed: isCollapsed,
+                    onTap: () => context.go(Routes.experiments),
+                  ),
+                  _SidebarNavItem(
+                    icon: Icons.groups_outlined,
+                    label: 'Team',
+                    isSelected: currentRoute.startsWith('/teams'),
+                    isCollapsed: isCollapsed,
+                    onTap: () => context.go(Routes.teams),
+                  ),
                 ],
               ),
             ),
