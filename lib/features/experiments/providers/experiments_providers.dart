@@ -43,6 +43,16 @@ Future<List<Experiment>> filteredExperiments(
   );
 }
 
+/// All experiments (for summary stats)
+@riverpod
+Future<List<Experiment>> allExperiments(
+  AllExperimentsRef ref,
+) async {
+  final service = ref.watch(experimentServiceProvider);
+  final selectedProjectId = ref.watch(selectedProjectIdProvider);
+  return service.listExperiments(projectId: selectedProjectId);
+}
+
 /// Experiment detail
 @riverpod
 Future<Experiment> experimentDetail(

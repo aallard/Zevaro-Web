@@ -94,26 +94,52 @@ class _DecisionCommentsState extends ConsumerState<DecisionComments> {
               ),
               const SizedBox(height: AppSpacing.sm),
             ],
-            TextField(
-              controller: _controller,
-              decoration: InputDecoration(
-                hintText: _replyingTo != null
-                    ? 'Write a reply...'
-                    : 'Add a comment...',
-                border: const OutlineInputBorder(),
-                suffixIcon: IconButton(
-                  icon: isLoading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.send),
-                  onPressed: isLoading ? null : _submitComment,
-                ),
+            Container(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                border: Border.all(color: AppColors.border),
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
               ),
-              maxLines: 3,
-              minLines: 1,
+              child: Column(
+                children: [
+                  TextField(
+                    controller: _controller,
+                    decoration: InputDecoration(
+                      hintText: _replyingTo != null
+                          ? 'Write a reply...'
+                          : 'Write a comment...',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+                      ),
+                      contentPadding: const EdgeInsets.all(AppSpacing.sm),
+                      isDense: true,
+                    ),
+                    maxLines: 3,
+                    minLines: 1,
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      ElevatedButton.icon(
+                        onPressed: isLoading ? null : _submitComment,
+                        icon: isLoading
+                            ? const SizedBox(
+                                height: 16,
+                                width: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Icon(Icons.send, size: 18),
+                        label: const Text('Comment'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: AppSpacing.lg),
 

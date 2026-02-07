@@ -49,13 +49,13 @@ class DecisionSidebarPanel extends StatelessWidget {
             child: Row(
               children: [
                 ZAvatar(
-                  name: decision.assigneeName ?? 'Unassigned',
+                  name: decision.assignedTo?.fullName ?? 'Unassigned',
                   size: 28,
                 ),
                 const SizedBox(width: AppSpacing.xs),
                 Expanded(
                   child: Text(
-                    decision.assigneeName ?? 'Unassigned',
+                    decision.assignedTo?.fullName ?? 'Unassigned',
                     style: AppTypography.bodyMedium,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -69,33 +69,48 @@ class DecisionSidebarPanel extends StatelessWidget {
           // SLA
           _SidebarField(
             label: 'SLA',
-            child: Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(
-                  decision.isSlaBreached
-                      ? Icons.local_fire_department
-                      : Icons.timer_outlined,
-                  size: 16,
-                  color: decision.isSlaBreached
-                      ? AppColors.error
-                      : AppColors.success,
+                Row(
+                  children: [
+                    Icon(
+                      decision.isSlaBreached
+                          ? Icons.local_fire_department
+                          : Icons.timer_outlined,
+                      size: 16,
+                      color: decision.isSlaBreached
+                          ? AppColors.error
+                          : AppColors.success,
+                    ),
+                    const SizedBox(width: AppSpacing.xxs),
+                    Text(
+                      '${decision.urgency.slaHours}h',
+                      style: AppTypography.bodyMedium.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.xs),
+                    Text(
+                      decision.slaStatusDisplay,
+                      style: AppTypography.bodySmall.copyWith(
+                        color: decision.isSlaBreached
+                            ? AppColors.error
+                            : AppColors.textTertiary,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: AppSpacing.xxs),
-                Text(
-                  '${decision.urgency.slaHours}h',
-                  style: AppTypography.bodyMedium.copyWith(
-                    fontWeight: FontWeight.w600,
+                if (decision.timeToSla != null) ...[
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    decision.timeToSla!,
+                    style: AppTypography.bodySmall.copyWith(
+                      color: decision.slaColor,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
-                ),
-                const SizedBox(width: AppSpacing.xs),
-                Text(
-                  decision.isSlaBreached ? 'Breached' : 'Active',
-                  style: AppTypography.bodySmall.copyWith(
-                    color: decision.isSlaBreached
-                        ? AppColors.error
-                        : AppColors.textTertiary,
-                  ),
-                ),
+                ],
               ],
             ),
           ),
@@ -140,6 +155,56 @@ class DecisionSidebarPanel extends StatelessWidget {
               ),
             ),
           ],
+
+          if (decision.outcome != null) ...[
+            const Divider(height: AppSpacing.lg),
+            _SidebarField(
+              label: 'Linked Outcome',
+              child: Text(
+                decision.outcome!.title,
+                style: AppTypography.bodyMedium,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+
+          // Discussion stats
+          const Divider(height: AppSpacing.lg),
+          _SidebarField(
+            label: 'Discussion',
+            child: Row(
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.comment_outlined,
+                        size: 16, color: AppColors.textSecondary),
+                    const SizedBox(width: AppSpacing.xs),
+                    Text(
+                      '${decision.commentCount ?? 0}',
+                      style: AppTypography.bodyMedium.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(width: AppSpacing.md),
+                Row(
+                  children: [
+                    Icon(Icons.thumb_up_outlined,
+                        size: 16, color: AppColors.textSecondary),
+                    const SizedBox(width: AppSpacing.xs),
+                    Text(
+                      '${decision.voteCount ?? 0}',
+                      style: AppTypography.bodyMedium.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );

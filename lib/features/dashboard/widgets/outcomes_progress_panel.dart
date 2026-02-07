@@ -22,7 +22,25 @@ class OutcomesProgressPanel extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Outcomes Progress', style: AppTypography.h4),
+          Row(
+            children: [
+              Text('Outcomes Progress', style: AppTypography.h4),
+              const Spacer(),
+              PopupMenuButton<String>(
+                icon: const Icon(Icons.more_vert, size: 20),
+                itemBuilder: (BuildContext context) => [
+                  const PopupMenuItem(
+                    value: 'option1',
+                    child: Text('View All'),
+                  ),
+                  const PopupMenuItem(
+                    value: 'option2',
+                    child: Text('Export'),
+                  ),
+                ],
+              ),
+            ],
+          ),
           const SizedBox(height: AppSpacing.md),
           if (outcomes.isEmpty)
             Padding(
@@ -63,6 +81,15 @@ class _OutcomeProgressBar extends StatelessWidget {
         children: [
           Row(
             children: [
+              Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: _barColor,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.xs),
               Expanded(
                 child: Text(
                   outcome.title,
@@ -75,6 +102,7 @@ class _OutcomeProgressBar extends StatelessWidget {
                 '${outcome.progressPercent.toStringAsFixed(0)}%',
                 style: AppTypography.labelSmall.copyWith(
                   fontWeight: FontWeight.w600,
+                  color: AppColors.textSecondary,
                 ),
               ),
             ],

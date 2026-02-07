@@ -8,6 +8,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../providers/shell_providers.dart';
+import '../common/avatar.dart';
 
 class Sidebar extends ConsumerWidget {
   final String currentRoute;
@@ -22,14 +23,22 @@ class Sidebar extends ConsumerWidget {
     final isCollapsed = ref.watch(sidebarCollapsedProvider);
     final selectedProjectId = ref.watch(selectedProjectIdProvider);
     final selectedProject = ref.watch(selectedProjectProvider);
+    final currentUser = ref.watch(currentUserProvider);
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
       width: isCollapsed
           ? AppSpacing.sidebarCollapsedWidth
           : AppSpacing.sidebarWidth,
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.sidebarBg,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.15),
+            blurRadius: 8,
+            offset: const Offset(2, 0),
+          ),
+        ],
       ),
       child: Column(
         children: [
@@ -47,6 +56,13 @@ class Sidebar extends ConsumerWidget {
                   decoration: BoxDecoration(
                     color: AppColors.sidebarAccent,
                     borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.sidebarAccent.withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
                   child: const Center(
                     child: Text(
@@ -54,7 +70,8 @@ class Sidebar extends ConsumerWidget {
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 20,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.5,
                       ),
                     ),
                   ),
@@ -76,7 +93,7 @@ class Sidebar extends ConsumerWidget {
 
           Container(height: 1, color: AppColors.sidebarDivider),
 
-          // Project selector
+          // Project selector with accent bar
           if (!isCollapsed) ...[
             _ProjectSelector(
               selectedProject: selectedProject.valueOrNull,
@@ -98,7 +115,8 @@ class Sidebar extends ConsumerWidget {
                   _SidebarNavItem(
                     icon: Icons.folder_outlined,
                     label: 'Projects',
-                    isSelected: currentRoute == Routes.projects,
+                    isSelected: currentRoute == Routes.projects ||
+                        currentRoute.startsWith('/projects'),
                     isCollapsed: isCollapsed,
                     onTap: () => context.go(Routes.projects),
                   ),
@@ -133,7 +151,7 @@ class Sidebar extends ConsumerWidget {
                     onTap: () => context.go(Routes.dashboard),
                   ),
                   _SidebarNavItem(
-                    icon: Icons.how_to_vote_outlined,
+                    icon: Icons.bolt_outlined,
                     label: 'Decision Queue',
                     isSelected: currentRoute.startsWith('/decisions'),
                     isCollapsed: isCollapsed,
@@ -147,21 +165,21 @@ class Sidebar extends ConsumerWidget {
                     onTap: () => context.go(Routes.outcomes),
                   ),
                   _SidebarNavItem(
-                    icon: Icons.science_outlined,
+                    icon: Icons.lightbulb_outlined,
                     label: 'Hypotheses',
                     isSelected: currentRoute.startsWith('/hypotheses'),
                     isCollapsed: isCollapsed,
                     onTap: () => context.go(Routes.hypotheses),
                   ),
                   _SidebarNavItem(
-                    icon: Icons.biotech_outlined,
+                    icon: Icons.science_outlined,
                     label: 'Experiments',
                     isSelected: currentRoute.startsWith('/experiments'),
                     isCollapsed: isCollapsed,
                     onTap: () => context.go(Routes.experiments),
                   ),
                   _SidebarNavItem(
-                    icon: Icons.groups_outlined,
+                    icon: Icons.people_outlined,
                     label: 'Team',
                     isSelected: currentRoute.startsWith('/teams'),
                     isCollapsed: isCollapsed,
@@ -174,7 +192,7 @@ class Sidebar extends ConsumerWidget {
 
           Container(height: 1, color: AppColors.sidebarDivider),
 
-          // Bottom: Settings + Collapse
+          // Bottom: Settings + User
           Padding(
             padding: const EdgeInsets.all(AppSpacing.xs),
             child: Column(
@@ -186,20 +204,93 @@ class Sidebar extends ConsumerWidget {
                   isCollapsed: isCollapsed,
                   onTap: () => context.go(Routes.settings),
                 ),
-                _SidebarNavItem(
-                  icon: isCollapsed
-                      ? Icons.chevron_right
-                      : Icons.chevron_left,
-                  label: 'Collapse',
-                  isSelected: false,
+                const SizedBox(height: 4),
+                // User avatar at bottom
+                _UserProfile(
+                  user: currentUser.valueOrNull,
                   isCollapsed: isCollapsed,
-                  onTap: () =>
-                      ref.read(sidebarCollapsedProvider.notifier).toggle(),
+                  onTap: () => context.go(Routes.profile),
                 ),
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// User avatar + name at the bottom of sidebar
+class _UserProfile extends StatefulWidget {
+  final User? user;
+  final bool isCollapsed;
+  final VoidCallback onTap;
+
+  const _UserProfile({
+    required this.user,
+    required this.isCollapsed,
+    required this.onTap,
+  });
+
+  @override
+  State<_UserProfile> createState() => _UserProfileState();
+}
+
+class _UserProfileState extends State<_UserProfile> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final name = widget.user != null
+        ? '${widget.user!.firstName} ${widget.user!.lastName}'
+        : 'User';
+    final avatarUrl = widget.user?.avatarUrl;
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: widget.isCollapsed ? AppSpacing.sm : AppSpacing.sm,
+            vertical: AppSpacing.xs,
+          ),
+          decoration: BoxDecoration(
+            color: _isHovered
+                ? AppColors.sidebarBgHover
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+          ),
+          child: Row(
+            mainAxisAlignment: widget.isCollapsed
+                ? MainAxisAlignment.center
+                : MainAxisAlignment.start,
+            children: [
+              ZAvatar(
+                name: name,
+                imageUrl: avatarUrl,
+                size: 28,
+              ),
+              if (!widget.isCollapsed) ...[
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: Text(
+                    name,
+                    style: const TextStyle(
+                      color: AppColors.sidebarText,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w400,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
       ),
     );
   }

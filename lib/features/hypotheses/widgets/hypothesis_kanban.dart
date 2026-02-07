@@ -20,7 +20,6 @@ class HypothesisKanban extends ConsumerWidget {
       'Ready': [],
       'Building': [],
       'Measuring': [],
-      'Concluded': [],
     };
 
     for (final h in hypotheses) {
@@ -35,12 +34,22 @@ class HypothesisKanban extends ConsumerWidget {
       } else if (status == HypothesisStatus.DEPLOYED ||
           status == HypothesisStatus.MEASURING) {
         groups['Measuring']!.add(h);
-      } else {
-        groups['Concluded']!.add(h);
       }
+      // Concluded hypotheses (VALIDATED, INVALIDATED, ABANDONED) are not shown in kanban
     }
     return groups;
   }
+
+  int get _totalCount => hypotheses.length;
+
+  int get _validatedCount =>
+      hypotheses.where((h) => h.status == HypothesisStatus.VALIDATED).length;
+
+  int get _invalidatedCount =>
+      hypotheses.where((h) => h.status == HypothesisStatus.INVALIDATED).length;
+
+  int get _inProgressCount =>
+      hypotheses.where((h) => h.isActive).length;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -52,7 +61,7 @@ class HypothesisKanban extends ConsumerWidget {
         title: 'Draft',
         items: grouped['Draft']!,
         headerColor: AppColors.hypothesisDraft,
-        backgroundColor: AppColors.hypothesisDraft.withOpacity(0.03),
+        backgroundColor: AppColors.kanbanDraft,
         icon: Icons.edit_note,
       ),
       KanbanColumn(
@@ -60,7 +69,7 @@ class HypothesisKanban extends ConsumerWidget {
         title: 'Ready',
         items: grouped['Ready']!,
         headerColor: AppColors.hypothesisReady,
-        backgroundColor: AppColors.hypothesisReady.withOpacity(0.03),
+        backgroundColor: AppColors.kanbanReady,
         icon: Icons.check_circle_outline,
       ),
       KanbanColumn(
@@ -68,7 +77,7 @@ class HypothesisKanban extends ConsumerWidget {
         title: 'Building',
         items: grouped['Building']!,
         headerColor: AppColors.hypothesisBuilding,
-        backgroundColor: AppColors.hypothesisBuilding.withOpacity(0.03),
+        backgroundColor: AppColors.kanbanBuilding,
         icon: Icons.construction,
       ),
       KanbanColumn(
@@ -76,34 +85,50 @@ class HypothesisKanban extends ConsumerWidget {
         title: 'Measuring',
         items: grouped['Measuring']!,
         headerColor: AppColors.hypothesisMeasuring,
-        backgroundColor: AppColors.hypothesisMeasuring.withOpacity(0.03),
+        backgroundColor: AppColors.kanbanMeasuring,
         icon: Icons.science,
-      ),
-      KanbanColumn(
-        id: 'Concluded',
-        title: 'Concluded',
-        items: grouped['Concluded']!,
-        headerColor: AppColors.hypothesisValidated,
-        backgroundColor: AppColors.hypothesisValidated.withOpacity(0.03),
-        icon: Icons.verified,
       ),
     ];
 
-    return Padding(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      child: DraggableKanban<Hypothesis>(
-        columns: columns,
-        cardBuilder: (hypothesis, isDragging) => HypothesisCardEnhanced(
-          hypothesis: hypothesis,
+    return Column(
+      children: [
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            child: DraggableKanban<Hypothesis>(
+              columns: columns,
+              cardBuilder: (hypothesis, isDragging) => HypothesisCardEnhanced(
+                hypothesis: hypothesis,
+              ),
+              onCardMoved: (hypothesis, fromColumnId, toColumnId) {
+                _handleCardMoved(context, ref, hypothesis, fromColumnId, toColumnId);
+              },
+              idExtractor: (hypothesis) => hypothesis.id,
+              columnMinWidth: 280,
+              cardSpacing: 8,
+              emptyColumnBuilder: (columnId) => _buildEmptyState(columnId),
+            ),
+          ),
         ),
-        onCardMoved: (hypothesis, fromColumnId, toColumnId) {
-          _handleCardMoved(context, ref, hypothesis, fromColumnId, toColumnId);
-        },
-        idExtractor: (hypothesis) => hypothesis.id,
-        columnMinWidth: 280,
-        cardSpacing: 8,
-        emptyColumnBuilder: (columnId) => _buildEmptyState(columnId),
-      ),
+        // Footer with counts
+        Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.pagePaddingHorizontal,
+            vertical: AppSpacing.md,
+          ),
+          decoration: const BoxDecoration(
+            color: AppColors.surface,
+            border: Border(top: BorderSide(color: AppColors.border)),
+          ),
+          child: Text(
+            '$_totalCount Hypotheses · $_validatedCount Validated · '
+            '$_invalidatedCount Invalidated · $_inProgressCount In Progress',
+            style: AppTypography.bodySmall.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -122,7 +147,6 @@ class HypothesisKanban extends ConsumerWidget {
       'Ready': HypothesisStatus.READY,
       'Building': HypothesisStatus.BUILDING,
       'Measuring': HypothesisStatus.MEASURING,
-      'Concluded': HypothesisStatus.VALIDATED,
     };
 
     final newStatus = statusMap[toColumnId];
@@ -144,7 +168,6 @@ class HypothesisKanban extends ConsumerWidget {
       'Ready': Icons.check_circle_outline,
       'Building': Icons.construction,
       'Measuring': Icons.science,
-      'Concluded': Icons.verified,
     };
 
     final messageMap = {
@@ -152,7 +175,6 @@ class HypothesisKanban extends ConsumerWidget {
       'Ready': 'No hypotheses ready to build',
       'Building': 'No hypotheses being built',
       'Measuring': 'No hypotheses being measured',
-      'Concluded': 'No concluded hypotheses',
     };
 
     return Center(

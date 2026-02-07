@@ -17,6 +17,7 @@ class ExperimentsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final filterTab = ref.watch(experimentFilterNotifierProvider);
     final experimentsAsync = ref.watch(filteredExperimentsProvider);
+    final allExperimentsAsync = ref.watch(allExperimentsProvider);
 
     return Column(
       children: [
@@ -34,6 +35,7 @@ class ExperimentsScreen extends ConsumerWidget {
             children: [
               _Tab(
                 label: 'Running',
+                icon: Icons.science,
                 isSelected: filterTab == ExperimentFilterTab.running,
                 onTap: () => ref
                     .read(experimentFilterNotifierProvider.notifier)
@@ -42,6 +44,7 @@ class ExperimentsScreen extends ConsumerWidget {
               const SizedBox(width: AppSpacing.xxs),
               _Tab(
                 label: 'Completed',
+                icon: Icons.check_circle,
                 isSelected: filterTab == ExperimentFilterTab.completed,
                 onTap: () => ref
                     .read(experimentFilterNotifierProvider.notifier)
@@ -50,6 +53,7 @@ class ExperimentsScreen extends ConsumerWidget {
               const SizedBox(width: AppSpacing.xxs),
               _Tab(
                 label: 'Draft',
+                icon: Icons.description,
                 isSelected: filterTab == ExperimentFilterTab.draft,
                 onTap: () => ref
                     .read(experimentFilterNotifierProvider.notifier)
@@ -84,14 +88,54 @@ class ExperimentsScreen extends ConsumerWidget {
                   ),
                 );
               }
-              return ListView.builder(
-                padding: const EdgeInsets.all(
-                    AppSpacing.pagePaddingHorizontal),
-                itemCount: experiments.length,
-                itemBuilder: (context, index) => Padding(
-                  padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                  child: ExperimentCard(experiment: experiments[index]),
-                ),
+              return Column(
+                children: [
+                  // Summary stats line
+                  allExperimentsAsync.when(
+                    data: (allExperiments) {
+                      final runningCount = allExperiments
+                          .where((e) => e.status == ExperimentStatus.RUNNING)
+                          .length;
+                      final completedCount = allExperiments
+                          .where((e) => e.status == ExperimentStatus.CONCLUDED)
+                          .length;
+                      final winRate = _calculateWinRate(allExperiments);
+
+                      return Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.pagePaddingHorizontal,
+                          vertical: AppSpacing.md,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.surfaceVariant.withOpacity(0.3),
+                          border: const Border(
+                            bottom: BorderSide(color: AppColors.border),
+                          ),
+                        ),
+                        child: Text(
+                          '$runningCount Running · $completedCount Completed This Month · Win Rate: ${winRate.toStringAsFixed(0)}%',
+                          style: AppTypography.labelMedium.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      );
+                    },
+                    loading: () => const SizedBox.shrink(),
+                    error: (_, __) => const SizedBox.shrink(),
+                  ),
+                  Expanded(
+                    child: ListView.builder(
+                      padding: const EdgeInsets.all(
+                          AppSpacing.pagePaddingHorizontal),
+                      itemCount: experiments.length,
+                      itemBuilder: (context, index) => Padding(
+                        padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                        child: ExperimentCard(
+                            experiment: experiments[index]),
+                      ),
+                    ),
+                  ),
+                ],
               );
             },
             loading: () => const LoadingIndicator(
@@ -106,15 +150,27 @@ class ExperimentsScreen extends ConsumerWidget {
       ],
     );
   }
+
+  double _calculateWinRate(List<Experiment> experiments) {
+    if (experiments.isEmpty) return 0;
+    final completed = experiments
+        .where((e) => e.status == ExperimentStatus.CONCLUDED)
+        .toList();
+    if (completed.isEmpty) return 0;
+    final winners = completed.where((e) => e.isVariantWinning).length;
+    return (winners / completed.length) * 100;
+  }
 }
 
 class _Tab extends StatelessWidget {
   final String label;
+  final IconData? icon;
   final bool isSelected;
   final VoidCallback onTap;
 
   const _Tab({
     required this.label,
+    this.icon,
     required this.isSelected,
     required this.onTap,
   });
@@ -140,12 +196,30 @@ class _Tab extends StatelessWidget {
                 : AppColors.border,
           ),
         ),
-        child: Text(
-          label,
-          style: AppTypography.labelSmall.copyWith(
-            color: isSelected ? AppColors.primary : AppColors.textSecondary,
-            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-          ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (icon != null) ...[
+              Icon(
+                icon,
+                size: 16,
+                color: isSelected
+                    ? AppColors.primary
+                    : AppColors.textSecondary,
+              ),
+              const SizedBox(width: AppSpacing.xxs),
+            ],
+            Text(
+              label,
+              style: AppTypography.labelSmall.copyWith(
+                color: isSelected
+                    ? AppColors.primary
+                    : AppColors.textSecondary,
+                fontWeight:
+                    isSelected ? FontWeight.w600 : FontWeight.w500,
+              ),
+            ),
+          ],
         ),
       ),
     );

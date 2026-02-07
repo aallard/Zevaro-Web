@@ -47,7 +47,7 @@ class DecisionQueuePanel extends StatelessWidget {
               ),
             )
           else
-            ...decisions.take(5).map((d) => _DecisionQueueItem(decision: d)),
+            ...decisions.take(3).map((d) => _DecisionQueueItem(decision: d)),
         ],
       ),
     );
@@ -73,10 +73,10 @@ class _DecisionQueueItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
       decoration: const BoxDecoration(
         border: Border(
-          bottom: BorderSide(color: AppColors.borderLight),
+          bottom: BorderSide(color: AppColors.border),
         ),
       ),
       child: Row(
@@ -91,27 +91,47 @@ class _DecisionQueueItem extends StatelessWidget {
             ),
           ),
           const SizedBox(width: AppSpacing.sm),
-          // Title
+          // Title and assignee
           Expanded(
-            child: Text(
-              decision.title,
-              style: AppTypography.bodyMedium,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  decision.title,
+                  style: AppTypography.bodyMedium,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                if (decision.assigneeName != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: AppSpacing.xxs),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.xs,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: _priorityColor.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+                      ),
+                      child: Text(
+                        decision.assigneeName!,
+                        style: AppTypography.labelSmall.copyWith(
+                          color: _priorityColor,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ),
-          // Assignee avatar
-          if (decision.assigneeName != null) ...[
-            ZAvatar(
-              name: decision.assigneeName!,
-              imageUrl: decision.assigneeAvatarUrl,
-              size: 24,
-            ),
-            const SizedBox(width: AppSpacing.xs),
-          ],
+          const SizedBox(width: AppSpacing.sm),
           // Waiting time
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
               color: decision.slaBreached
                   ? AppColors.error.withOpacity(0.1)
@@ -138,6 +158,14 @@ class _DecisionQueueItem extends StatelessWidget {
               ],
             ),
           ),
+          const SizedBox(width: AppSpacing.sm),
+          // Assignee large avatar on right
+          if (decision.assigneeName != null)
+            ZAvatar(
+              name: decision.assigneeName!,
+              imageUrl: decision.assigneeAvatarUrl,
+              size: 40,
+            ),
         ],
       ),
     );

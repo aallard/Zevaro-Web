@@ -20,6 +20,8 @@ class OutcomesScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final outcomesAsync = ref.watch(filteredOutcomesProvider);
+    final filterState = ref.watch(outcomeFiltersProvider);
+    final searchController = TextEditingController();
 
     return Column(
       children: [
@@ -27,52 +29,81 @@ class OutcomesScreen extends ConsumerWidget {
         Container(
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.pagePaddingHorizontal,
-            vertical: AppSpacing.sm,
+            vertical: AppSpacing.md,
           ),
           decoration: const BoxDecoration(
             color: AppColors.surface,
             border: Border(bottom: BorderSide(color: AppColors.border)),
           ),
-          child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Filter tabs
-              _FilterTab(label: 'All', isSelected: true, onTap: () {}),
-              const SizedBox(width: AppSpacing.xxs),
-              _FilterTab(label: 'Active', isSelected: false, onTap: () {}),
-              const SizedBox(width: AppSpacing.xxs),
-              _FilterTab(label: 'Validated', isSelected: false, onTap: () {}),
-              const SizedBox(width: AppSpacing.xxs),
-              _FilterTab(label: 'Invalidated', isSelected: false, onTap: () {}),
-              const Spacer(),
-              // Search
-              SizedBox(
-                width: 200,
-                child: TextField(
-                  decoration: InputDecoration(
-                    hintText: 'Search outcomes...',
-                    hintStyle: AppTypography.bodySmall,
-                    prefixIcon: const Icon(Icons.search, size: 18),
-                    isDense: true,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.sm,
-                      vertical: AppSpacing.xs,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                      borderSide: const BorderSide(color: AppColors.border),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                      borderSide: const BorderSide(color: AppColors.border),
+              Row(
+                children: [
+                  _FilterTab(
+                    label: 'All',
+                    isSelected: filterState.status == null,
+                    onTap: () => ref.read(outcomeFiltersProvider.notifier).setStatus(null),
+                  ),
+                  const SizedBox(width: AppSpacing.xs),
+                  _FilterTab(
+                    label: 'Active',
+                    isSelected: filterState.status == OutcomeStatus.IN_PROGRESS,
+                    onTap: () => ref.read(outcomeFiltersProvider.notifier).setStatus(OutcomeStatus.IN_PROGRESS),
+                  ),
+                  const SizedBox(width: AppSpacing.xs),
+                  _FilterTab(
+                    label: 'Validated',
+                    isSelected: filterState.status == OutcomeStatus.VALIDATED,
+                    onTap: () => ref.read(outcomeFiltersProvider.notifier).setStatus(OutcomeStatus.VALIDATED),
+                  ),
+                  const SizedBox(width: AppSpacing.xs),
+                  _FilterTab(
+                    label: 'Invalidated',
+                    isSelected: filterState.status == OutcomeStatus.INVALIDATED,
+                    onTap: () => ref.read(outcomeFiltersProvider.notifier).setStatus(OutcomeStatus.INVALIDATED),
+                  ),
+                  const Spacer(),
+                  // Search
+                  SizedBox(
+                    width: 220,
+                    child: TextField(
+                      controller: searchController,
+                      onChanged: (value) => ref.read(outcomeFiltersProvider.notifier).setSearch(value),
+                      decoration: InputDecoration(
+                        hintText: 'Search outcomes...',
+                        hintStyle: AppTypography.bodySmall,
+                        prefixIcon: const Icon(Icons.search, size: 18),
+                        isDense: true,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.sm,
+                          vertical: AppSpacing.xs,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                          borderSide: const BorderSide(color: AppColors.border),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                          borderSide: const BorderSide(color: AppColors.border),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                          borderSide: const BorderSide(color: AppColors.primary),
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              FilledButton.icon(
-                onPressed: () => showCreateOutcomeDialog(context),
-                icon: const Icon(Icons.add, size: 18),
-                label: const Text('New Outcome'),
+                  const SizedBox(width: AppSpacing.md),
+                  FilledButton.icon(
+                    onPressed: () => showCreateOutcomeDialog(context).then((_) {
+                      ref.invalidate(filteredOutcomesProvider);
+                    }),
+                    icon: const Icon(Icons.add, size: 18),
+                    label: const Text('New Outcome'),
+                  ),
+                ],
               ),
             ],
           ),
@@ -97,17 +128,25 @@ class OutcomesScreen extends ConsumerWidget {
                   ),
                 );
               }
-              return ListView.builder(
-                padding: const EdgeInsets.all(AppSpacing.pagePaddingHorizontal),
-                itemCount: outcomes.length,
-                itemBuilder: (context, index) => Padding(
-                  padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                  child: OutcomeCardEnhanced(
-                    outcome: outcomes[index],
-                    onTap: () => context.go(
-                        Routes.outcomeById(outcomes[index].id)),
+              return Column(
+                children: [
+                  Expanded(
+                    child: ListView.builder(
+                      padding: const EdgeInsets.all(AppSpacing.pagePaddingHorizontal),
+                      itemCount: outcomes.length,
+                      itemBuilder: (context, index) => Padding(
+                        padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                        child: OutcomeCardEnhanced(
+                          outcome: outcomes[index],
+                          onTap: () => context.go(
+                              Routes.outcomeById(outcomes[index].id)),
+                        ),
+                      ),
+                    ),
                   ),
-                ),
+                  // Footer with summary stats
+                  _FooterStats(outcomes: outcomes),
+                ],
               );
             },
             loading: () =>
@@ -141,27 +180,61 @@ class _FilterTab extends StatelessWidget {
       borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
       child: Container(
         padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.sm,
-          vertical: AppSpacing.xxs,
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.xs,
         ),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppColors.primary.withOpacity(0.1)
+              ? AppColors.primary
               : Colors.transparent,
           borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
           border: Border.all(
             color: isSelected
-                ? AppColors.primary.withOpacity(0.3)
+                ? AppColors.primary
                 : AppColors.border,
           ),
         ),
         child: Text(
           label,
           style: AppTypography.labelSmall.copyWith(
-            color: isSelected ? AppColors.primary : AppColors.textSecondary,
+            color: isSelected ? AppColors.textOnPrimary : AppColors.textSecondary,
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _FooterStats extends StatelessWidget {
+  final List<Outcome> outcomes;
+
+  const _FooterStats({required this.outcomes});
+
+  @override
+  Widget build(BuildContext context) {
+    final total = outcomes.length;
+    final validated = outcomes.where((o) => o.status == OutcomeStatus.VALIDATED).length;
+    final inProgress = outcomes.where((o) => o.status == OutcomeStatus.IN_PROGRESS).length;
+    final abandoned = outcomes.where((o) => o.status == OutcomeStatus.ABANDONED).length;
+    final validationPercent = total > 0 ? ((validated / total) * 100).toStringAsFixed(0) : '0';
+
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: const BoxDecoration(
+        color: AppColors.surface,
+        border: Border(top: BorderSide(color: AppColors.border)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            '$total Total Outcomes  •  $validated Validated ($validationPercent%)  •  $inProgress In Progress  •  $abandoned Abandoned',
+            style: AppTypography.bodySmall.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ],
       ),
     );
   }

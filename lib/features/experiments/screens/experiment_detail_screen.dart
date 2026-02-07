@@ -29,21 +29,42 @@ class ExperimentDetailScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Back
-            TextButton.icon(
-              onPressed: () => context.go(Routes.experiments),
-              icon: const Icon(Icons.arrow_back, size: 18),
-              label: const Text('Back to Experiments'),
-              style: TextButton.styleFrom(
-                foregroundColor: AppColors.textSecondary,
-                padding: EdgeInsets.zero,
-              ),
+            // Breadcrumb
+            Row(
+              children: [
+                TextButton.icon(
+                  onPressed: () => context.go(Routes.experiments),
+                  icon: const Icon(Icons.arrow_back, size: 16),
+                  label: const Text('Experiments'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.textSecondary,
+                    padding: EdgeInsets.zero,
+                  ),
+                ),
+                Text(
+                  ' > ',
+                  style: AppTypography.bodySmall
+                      .copyWith(color: AppColors.textTertiary),
+                ),
+                Text(
+                  experiment.name,
+                  style: AppTypography.bodySmall
+                      .copyWith(color: AppColors.textSecondary),
+                ),
+              ],
             ),
-            const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: AppSpacing.lg),
 
             // Header
             _ExperimentHeader(experiment: experiment),
-            const SizedBox(height: AppSpacing.lg),
+            const SizedBox(height: AppSpacing.md),
+
+            // Timeline bar for running experiments
+            if (experiment.status == ExperimentStatus.RUNNING &&
+                experiment.daysElapsed != null) ...[
+              _TimelineBar(experiment: experiment),
+              const SizedBox(height: AppSpacing.lg),
+            ],
 
             // Content
             if (isWide)
@@ -64,12 +85,20 @@ class ExperimentDetailScreen extends ConsumerWidget {
                   ),
                   const SizedBox(width: AppSpacing.lg),
                   Expanded(
-                    child: _SidebarPanel(experiment: experiment),
+                    child: Column(
+                      children: [
+                        _SidebarPanel(experiment: experiment),
+                        const SizedBox(height: AppSpacing.lg),
+                        _QuickActionsPanel(experiment: experiment),
+                      ],
+                    ),
                   ),
                 ],
               )
             else ...[
               _SidebarPanel(experiment: experiment),
+              const SizedBox(height: AppSpacing.lg),
+              _QuickActionsPanel(experiment: experiment),
               const SizedBox(height: AppSpacing.lg),
               _VariantComparison(experiment: experiment),
               const SizedBox(height: AppSpacing.lg),
@@ -87,6 +116,76 @@ class ExperimentDetailScreen extends ConsumerWidget {
         onRetry: () => ref.invalidate(experimentDetailProvider(id)),
       ),
     );
+  }
+}
+
+class _TimelineBar extends StatelessWidget {
+  final Experiment experiment;
+
+  const _TimelineBar({required this.experiment});
+
+  @override
+  Widget build(BuildContext context) {
+    final progress = ((experiment.daysElapsed ?? 0) /
+            (experiment.durationDays ?? 1) *
+            100)
+        .clamp(0, 100);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                'Day ${experiment.daysElapsed} of ${experiment.durationDays ?? "∞"}',
+                style: AppTypography.h4,
+              ),
+              const Spacer(),
+              Text(
+                '${progress.toStringAsFixed(0)}%',
+                style: AppTypography.labelMedium.copyWith(
+                  color: AppColors.textTertiary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+            child: LinearProgressIndicator(
+              value: progress / 100,
+              backgroundColor: AppColors.surfaceVariant,
+              valueColor: AlwaysStoppedAnimation<Color>(
+                _getTypeColor(experiment),
+              ),
+              minHeight: 8,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Color _getTypeColor(Experiment experiment) {
+    switch (experiment.type) {
+      case ExperimentType.A_B_TEST:
+        return AppColors.experimentAbTest;
+      case ExperimentType.FEATURE_FLAG:
+        return AppColors.experimentFeatureFlag;
+      case ExperimentType.CANARY:
+        return AppColors.experimentCanary;
+      case ExperimentType.MANUAL:
+        return AppColors.experimentManual;
+    }
   }
 }
 
@@ -551,20 +650,56 @@ class _SidebarPanel extends StatelessWidget {
               ],
             ),
           ),
+          if (experiment.hypothesisTitle != null) ...[
+            const Divider(height: AppSpacing.lg),
+            _Field(
+              label: 'Hypothesis',
+              child: Text(experiment.hypothesisTitle!,
+                  style: AppTypography.bodyMedium),
+            ),
+          ],
           if (experiment.startDate != null) ...[
             const Divider(height: AppSpacing.lg),
             _Field(
-              label: 'Started',
-              child: Text(_formatDate(experiment.startDate!),
-                  style: AppTypography.bodyMedium),
+              label: 'Start Date',
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(_formatDate(experiment.startDate!),
+                      style: AppTypography.bodyMedium),
+                  const SizedBox(height: AppSpacing.xxs),
+                  Text(
+                    '${_daysAgo(experiment.startDate!)} days ago',
+                    style: AppTypography.labelSmall
+                        .copyWith(color: AppColors.textTertiary),
+                  ),
+                ],
+              ),
             ),
           ],
           if (experiment.endDate != null) ...[
             const Divider(height: AppSpacing.lg),
             _Field(
-              label: 'Ends',
-              child: Text(_formatDate(experiment.endDate!),
-                  style: AppTypography.bodyMedium),
+              label: 'End Date',
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(_formatDate(experiment.endDate!),
+                      style: AppTypography.bodyMedium),
+                  const SizedBox(height: AppSpacing.xxs),
+                  Text(
+                    '${experiment.daysRemaining ?? 0} days remaining',
+                    style: AppTypography.labelSmall.copyWith(
+                      color: experiment.isOverdue
+                          ? AppColors.error
+                          : AppColors.textTertiary,
+                      fontWeight: experiment.isOverdue
+                          ? FontWeight.w600
+                          : FontWeight.w400,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
           if (experiment.daysRemaining != null &&
@@ -606,6 +741,10 @@ class _SidebarPanel extends StatelessWidget {
     ];
     return '${months[date.month - 1]} ${date.day}, ${date.year}';
   }
+
+  int _daysAgo(DateTime date) {
+    return DateTime.now().difference(date).inDays;
+  }
 }
 
 class _Field extends StatelessWidget {
@@ -625,6 +764,92 @@ class _Field extends StatelessWidget {
         const SizedBox(height: AppSpacing.xxs),
         child,
       ],
+    );
+  }
+}
+
+class _QuickActionsPanel extends StatelessWidget {
+  final Experiment experiment;
+
+  const _QuickActionsPanel({required this.experiment});
+
+  @override
+  Widget build(BuildContext context) {
+    final isRunning = experiment.status == ExperimentStatus.RUNNING;
+    final isConcluded = experiment.status == ExperimentStatus.CONCLUDED;
+
+    if (!isRunning && !isConcluded) {
+      return const SizedBox.shrink();
+    }
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.cardPadding),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Quick Actions', style: AppTypography.h4),
+          const SizedBox(height: AppSpacing.md),
+          if (isRunning) ...[
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: () {},
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.warning,
+                ),
+                child: Text(
+                  'End Early',
+                  style: AppTypography.labelMedium.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: () {},
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.success,
+                ),
+                child: Text(
+                  'Extend Duration',
+                  style: AppTypography.labelMedium.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+          ],
+          if (isConcluded) ...[
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: () {},
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                ),
+                child: Text(
+                  'Declare Winner',
+                  style: AppTypography.labelMedium.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 }

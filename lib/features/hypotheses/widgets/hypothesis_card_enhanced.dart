@@ -28,17 +28,18 @@ class HypothesisCardEnhanced extends StatelessWidget {
             borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
             border: Border.all(
               color: isValidated
-                  ? AppColors.success.withOpacity(0.4)
+                  ? AppColors.success.withOpacity(0.5)
                   : isInvalidated
-                      ? AppColors.error.withOpacity(0.4)
+                      ? AppColors.error.withOpacity(0.5)
                       : AppColors.border,
+              width: isValidated || isInvalidated ? 2 : 1,
             ),
           ),
           padding: const EdgeInsets.all(AppSpacing.sm),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Linked outcome
+              // Linked outcome reference
               if (hypothesis.outcomeName != null)
                 Text(
                   '→ ${hypothesis.outcomeName}',
@@ -50,24 +51,28 @@ class HypothesisCardEnhanced extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
 
-              const SizedBox(height: AppSpacing.xxs),
+              if (hypothesis.outcomeName != null)
+                const SizedBox(height: AppSpacing.xxs),
 
-              // Title
+              // Title (statement)
               Text(
-                hypothesis.title,
-                style: AppTypography.labelLarge,
+                hypothesis.statement,
+                style: AppTypography.labelLarge.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
 
               const SizedBox(height: AppSpacing.xxs),
 
-              // Belief statement
-              if (hypothesis.beliefStatement != null)
+              // Description (belief statement) - italic, gray
+              if (hypothesis.description != null && hypothesis.description!.isNotEmpty)
                 Text(
-                  hypothesis.beliefStatement!,
+                  hypothesis.description!,
                   style: AppTypography.bodySmall.copyWith(
                     fontStyle: FontStyle.italic,
+                    color: AppColors.textSecondary,
                   ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
@@ -75,13 +80,13 @@ class HypothesisCardEnhanced extends StatelessWidget {
 
               const SizedBox(height: AppSpacing.xs),
 
-              // Effort + Impact badges
+              // Badges row: Effort, Impact, Confidence
               Row(
                 children: [
                   if (hypothesis.effort != null)
                     _Badge(
                       label: hypothesis.effort!,
-                      color: AppColors.secondary,
+                      color: _effortColor(hypothesis.effort!),
                     ),
                   if (hypothesis.effort != null && hypothesis.impact != null)
                     const SizedBox(width: AppSpacing.xxs),
@@ -90,41 +95,57 @@ class HypothesisCardEnhanced extends StatelessWidget {
                       label: hypothesis.impact!,
                       color: _impactColor(hypothesis.impact!),
                     ),
+                  if ((hypothesis.effort != null || hypothesis.impact != null) &&
+                      hypothesis.confidence != null)
+                    const SizedBox(width: AppSpacing.xxs),
+                  if (hypothesis.confidence != null)
+                    _ConfidenceBadge(confidence: hypothesis.confidence!),
                   const Spacer(),
-                  // Owner avatar
+                  // Owner avatar at bottom-right
                   if (hypothesis.ownerName != null)
                     ZAvatar(
                       name: hypothesis.ownerName!,
                       imageUrl: hypothesis.ownerAvatarUrl,
-                      size: 20,
+                      size: 24,
                     ),
                 ],
               ),
 
-              // Concluded status
+              // Measuring cards: show metric improvements
+              if (hypothesis.status == HypothesisStatus.MEASURING &&
+                  hypothesis.metrics != null &&
+                  hypothesis.metrics!.isNotEmpty)
+                ..._buildMetricsSection(),
+
+              // Concluded status badges
               if (isValidated || isInvalidated) ...[
                 const SizedBox(height: AppSpacing.xs),
                 Container(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: isValidated
                         ? AppColors.success.withOpacity(0.1)
                         : AppColors.error.withOpacity(0.1),
                     borderRadius:
                         BorderRadius.circular(AppSpacing.radiusSm),
+                    border: Border.all(
+                      color: isValidated
+                          ? AppColors.success.withOpacity(0.5)
+                          : AppColors.error.withOpacity(0.5),
+                    ),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
-                        isValidated ? Icons.check : Icons.close,
-                        size: 12,
+                        isValidated ? Icons.check_circle : Icons.cancel,
+                        size: 14,
                         color: isValidated
                             ? AppColors.success
                             : AppColors.error,
                       ),
-                      const SizedBox(width: 2),
+                      const SizedBox(width: 4),
                       Text(
                         isValidated ? 'VALIDATED' : 'INVALIDATED',
                         style: AppTypography.labelSmall.copyWith(
@@ -132,9 +153,19 @@ class HypothesisCardEnhanced extends StatelessWidget {
                               ? AppColors.success
                               : AppColors.error,
                           fontWeight: FontWeight.w700,
-                          fontSize: 10,
+                          fontSize: 11,
                         ),
                       ),
+                      if (isValidated) ...[
+                        const SizedBox(width: 2),
+                        Text(
+                          '✓',
+                          style: AppTypography.labelSmall.copyWith(
+                            color: AppColors.success,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -146,6 +177,64 @@ class HypothesisCardEnhanced extends StatelessWidget {
     );
   }
 
+  List<Widget> _buildMetricsSection() {
+    final metrics = hypothesis.metrics ?? [];
+    if (metrics.isEmpty) return [];
+
+    return [
+      const SizedBox(height: AppSpacing.xs),
+      Column(
+        children: metrics.take(2).map((metric) {
+          final improvement = metric.improvement;
+          final formattedImprovement =
+              improvement != null ? '${improvement.toStringAsFixed(1)}%' : 'N/A';
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 2),
+            child: Row(
+              children: [
+                Text(
+                  metric.name,
+                  style: AppTypography.labelSmall.copyWith(
+                    fontSize: 9,
+                    color: AppColors.textTertiary,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const Spacer(),
+                Text(
+                  formattedImprovement,
+                  style: AppTypography.labelSmall.copyWith(
+                    fontSize: 9,
+                    color: improvement != null && improvement > 0
+                        ? AppColors.success
+                        : AppColors.textTertiary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }).toList(),
+      ),
+    ];
+  }
+
+  Color _effortColor(String effort) {
+    switch (effort.toUpperCase()) {
+      case 'XS':
+      case 'S':
+        return AppColors.success;
+      case 'M':
+        return AppColors.warning;
+      case 'L':
+      case 'XL':
+        return AppColors.error;
+      default:
+        return AppColors.secondary;
+    }
+  }
+
   Color _impactColor(String impact) {
     switch (impact.toUpperCase()) {
       case 'HIGH':
@@ -153,7 +242,7 @@ class HypothesisCardEnhanced extends StatelessWidget {
       case 'MEDIUM':
         return AppColors.warning;
       case 'LOW':
-        return AppColors.textTertiary;
+        return AppColors.error;
       default:
         return AppColors.primary;
     }
@@ -173,9 +262,48 @@ class _Badge extends StatelessWidget {
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+        border: Border.all(
+          color: color.withOpacity(0.3),
+          width: 0.5,
+        ),
       ),
       child: Text(
         label,
+        style: AppTypography.labelSmall.copyWith(
+          color: color,
+          fontWeight: FontWeight.w600,
+          fontSize: 10,
+        ),
+      ),
+    );
+  }
+}
+
+class _ConfidenceBadge extends StatelessWidget {
+  final HypothesisConfidence confidence;
+
+  const _ConfidenceBadge({required this.confidence});
+
+  Color _getConfidenceColor() {
+    final hexColor = confidence.color;
+    return Color(int.parse(hexColor.replaceFirst('#', '0xFF')));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final color = _getConfidenceColor();
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+        border: Border.all(
+          color: color.withOpacity(0.3),
+          width: 0.5,
+        ),
+      ),
+      child: Text(
+        confidence.displayName,
         style: AppTypography.labelSmall.copyWith(
           color: color,
           fontWeight: FontWeight.w600,

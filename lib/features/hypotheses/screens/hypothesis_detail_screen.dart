@@ -28,19 +28,42 @@ class HypothesisDetailScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Back
-            TextButton.icon(
-              onPressed: () => context.go(Routes.hypotheses),
-              icon: const Icon(Icons.arrow_back, size: 18),
-              label: const Text('Back to Hypotheses'),
-              style: TextButton.styleFrom(
-                foregroundColor: AppColors.textSecondary,
-                padding: EdgeInsets.zero,
+            // Breadcrumb: "Hypotheses > {statement}"
+            GestureDetector(
+              onTap: () => context.go(Routes.hypotheses),
+              child: Row(
+                children: [
+                  Text(
+                    'Hypotheses',
+                    style: AppTypography.labelMedium.copyWith(
+                      color: AppColors.primary,
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.xs),
+                  Text(
+                    '>',
+                    style: AppTypography.labelMedium.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.xs),
+                  Expanded(
+                    child: Text(
+                      hypothesis.statement,
+                      style: AppTypography.labelMedium.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: AppSpacing.md),
 
-            // Header with status
+            // Header with status badges
             _HypothesisHeader(hypothesis: hypothesis),
             const SizedBox(height: AppSpacing.lg),
 
@@ -57,6 +80,11 @@ class HypothesisDetailScreen extends ConsumerWidget {
                         const SizedBox(height: AppSpacing.lg),
                         _DescriptionSection(hypothesis: hypothesis),
                         const SizedBox(height: AppSpacing.lg),
+                        if (hypothesis.metrics != null && hypothesis.metrics!.isNotEmpty)
+                          ...[
+                            _MetricsSection(hypothesis: hypothesis),
+                            const SizedBox(height: AppSpacing.lg),
+                          ],
                         _ExperimentsSection(
                           hypothesisId: hypothesis.id,
                           ref: ref,
@@ -77,6 +105,11 @@ class HypothesisDetailScreen extends ConsumerWidget {
               const SizedBox(height: AppSpacing.lg),
               _DescriptionSection(hypothesis: hypothesis),
               const SizedBox(height: AppSpacing.lg),
+              if (hypothesis.metrics != null && hypothesis.metrics!.isNotEmpty)
+                ...[
+                  _MetricsSection(hypothesis: hypothesis),
+                  const SizedBox(height: AppSpacing.lg),
+                ],
               _ExperimentsSection(
                 hypothesisId: hypothesis.id,
                 ref: ref,
@@ -156,7 +189,7 @@ class _HypothesisHeader extends StatelessWidget {
           ],
         ),
         const SizedBox(height: AppSpacing.sm),
-        Text(hypothesis.title, style: AppTypography.h2),
+        Text(hypothesis.statement, style: AppTypography.h2),
         if (hypothesis.outcomeName != null) ...[
           const SizedBox(height: AppSpacing.xxs),
           Row(
@@ -222,24 +255,26 @@ class _BeliefSection extends StatelessWidget {
         children: [
           Text('Hypothesis Statement', style: AppTypography.h4),
           const SizedBox(height: AppSpacing.md),
-          if (hypothesis.beliefStatement != null) ...[
+          if (hypothesis.statement.isNotEmpty) ...[
             _BeliefRow(
               label: 'We believe',
-              content: hypothesis.beliefStatement!,
+              content: hypothesis.statement,
             ),
           ],
-          if (hypothesis.expectedOutcome != null) ...[
+          if (hypothesis.description != null) ...[
             const SizedBox(height: AppSpacing.sm),
             _BeliefRow(
               label: 'Will result in',
-              content: hypothesis.expectedOutcome!,
+              content: hypothesis.description!,
             ),
           ],
-          if (hypothesis.measurementCriteria != null) ...[
+          if (hypothesis.metrics != null && hypothesis.metrics!.isNotEmpty) ...[
             const SizedBox(height: AppSpacing.sm),
             _BeliefRow(
               label: 'Measured by',
-              content: hypothesis.measurementCriteria!,
+              content: hypothesis.metrics!
+                  .map((m) => m.name)
+                  .join(', '),
             ),
           ],
         ],
@@ -306,6 +341,111 @@ class _DescriptionSection extends StatelessWidget {
               color: AppColors.textSecondary,
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MetricsSection extends StatelessWidget {
+  final Hypothesis hypothesis;
+
+  const _MetricsSection({required this.hypothesis});
+
+  @override
+  Widget build(BuildContext context) {
+    final metrics = hypothesis.metrics ?? [];
+    if (metrics.isEmpty) return const SizedBox.shrink();
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.cardPadding),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Metrics', style: AppTypography.h4),
+          const SizedBox(height: AppSpacing.md),
+          ...metrics.map((metric) {
+            final progress = metric.progressToTarget;
+            final progressPercent =
+                progress != null ? (progress * 100).toStringAsFixed(1) : 'N/A';
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              metric.name,
+                              style: AppTypography.labelMedium.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(height: AppSpacing.xxs),
+                            Text(
+                              'Baseline: ${metric.formattedBaseline} → Target: ${metric.formattedTarget}',
+                              style: AppTypography.bodySmall.copyWith(
+                                color: AppColors.textTertiary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.xs,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withOpacity(0.1),
+                          borderRadius:
+                              BorderRadius.circular(AppSpacing.radiusSm),
+                        ),
+                        child: Text(
+                          '$progressPercent%',
+                          style: AppTypography.labelSmall.copyWith(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (metric.currentValue != null) ...[
+                    const SizedBox(height: AppSpacing.xs),
+                    ClipRRect(
+                      borderRadius:
+                          BorderRadius.circular(AppSpacing.radiusSm),
+                      child: LinearProgressIndicator(
+                        value: progress != null
+                            ? progress.clamp(0.0, 1.0)
+                            : null,
+                        minHeight: 4,
+                        backgroundColor:
+                            AppColors.textTertiary.withOpacity(0.1),
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          progress != null && progress > 0
+                              ? AppColors.success
+                              : AppColors.textTertiary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            );
+          }).toList(),
         ],
       ),
     );

@@ -17,15 +17,17 @@ class VoteCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surfaceVariant,
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        border: Border.all(color: AppColors.border),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ZAvatar(
             name: vote.voterName ?? 'User',
-            size: 36,
+            imageUrl: vote.voterAvatarUrl,
+            size: 40,
           ),
-          const SizedBox(width: AppSpacing.sm),
+          const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -34,7 +36,9 @@ class VoteCard extends StatelessWidget {
                   children: [
                     Text(
                       vote.voterName ?? 'Unknown',
-                      style: AppTypography.labelMedium,
+                      style: AppTypography.labelMedium.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     const SizedBox(width: AppSpacing.sm),
                     Container(
@@ -48,28 +52,31 @@ class VoteCard extends StatelessWidget {
                             BorderRadius.circular(AppSpacing.radiusSm),
                       ),
                       child: Text(
-                        vote.vote,
+                        vote.vote.toUpperCase(),
                         style: AppTypography.labelSmall.copyWith(
                           color: _getVoteColor(vote.vote),
+                          fontWeight: FontWeight.w600,
                         ),
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      _getRelativeTime(vote.votedAt),
+                      style: AppTypography.bodySmall.copyWith(
+                        color: AppColors.textTertiary,
                       ),
                     ),
                   ],
                 ),
                 if (vote.comment != null && vote.comment!.isNotEmpty) ...[
-                  const SizedBox(height: AppSpacing.xs),
+                  const SizedBox(height: AppSpacing.sm),
                   Text(
                     vote.comment!,
-                    style: AppTypography.bodySmall,
+                    style: AppTypography.bodySmall.copyWith(
+                      color: AppColors.textPrimary,
+                    ),
                   ),
                 ],
-                const SizedBox(height: AppSpacing.xxs),
-                Text(
-                  _formatTime(vote.votedAt),
-                  style: AppTypography.bodySmall.copyWith(
-                    color: AppColors.textTertiary,
-                  ),
-                ),
               ],
             ),
           ),
@@ -92,7 +99,20 @@ class VoteCard extends StatelessWidget {
     return AppColors.primary;
   }
 
-  String _formatTime(DateTime date) {
-    return '${date.day}/${date.month} ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
+  String _getRelativeTime(DateTime date) {
+    final now = DateTime.now();
+    final diff = now.difference(date);
+
+    if (diff.inSeconds < 60) {
+      return 'just now';
+    } else if (diff.inMinutes < 60) {
+      return '${diff.inMinutes}m ago';
+    } else if (diff.inHours < 24) {
+      return '${diff.inHours}h ago';
+    } else if (diff.inDays < 7) {
+      return '${diff.inDays}d ago';
+    } else {
+      return '${date.day}/${date.month}';
+    }
   }
 }

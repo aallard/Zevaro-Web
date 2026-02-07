@@ -56,13 +56,13 @@ class OutcomeCardEnhanced extends StatelessWidget {
           padding: const EdgeInsets.all(AppSpacing.cardPadding),
           child: Row(
             children: [
-              // Progress ring
+              // Progress ring with dynamic color
               SizedBox(
                 width: 64,
                 height: 64,
                 child: _ProgressRing(
                   progress: outcome.validationRate / 100,
-                  color: _statusColor,
+                  color: _getProgressRingColor(outcome.validationRate),
                   label: '${outcome.validationRate.toStringAsFixed(0)}%',
                 ),
               ),
@@ -104,21 +104,25 @@ class OutcomeCardEnhanced extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: AppSpacing.xxs),
+                    if (outcome.description != null && outcome.description!.isNotEmpty)
+                      Text(
+                        outcome.description!,
+                        style: AppTypography.bodySmall,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    const SizedBox(height: AppSpacing.xs),
 
-                    // Stats row
-                    Text(
-                      '${outcome.hypothesisCount} Hypotheses · '
-                      '${outcome.validatedHypothesisCount} Validated · '
-                      '${outcome.activeHypothesisCount} Running',
-                      style: AppTypography.bodySmall,
-                    ),
+                    // Hypothesis chips
+                    _HypothesisChips(outcome: outcome),
                   ],
                 ),
               ),
 
-              // Right side: Owner + target
+              // Right side: Owner + team + target date
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   if (outcome.ownerName != null)
                     Row(
@@ -149,6 +153,21 @@ class OutcomeCardEnhanced extends StatelessWidget {
                       ],
                     ),
                   ],
+                  if (outcome.teamName != null) ...[
+                    const SizedBox(height: AppSpacing.xs),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.people_outline,
+                            size: 12, color: AppColors.textTertiary),
+                        const SizedBox(width: 4),
+                        Text(
+                          outcome.teamName!,
+                          style: AppTypography.labelSmall,
+                        ),
+                      ],
+                    ),
+                  ],
                 ],
               ),
             ],
@@ -156,6 +175,16 @@ class OutcomeCardEnhanced extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Color _getProgressRingColor(double validationRate) {
+    if (validationRate >= 60) {
+      return AppColors.success; // Green
+    } else if (validationRate >= 30) {
+      return AppColors.warning; // Amber
+    } else {
+      return AppColors.error; // Red
+    }
   }
 
   String _formatDate(DateTime date) {
@@ -241,4 +270,109 @@ class _RingPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _RingPainter old) =>
       old.progress != progress || old.color != color;
+}
+
+class _HypothesisChips extends StatelessWidget {
+  final Outcome outcome;
+
+  const _HypothesisChips({required this.outcome});
+
+  @override
+  Widget build(BuildContext context) {
+    final validatedCount = outcome.validatedHypothesisCount;
+    final invalidatedCount = outcome.hypothesisCount -
+        outcome.validatedHypothesisCount -
+        outcome.activeHypothesisCount;
+    final activeCount = outcome.activeHypothesisCount;
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Validated
+        if (validatedCount > 0)
+          _HypothesisChip(
+            icon: Icons.check_circle,
+            label: 'Hypothesis',
+            count: validatedCount,
+            color: AppColors.success,
+          ),
+        if (validatedCount > 0) const SizedBox(width: AppSpacing.xxs),
+        // Invalidated
+        if (invalidatedCount > 0)
+          _HypothesisChip(
+            icon: Icons.cancel,
+            label: 'Hypothesis',
+            count: invalidatedCount,
+            color: AppColors.error,
+          ),
+        if (invalidatedCount > 0) const SizedBox(width: AppSpacing.xxs),
+        // Active
+        if (activeCount > 0)
+          _HypothesisChip(
+            icon: Icons.link,
+            label: 'Hypothesis',
+            count: activeCount,
+            color: AppColors.primary,
+          ),
+        const SizedBox(width: AppSpacing.xs),
+        TextButton(
+          onPressed: () {},
+          style: TextButton.styleFrom(
+            padding: EdgeInsets.zero,
+            minimumSize: Size.zero,
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
+          child: Text(
+            'Expand >',
+            style: AppTypography.labelSmall.copyWith(
+              color: AppColors.primary,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _HypothesisChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final int count;
+  final Color color;
+
+  const _HypothesisChip({
+    required this.icon,
+    required this.label,
+    required this.count,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.xs,
+        vertical: 2,
+      ),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12, color: color),
+          const SizedBox(width: 2),
+          Text(
+            label,
+            style: AppTypography.labelSmall.copyWith(
+              color: color,
+              fontSize: 10,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }

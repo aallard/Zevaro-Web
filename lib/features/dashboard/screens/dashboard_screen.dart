@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:zevaro_flutter_sdk/zevaro_flutter_sdk.dart';
 
+import '../../../core/router/routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
@@ -63,18 +64,73 @@ class _NoProjectSelected extends StatelessWidget {
   }
 }
 
-class _DashboardContent extends StatelessWidget {
+class _DashboardContent extends ConsumerWidget {
   final ProjectDashboard dashboard;
 
   const _DashboardContent({required this.dashboard});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final selectedProject = ref.watch(selectedProjectProvider);
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(AppSpacing.pagePaddingHorizontal),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Breadcrumb
+          selectedProject.when(
+            data: (project) {
+              if (project != null) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                  child: Row(
+                    children: [
+                      Text(
+                        'Projects',
+                        style: AppTypography.bodySmall.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+                        child: Icon(
+                          Icons.chevron_right,
+                          size: 16,
+                          color: AppColors.textTertiary,
+                        ),
+                      ),
+                      Text(
+                        project.name,
+                        style: AppTypography.bodySmall.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+                        child: Icon(
+                          Icons.chevron_right,
+                          size: 16,
+                          color: AppColors.textTertiary,
+                        ),
+                      ),
+                      Text(
+                        'Dashboard',
+                        style: AppTypography.bodySmall.copyWith(
+                          color: AppColors.textPrimary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+              return const SizedBox.shrink();
+            },
+            loading: () => const SizedBox.shrink(),
+            error: (_, __) => const SizedBox.shrink(),
+          ),
+
           // Row 1: Metric cards
           LayoutBuilder(
             builder: (context, constraints) {
@@ -88,10 +144,10 @@ class _DashboardContent extends StatelessWidget {
                     child: MetricCard(
                       title: 'Pending Decisions',
                       value: '${dashboard.pendingDecisionCount}',
-                      icon: Icons.how_to_vote_outlined,
+                      icon: Icons.warning_amber,
                       color: dashboard.slaBreachedDecisionCount > 0
-                          ? AppColors.warning
-                          : AppColors.primary,
+                          ? AppColors.error
+                          : AppColors.warning,
                       subtitle: dashboard.slaBreachedDecisionCount > 0
                           ? '${dashboard.slaBreachedDecisionCount} SLA breached'
                           : null,
@@ -103,7 +159,7 @@ class _DashboardContent extends StatelessWidget {
                     child: MetricCard(
                       title: 'Active Outcomes',
                       value: '${dashboard.activeOutcomeCount}',
-                      icon: Icons.flag_outlined,
+                      icon: Icons.check_circle_outline,
                       color: AppColors.success,
                       subtitle:
                           '${dashboard.outcomeValidationPercentage.toStringAsFixed(0)}% validated',
@@ -114,7 +170,7 @@ class _DashboardContent extends StatelessWidget {
                     child: MetricCard(
                       title: 'Running Experiments',
                       value: '${dashboard.runningExperimentCount}',
-                      icon: Icons.biotech_outlined,
+                      icon: Icons.science_outlined,
                       color: AppColors.secondary,
                     ),
                   ),
@@ -123,8 +179,8 @@ class _DashboardContent extends StatelessWidget {
                     child: MetricCard(
                       title: 'Avg Decision Time',
                       value: '${dashboard.avgDecisionTimeHours.toStringAsFixed(1)}h',
-                      icon: Icons.timer_outlined,
-                      color: AppColors.info,
+                      icon: Icons.schedule_outlined,
+                      color: AppColors.secondary,
                       subtitle: dashboard.avgDecisionTimeTrend < 0
                           ? 'Improving'
                           : dashboard.avgDecisionTimeTrend > 0
@@ -132,7 +188,7 @@ class _DashboardContent extends StatelessWidget {
                               : null,
                       subtitleColor: dashboard.avgDecisionTimeTrend < 0
                           ? AppColors.success
-                          : AppColors.warning,
+                          : AppColors.error,
                       trendIcon: dashboard.avgDecisionTimeTrend < 0
                           ? Icons.trending_down
                           : dashboard.avgDecisionTimeTrend > 0

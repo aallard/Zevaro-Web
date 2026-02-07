@@ -10,8 +10,8 @@ import '../../../shared/widgets/common/loading_indicator.dart';
 import '../../../shared/widgets/common/error_view.dart';
 import '../providers/teams_providers.dart';
 
-class MemberTable extends ConsumerWidget {
-  const MemberTable({super.key});
+class WorkloadMatrix extends ConsumerWidget {
+  const WorkloadMatrix({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -24,7 +24,7 @@ class MemberTable extends ConsumerWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.groups_outlined, size: 64,
+                Icon(Icons.assessment_outlined, size: 64,
                     color: AppColors.textTertiary),
                 const SizedBox(height: AppSpacing.md),
                 Text('No team members yet',
@@ -62,24 +62,30 @@ class MemberTable extends ConsumerWidget {
                     children: [
                       Expanded(
                         flex: 2,
-                        child: Text('Team Members',
+                        child: Text('Member',
                             style: AppTypography.labelMedium),
                       ),
                       SizedBox(
                         width: 100,
-                        child: Text('Role',
+                        child: Text('Draft',
                             style: AppTypography.labelMedium,
                             textAlign: TextAlign.center),
                       ),
                       SizedBox(
-                        width: 120,
-                        child: Text('Pending Decisions',
+                        width: 100,
+                        child: Text('Ready',
                             style: AppTypography.labelMedium,
                             textAlign: TextAlign.center),
                       ),
                       SizedBox(
-                        width: 120,
-                        child: Text('Response Time',
+                        width: 100,
+                        child: Text('Building',
+                            style: AppTypography.labelMedium,
+                            textAlign: TextAlign.center),
+                      ),
+                      SizedBox(
+                        width: 100,
+                        child: Text('Measuring',
                             style: AppTypography.labelMedium,
                             textAlign: TextAlign.center),
                       ),
@@ -87,13 +93,13 @@ class MemberTable extends ConsumerWidget {
                   ),
                 ),
                 // Build rows from member data
-                ...members.map((member) => _MemberRow(member: member)),
+                ...members.map((member) => _WorkloadRow(member: member)),
               ],
             ),
           ),
         );
       },
-      loading: () => const LoadingIndicator(message: 'Loading team members...'),
+      loading: () => const LoadingIndicator(message: 'Loading workload...'),
       error: (e, _) => ErrorView(
         message: e.toString(),
         onRetry: () => ref.invalidate(teamMembersWithStatsProvider),
@@ -102,26 +108,14 @@ class MemberTable extends ConsumerWidget {
   }
 }
 
-class _MemberRow extends StatelessWidget {
+class _WorkloadRow extends StatelessWidget {
   final TeamMember member;
 
-  const _MemberRow({required this.member});
-
-  Color _getRoleColor(TeamMemberRole role) {
-    switch (role) {
-      case TeamMemberRole.lead:
-        return AppColors.primary;
-      case TeamMemberRole.owner:
-        return AppColors.secondary;
-      case TeamMemberRole.member:
-        return AppColors.textSecondary;
-    }
-  }
+  const _WorkloadRow({required this.member});
 
   @override
   Widget build(BuildContext context) {
     final memberName = member.user.fullName ?? 'Unknown User';
-    final memberEmail = member.user.title ?? '';
 
     return Container(
       padding: const EdgeInsets.symmetric(
@@ -135,7 +129,7 @@ class _MemberRow extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // Avatar + name + email
+          // Member info
           Expanded(
             flex: 2,
             child: Row(
@@ -147,79 +141,57 @@ class _MemberRow extends StatelessWidget {
                 ),
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        memberName,
-                        style: AppTypography.labelLarge,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      if (memberEmail.isNotEmpty)
-                        Text(
-                          memberEmail,
-                          style: AppTypography.bodySmall,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                    ],
+                  child: Text(
+                    memberName,
+                    style: AppTypography.labelLarge,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
             ),
           ),
-          // Role badge
+          // Draft count
           SizedBox(
             width: 100,
             child: Center(
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.sm,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: _getRoleColor(member.teamRole).withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
-                ),
-                child: Text(
-                  member.teamRole.displayName,
-                  style: AppTypography.labelSmall.copyWith(
-                    color: _getRoleColor(member.teamRole),
-                    fontWeight: FontWeight.w600,
-                  ),
-                  maxLines: 1,
-                ),
-              ),
-            ),
-          ),
-          // Pending decisions
-          SizedBox(
-            width: 120,
-            child: Center(
               child: Text(
-                '0 decisions pending',
-                style: AppTypography.bodySmall,
+                '0',
+                style: AppTypography.bodyMedium,
                 textAlign: TextAlign.center,
               ),
             ),
           ),
-          // Response time
+          // Ready count
           SizedBox(
-            width: 120,
+            width: 100,
             child: Center(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.timer_outlined,
-                      size: 14, color: AppColors.textTertiary),
-                  const SizedBox(width: 4),
-                  Text(
-                    'N/A',
-                    style: AppTypography.bodySmall,
-                  ),
-                ],
+              child: Text(
+                '0',
+                style: AppTypography.bodyMedium,
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+          // Building count
+          SizedBox(
+            width: 100,
+            child: Center(
+              child: Text(
+                '0',
+                style: AppTypography.bodyMedium,
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+          // Measuring count
+          SizedBox(
+            width: 100,
+            child: Center(
+              child: Text(
+                '0',
+                style: AppTypography.bodyMedium,
+                textAlign: TextAlign.center,
               ),
             ),
           ),

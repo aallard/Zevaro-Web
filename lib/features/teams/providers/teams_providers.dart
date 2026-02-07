@@ -132,3 +132,26 @@ Future<List<User>> availableUsers(AvailableUsersRef ref, String teamId) async {
 
   return allUsers.content.where((u) => !memberUserIds.contains(u.id)).toList();
 }
+
+/// Team members with their statistics (for Team & People screen)
+@riverpod
+Future<List<TeamMember>> teamMembersWithStats(TeamMembersWithStatsRef ref) async {
+  final teamService = ref.watch(teamServiceProvider);
+  // For now, get the first team's members (or all members from all teams)
+  final teams = await ref.watch(teamsListProvider.future);
+  if (teams.isEmpty) {
+    return [];
+  }
+
+  final team = await teamService.getTeamWithMembers(teams.first.id);
+  return team.members ?? [];
+}
+
+/// Team stakeholders (for Team & People screen)
+@riverpod
+Future<List<Stakeholder>> teamStakeholders(TeamStakeholdersRef ref) async {
+  final stakeholderService = ref.watch(stakeholderServiceProvider);
+  // Fetch stakeholders (in a real implementation, this might be filtered by team)
+  final response = await stakeholderService.listStakeholders();
+  return response.content;
+}

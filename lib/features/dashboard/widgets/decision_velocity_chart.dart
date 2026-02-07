@@ -30,7 +30,7 @@ class DecisionVelocityChart extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.md),
           SizedBox(
-            height: 160,
+            height: 200,
             child: metrics.isEmpty
                 ? Center(
                     child: Text(
@@ -51,34 +51,69 @@ class _SimpleBarChart extends StatelessWidget {
 
   const _SimpleBarChart({required this.metrics});
 
+  String _getWeekLabel(int index, int total) {
+    final daysAgo = total - index - 1;
+    if (daysAgo == 0) return 'Now';
+    final weeksAgo = (daysAgo / 7).ceil();
+    return '${weeksAgo}wk ago';
+  }
+
   @override
   Widget build(BuildContext context) {
     final maxCount = metrics.fold<int>(
         1, (max, m) => m.count > max ? m.count : max);
+    final total = metrics.length;
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: metrics.map((m) {
-        final height = (m.count / maxCount * 140).clamp(4.0, 140.0);
-        return Expanded(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 1),
-            child: Tooltip(
-              message: '${m.count} decisions',
-              child: Container(
-                height: height,
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.7),
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(2),
-                    topRight: Radius.circular(2),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Bar chart
+        Expanded(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: metrics.asMap().entries.map((entry) {
+              final index = entry.key;
+              final m = entry.value;
+              final height = (m.count / maxCount * 140).clamp(4.0, 140.0);
+              return Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 1),
+                  child: Tooltip(
+                    message: '${m.count} decisions',
+                    child: Container(
+                      height: height,
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withOpacity(0.8),
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(2),
+                          topRight: Radius.circular(2),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ),
+              );
+            }).toList(),
           ),
-        );
-      }).toList(),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        // X-axis labels
+        Row(
+          children: metrics.asMap().entries.map((entry) {
+            final index = entry.key;
+            final label = _getWeekLabel(index, total);
+            return Expanded(
+              child: Text(
+                label,
+                style: AppTypography.labelSmall.copyWith(
+                  color: AppColors.textTertiary,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            );
+          }).toList(),
+        ),
+      ],
     );
   }
 }

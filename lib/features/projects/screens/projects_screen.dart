@@ -44,6 +44,72 @@ class ProjectsScreen extends ConsumerWidget {
 
               const SizedBox(width: AppSpacing.md),
 
+              // Sort dropdown
+              PopupMenuButton<String>(
+                itemBuilder: (context) => [
+                  const PopupMenuItem(
+                    value: 'recent',
+                    child: Row(
+                      children: [
+                        Icon(Icons.schedule, size: 16),
+                        SizedBox(width: AppSpacing.sm),
+                        Text('Recent'),
+                      ],
+                    ),
+                  ),
+                  const PopupMenuItem(
+                    value: 'name',
+                    child: Row(
+                      children: [
+                        Icon(Icons.sort_by_alpha, size: 16),
+                        SizedBox(width: AppSpacing.sm),
+                        Text('Name'),
+                      ],
+                    ),
+                  ),
+                  const PopupMenuItem(
+                    value: 'status',
+                    child: Row(
+                      children: [
+                        Icon(Icons.label, size: 16),
+                        SizedBox(width: AppSpacing.sm),
+                        Text('Status'),
+                      ],
+                    ),
+                  ),
+                ],
+                onSelected: (value) {
+                  // Handle sort selection
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.sm,
+                    vertical: AppSpacing.xs,
+                  ),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: AppColors.border),
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.sort, size: 16, color: AppColors.textSecondary),
+                      const SizedBox(width: AppSpacing.xs),
+                      Text(
+                        'Sort: Recent',
+                        style: AppTypography.labelSmall.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.xs),
+                      Icon(Icons.expand_more, size: 16, color: AppColors.textSecondary),
+                    ],
+                  ),
+                ),
+              ),
+
+              const SizedBox(width: AppSpacing.md),
+
               // View toggle
               SegmentedButton<ProjectViewMode>(
                 segments: const [

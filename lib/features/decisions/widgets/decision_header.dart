@@ -3,6 +3,7 @@ import 'package:zevaro_flutter_sdk/zevaro_flutter_sdk.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../shared/widgets/common/avatar.dart';
 import 'urgency_badge.dart';
 import 'sla_indicator.dart';
 
@@ -26,53 +27,51 @@ class DecisionHeader extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Status + Type row
+            // Badges row: Priority, Type, Timestamp, Escalate
             Row(
               children: [
+                // Priority badge
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: AppSpacing.sm,
                     vertical: AppSpacing.xxs,
                   ),
                   decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.1),
+                    color: _getPriorityColor().withOpacity(0.1),
                     borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        _getStatusIcon(decision.status),
-                        size: 14,
-                        color: statusColor,
-                      ),
-                      const SizedBox(width: AppSpacing.xxs),
-                      Text(
-                        decision.status.displayName,
-                        style: AppTypography.labelMedium.copyWith(
-                          color: statusColor,
-                        ),
-                      ),
-                    ],
+                  child: Text(
+                    _getPriorityLabel(),
+                    style: AppTypography.labelSmall.copyWith(
+                      color: _getPriorityColor(),
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
                 const SizedBox(width: AppSpacing.sm),
+                // Type badge (outlined)
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: AppSpacing.sm,
                     vertical: AppSpacing.xxs,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.surfaceVariant,
+                    border: Border.all(color: AppColors.border),
                     borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
                   ),
                   child: Text(
                     decision.type.displayName,
-                    style: AppTypography.labelMedium,
+                    style: AppTypography.labelSmall,
                   ),
                 ),
                 const Spacer(),
-                UrgencyBadge(urgency: decision.urgency),
+                // Relative timestamp
+                Text(
+                  _getRelativeTime(decision.createdAt),
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.textTertiary,
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: AppSpacing.md),
@@ -84,7 +83,74 @@ class DecisionHeader extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.md),
 
-            // SLA + Actions
+            // Subtitle: Created by, Created time, Assigned to
+            Row(
+              children: [
+                Icon(Icons.person_outline, size: 16, color: AppColors.textSecondary),
+                const SizedBox(width: AppSpacing.xs),
+                if (decision.owner != null)
+                  Text(
+                    'Created by ${decision.owner!.fullName}',
+                    style: AppTypography.bodySmall.copyWith(
+                      color: AppColors.textPrimary,
+                    ),
+                  )
+                else
+                  Text(
+                    'Created',
+                    style: AppTypography.bodySmall.copyWith(
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                const SizedBox(width: AppSpacing.xs),
+                Text(
+                  '·',
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.textTertiary,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.xs),
+                Text(
+                  _getRelativeTime(decision.createdAt),
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.textTertiary,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.xs),
+                Text(
+                  '·',
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.textTertiary,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.xs),
+                Text(
+                  'Assigned to',
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.xs),
+                if (decision.assignedTo != null)
+                  Text(
+                    decision.assignedTo!.fullName,
+                    style: AppTypography.bodySmall.copyWith(
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  )
+                else
+                  Text(
+                    'Unassigned',
+                    style: AppTypography.bodySmall.copyWith(
+                      color: AppColors.textTertiary,
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.md),
+
+            // SLA + Escalate Actions
             Row(
               children: [
                 SlaIndicator(decision: decision),
@@ -105,6 +171,33 @@ class DecisionHeader extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Color _getPriorityColor() {
+    final urgencyColor =
+        Color(int.parse(decision.urgency.color.replaceFirst('#', '0xFF')));
+    return urgencyColor;
+  }
+
+  String _getPriorityLabel() {
+    return decision.urgency.displayName;
+  }
+
+  String _getRelativeTime(DateTime date) {
+    final now = DateTime.now();
+    final diff = now.difference(date);
+
+    if (diff.inSeconds < 60) {
+      return 'just now';
+    } else if (diff.inMinutes < 60) {
+      return '${diff.inMinutes}m ago';
+    } else if (diff.inHours < 24) {
+      return '${diff.inHours}h ago';
+    } else if (diff.inDays < 7) {
+      return '${diff.inDays}d ago';
+    } else {
+      return '${date.day}/${date.month}/${date.year}';
+    }
   }
 
   Color _getStatusColor(DecisionStatus status) {

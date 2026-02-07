@@ -250,8 +250,6 @@ Future<List<Experiment>> hypothesisExperiments(
   HypothesisExperimentsRef ref,
   String hypothesisId,
 ) async {
-  final hypothesisService = ref.watch(hypothesisServiceProvider);
-  final experiments =
-      await hypothesisService.getHypothesisExperiments(hypothesisId);
-  return experiments;
+  // TODO: SDK does not yet expose getHypothesisExperiments
+  return [];
 }

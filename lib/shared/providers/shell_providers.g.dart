@@ -6,44 +6,6 @@ part of 'shell_providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$selectedProjectIdHash() => r'14cc79b1a84dff7cfb5b7fa608b471c5fca4e5e4';
-
-/// Selected project ID (from SDK)
-///
-/// Copied from [selectedProjectId].
-@ProviderFor(selectedProjectId)
-final selectedProjectIdProvider = AutoDisposeProvider<String?>.internal(
-  selectedProjectId,
-  name: r'selectedProjectIdProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$selectedProjectIdHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef SelectedProjectIdRef = AutoDisposeProviderRef<String?>;
-String _$selectedProjectHash() => r'd8e9f319734da38c0c2cf624adf6023d4853c5e7';
-
-/// Selected project details (from SDK)
-///
-/// Copied from [selectedProject].
-@ProviderFor(selectedProject)
-final selectedProjectProvider = AutoDisposeFutureProvider<Project?>.internal(
-  selectedProject,
-  name: r'selectedProjectProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$selectedProjectHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef SelectedProjectRef = AutoDisposeFutureProviderRef<Project?>;
 String _$sidebarCollapsedHash() => r'543dbbb35288c3827db285783f0404f524135d20';
 
 /// Sidebar collapsed state

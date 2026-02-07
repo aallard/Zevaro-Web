@@ -15,13 +15,13 @@ class ExperimentCard extends StatelessWidget {
   Color get _typeColor {
     switch (experiment.type) {
       case ExperimentType.A_B_TEST:
-        return const Color(0xFF8B5CF6); // Violet
+        return AppColors.experimentAbTest;
       case ExperimentType.FEATURE_FLAG:
-        return const Color(0xFF14B8A6); // Teal
+        return AppColors.experimentFeatureFlag;
       case ExperimentType.CANARY:
-        return const Color(0xFFF59E0B); // Amber
+        return AppColors.experimentCanary;
       case ExperimentType.MANUAL:
-        return const Color(0xFF6B7280); // Gray
+        return AppColors.experimentManual;
     }
   }
 
@@ -29,6 +29,7 @@ class ExperimentCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isRunning = experiment.status == ExperimentStatus.RUNNING;
     final isConcluded = experiment.status == ExperimentStatus.CONCLUDED;
+    final isDraft = experiment.status == ExperimentStatus.DRAFT;
 
     return MouseRegion(
       cursor: SystemMouseCursors.click,
@@ -44,7 +45,7 @@ class ExperimentCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Top row: Type badge + title + day counter
+              // Top row: Type badge + title + action buttons (running only)
               Row(
                 children: [
                   // Type badge
@@ -75,20 +76,48 @@ class ExperimentCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  if (isRunning && experiment.daysElapsed != null) ...[
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: AppColors.surfaceVariant,
-                        borderRadius:
-                            BorderRadius.circular(AppSpacing.radiusMd),
+                  // Action buttons for running experiments
+                  if (isRunning) ...[
+                    const SizedBox(width: AppSpacing.sm),
+                    OutlinedButton(
+                      onPressed: () {},
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.sm,
+                          vertical: AppSpacing.xxs,
+                        ),
                       ),
                       child: Text(
-                        'Day ${experiment.daysElapsed} of ${experiment.durationDays ?? "∞"}',
-                        style: AppTypography.labelMedium.copyWith(
-                          fontWeight: FontWeight.w600,
+                        'View Details',
+                        style: AppTypography.labelSmall,
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.xs),
+                    OutlinedButton(
+                      onPressed: () {},
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.sm,
+                          vertical: AppSpacing.xxs,
                         ),
+                      ),
+                      child: Text(
+                        'End Early',
+                        style: AppTypography.labelSmall,
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.xs),
+                    OutlinedButton(
+                      onPressed: () {},
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.sm,
+                          vertical: AppSpacing.xxs,
+                        ),
+                      ),
+                      child: Text(
+                        'Extend',
+                        style: AppTypography.labelSmall,
                       ),
                     ),
                   ],
@@ -108,6 +137,71 @@ class ExperimentCard extends StatelessWidget {
               ],
 
               const SizedBox(height: AppSpacing.md),
+
+              // Timeline bar for running experiments
+              if (isRunning && experiment.daysElapsed != null) ...[
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          'Day ${experiment.daysElapsed} of ${experiment.durationDays ?? "∞"}',
+                          style: AppTypography.labelSmall.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const Spacer(),
+                        Text(
+                          '${((experiment.daysElapsed ?? 0) / (experiment.durationDays ?? 1) * 100).toStringAsFixed(0)}%',
+                          style: AppTypography.labelSmall.copyWith(
+                            color: AppColors.textTertiary,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: AppSpacing.xxs),
+                    ClipRRect(
+                      borderRadius:
+                          BorderRadius.circular(AppSpacing.radiusFull),
+                      child: LinearProgressIndicator(
+                        value: (experiment.daysElapsed ?? 0) /
+                            (experiment.durationDays ?? 1),
+                        backgroundColor: AppColors.surfaceVariant,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          _typeColor,
+                        ),
+                        minHeight: 6,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                  ],
+                ),
+              ],
+
+              // Sample indicator for running experiments
+              if (isRunning) ...[
+                Row(
+                  children: [
+                    Container(
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        color: experiment.hasReachedSampleTarget
+                            ? AppColors.success
+                            : AppColors.warning,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.xs),
+                    Text(
+                      'Sample: ${experiment.currentSampleSize} / ${experiment.sampleSizeTarget} required',
+                      style: AppTypography.labelSmall,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.md),
+              ],
 
               // Metrics row (for running/concluded)
               if (experiment.controlValue != null &&
@@ -177,74 +271,33 @@ class ExperimentCard extends StatelessWidget {
                 const SizedBox(height: AppSpacing.sm),
               ],
 
-              // Progress bar for running experiments
-              if (isRunning) ...[
-                Row(
-                  children: [
-                    // Sample size progress
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Text(
-                                'Sample: ${experiment.currentSampleSize} / ${experiment.sampleSizeTarget}',
-                                style: AppTypography.labelSmall,
-                              ),
-                              const Spacer(),
-                              Text(
-                                '${experiment.sampleProgress.toStringAsFixed(0)}%',
-                                style: AppTypography.labelSmall.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: AppSpacing.xxs),
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(
-                                AppSpacing.radiusFull),
-                            child: LinearProgressIndicator(
-                              value: experiment.sampleProgress / 100,
-                              backgroundColor: AppColors.surfaceVariant,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                  AppColors.primary),
-                              minHeight: 4,
-                            ),
-                          ),
-                        ],
+              // Result banner for concluded
+              if (isConcluded) ...[
+                if (experiment.isVariantWinning &&
+                    experiment.isSignificant &&
+                    experiment.deltaPercent != null)
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: AppColors.success.withOpacity(0.08),
+                      borderRadius:
+                          BorderRadius.circular(AppSpacing.radiusMd),
+                      border: Border.all(
+                        color: AppColors.success.withOpacity(0.2),
                       ),
                     ),
-                  ],
-                ),
-              ],
-
-              // Result banner for concluded
-              if (isConcluded && experiment.conclusion != null) ...[
-                Container(
-                  width: double.infinity,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: experiment.isVariantWinning
-                        ? AppColors.success.withOpacity(0.08)
-                        : AppColors.surfaceVariant,
-                    borderRadius:
-                        BorderRadius.circular(AppSpacing.radiusMd),
-                  ),
-                  child: Text(
-                    experiment.conclusion!,
-                    style: AppTypography.labelMedium.copyWith(
-                      color: experiment.isVariantWinning
-                          ? AppColors.success
-                          : AppColors.textSecondary,
-                      fontWeight: FontWeight.w600,
+                    child: Text(
+                      'WINNER: Variant — +${experiment.deltaPercent!.toStringAsFixed(1)}%',
+                      style: AppTypography.labelMedium.copyWith(
+                        color: AppColors.success,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
               ],
             ],
           ),

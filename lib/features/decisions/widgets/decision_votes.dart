@@ -53,59 +53,86 @@ class _DecisionVotesState extends ConsumerState<DecisionVotes> {
 
             // Vote form (if not decided)
             if (widget.decision.status != DecisionStatus.DECIDED) ...[
-              Text(
-                'Cast your vote',
-                style: AppTypography.labelMedium,
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              Wrap(
-                spacing: AppSpacing.sm,
-                children: [
-                  _VoteOption(
-                    label: 'Approve',
-                    isSelected: _selectedVote == 'Approve',
-                    color: AppColors.success,
-                    onTap: () => setState(() => _selectedVote = 'Approve'),
-                  ),
-                  _VoteOption(
-                    label: 'Reject',
-                    isSelected: _selectedVote == 'Reject',
-                    color: AppColors.error,
-                    onTap: () => setState(() => _selectedVote = 'Reject'),
-                  ),
-                  _VoteOption(
-                    label: 'Abstain',
-                    isSelected: _selectedVote == 'Abstain',
-                    color: AppColors.textSecondary,
-                    onTap: () => setState(() => _selectedVote = 'Abstain'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.md),
-              TextField(
-                controller: _commentController,
-                decoration: const InputDecoration(
-                  hintText: 'Add a comment (optional)',
-                  border: OutlineInputBorder(),
+              Container(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.05),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                  border: Border.all(color: AppColors.primary.withOpacity(0.2)),
                 ),
-                maxLines: 2,
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed:
-                      _selectedVote == null || isLoading ? null : _submitVote,
-                  child: isLoading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Text('Submit Vote'),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Cast your vote',
+                      style: AppTypography.labelMedium.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    Wrap(
+                      spacing: AppSpacing.sm,
+                      runSpacing: AppSpacing.sm,
+                      children: [
+                        _VoteOption(
+                          label: 'Approve',
+                          isSelected: _selectedVote == 'Approve',
+                          color: AppColors.success,
+                          onTap: () => setState(() => _selectedVote = 'Approve'),
+                        ),
+                        _VoteOption(
+                          label: 'Reject',
+                          isSelected: _selectedVote == 'Reject',
+                          color: AppColors.error,
+                          onTap: () => setState(() => _selectedVote = 'Reject'),
+                        ),
+                        _VoteOption(
+                          label: 'Abstain',
+                          isSelected: _selectedVote == 'Abstain',
+                          color: AppColors.textSecondary,
+                          onTap: () => setState(() => _selectedVote = 'Abstain'),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    TextField(
+                      controller: _commentController,
+                      decoration: InputDecoration(
+                        hintText: 'Add a comment (optional)',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+                        ),
+                        contentPadding: const EdgeInsets.all(AppSpacing.sm),
+                      ),
+                      maxLines: 2,
+                      minLines: 1,
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: _selectedVote == null || isLoading
+                            ? null
+                            : _submitVote,
+                        icon: isLoading
+                            ? const SizedBox(
+                                height: 16,
+                                width: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Icon(Icons.how_to_vote),
+                        label: const Text('Cast Vote'),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const Divider(height: AppSpacing.xl),
+              const SizedBox(height: AppSpacing.lg),
+              const Divider(height: AppSpacing.sm),
+              const SizedBox(height: AppSpacing.lg),
             ],
 
             // Existing votes

@@ -40,53 +40,87 @@ class CommentCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               ZAvatar(
                 name: comment.authorName ?? 'User',
-                size: 32,
+                imageUrl: comment.authorAvatarUrl,
+                size: 36,
               ),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      comment.authorName ?? 'Unknown',
-                      style: AppTypography.labelMedium,
-                    ),
-                    Text(
-                      _formatTime(comment.createdAt),
-                      style: AppTypography.bodySmall.copyWith(
-                        color: AppColors.textTertiary,
-                      ),
+                    Row(
+                      children: [
+                        Text(
+                          comment.authorName ?? 'Unknown',
+                          style: AppTypography.labelMedium.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(width: AppSpacing.xs),
+                        Text(
+                          _getRelativeTime(comment.createdAt),
+                          style: AppTypography.bodySmall.copyWith(
+                            color: AppColors.textTertiary,
+                          ),
+                        ),
+                        if (comment.edited)
+                          Padding(
+                            padding:
+                                const EdgeInsets.only(left: AppSpacing.xs),
+                            child: Text(
+                              '(edited)',
+                              style: AppTypography.bodySmall.copyWith(
+                                color: AppColors.textTertiary,
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                   ],
                 ),
               ),
               if (onReply != null)
-                TextButton.icon(
+                TextButton(
                   onPressed: onReply,
-                  icon: const Icon(Icons.reply, size: 16),
-                  label: const Text('Reply'),
                   style: TextButton.styleFrom(
-                    foregroundColor: AppColors.textSecondary,
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+                    foregroundColor: AppColors.primary,
+                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
                   ),
+                  child: const Text('Reply'),
                 ),
             ],
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
             comment.content,
-            style: AppTypography.bodyMedium,
+            style: AppTypography.bodyMedium.copyWith(
+              color: AppColors.textPrimary,
+            ),
           ),
         ],
       ),
     );
   }
 
-  String _formatTime(DateTime date) {
-    return '${date.day}/${date.month} ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
+  String _getRelativeTime(DateTime date) {
+    final now = DateTime.now();
+    final diff = now.difference(date);
+
+    if (diff.inSeconds < 60) {
+      return 'just now';
+    } else if (diff.inMinutes < 60) {
+      return '${diff.inMinutes}m ago';
+    } else if (diff.inHours < 24) {
+      return '${diff.inHours}h ago';
+    } else if (diff.inDays < 7) {
+      return '${diff.inDays}d ago';
+    } else {
+      return '${date.day}/${date.month}';
+    }
   }
 }

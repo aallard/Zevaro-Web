@@ -7,6 +7,7 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../shared/widgets/common/loading_indicator.dart';
 import '../../../shared/widgets/common/error_view.dart';
+import '../providers/hypotheses_providers.dart';
 import '../widgets/hypothesis_kanban.dart';
 
 class HypothesesScreen extends ConsumerWidget {
@@ -18,51 +19,129 @@ class HypothesesScreen extends ConsumerWidget {
     final hypothesesAsync = ref.watch(
       hypothesisListProvider(projectId: selectedProjectId),
     );
+    final filterState = ref.watch(hypothesisFiltersProvider);
 
     return Column(
       children: [
-        // Toolbar
+        // Toolbar with filters and actions
         Container(
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.pagePaddingHorizontal,
-            vertical: AppSpacing.sm,
+            vertical: AppSpacing.md,
           ),
           decoration: const BoxDecoration(
             color: AppColors.surface,
             border: Border(bottom: BorderSide(color: AppColors.border)),
           ),
-          child: Row(
+          child: Column(
             children: [
-              // View toggle (board view selected)
-              SegmentedButton<String>(
-                segments: const [
-                  ButtonSegment(
-                    value: 'board',
-                    icon: Icon(Icons.view_kanban, size: 18),
-                    label: Text('Board'),
-                  ),
-                  ButtonSegment(
-                    value: 'list',
-                    icon: Icon(Icons.view_list, size: 18),
-                    label: Text('List'),
-                  ),
-                ],
-                selected: const {'board'},
-                onSelectionChanged: (_) {},
-                style: const ButtonStyle(
-                  visualDensity: VisualDensity.compact,
+              // First row: Filter tabs
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    _FilterPill(
+                      label: 'All',
+                      isSelected: filterState.status == null,
+                      onTap: () =>
+                          ref.read(hypothesisFiltersProvider.notifier).setStatus(null),
+                    ),
+                    const SizedBox(width: AppSpacing.xs),
+                    _FilterPill(
+                      label: 'Draft',
+                      isSelected: filterState.status == HypothesisStatus.DRAFT,
+                      onTap: () => ref
+                          .read(hypothesisFiltersProvider.notifier)
+                          .setStatus(HypothesisStatus.DRAFT),
+                    ),
+                    const SizedBox(width: AppSpacing.xs),
+                    _FilterPill(
+                      label: 'Ready',
+                      isSelected: filterState.status == HypothesisStatus.READY,
+                      onTap: () => ref
+                          .read(hypothesisFiltersProvider.notifier)
+                          .setStatus(HypothesisStatus.READY),
+                    ),
+                    const SizedBox(width: AppSpacing.xs),
+                    _FilterPill(
+                      label: 'Building',
+                      isSelected: filterState.status == HypothesisStatus.BUILDING,
+                      onTap: () => ref
+                          .read(hypothesisFiltersProvider.notifier)
+                          .setStatus(HypothesisStatus.BUILDING),
+                    ),
+                    const SizedBox(width: AppSpacing.xs),
+                    _FilterPill(
+                      label: 'Measuring',
+                      isSelected: filterState.status == HypothesisStatus.MEASURING,
+                      onTap: () => ref
+                          .read(hypothesisFiltersProvider.notifier)
+                          .setStatus(HypothesisStatus.MEASURING),
+                    ),
+                    const SizedBox(width: AppSpacing.xs),
+                    _FilterPill(
+                      label: 'Concluded',
+                      isSelected: filterState.status == HypothesisStatus.VALIDATED ||
+                          filterState.status == HypothesisStatus.INVALIDATED,
+                      onTap: () => ref
+                          .read(hypothesisFiltersProvider.notifier)
+                          .setStatus(HypothesisStatus.VALIDATED),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(width: AppSpacing.md),
-              // Status filter pills
-              _FilterPill(label: 'All', isSelected: true, onTap: () {}),
-              const SizedBox(width: AppSpacing.xxs),
-              _FilterPill(label: 'My Hypotheses', isSelected: false, onTap: () {}),
-              const Spacer(),
-              FilledButton.icon(
-                onPressed: () {},
-                icon: const Icon(Icons.add, size: 18),
-                label: const Text('New Hypothesis'),
+              const SizedBox(height: AppSpacing.md),
+              // Second row: Search, list toggle, and new button
+              Row(
+                children: [
+                  // Search bar
+                  Expanded(
+                    child: Container(
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: AppColors.background,
+                        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                        border: Border.all(color: AppColors.border),
+                      ),
+                      child: TextField(
+                        onChanged: (value) => ref
+                            .read(hypothesisFiltersProvider.notifier)
+                            .setSearch(value.isEmpty ? null : value),
+                        decoration: InputDecoration(
+                          hintText: 'Search hypotheses...',
+                          border: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.sm,
+                            vertical: AppSpacing.xs,
+                          ),
+                          prefixIcon: const Icon(
+                            Icons.search,
+                            size: 18,
+                            color: AppColors.textTertiary,
+                          ),
+                          hintStyle: AppTypography.bodySmall.copyWith(
+                            color: AppColors.textTertiary,
+                          ),
+                        ),
+                        style: AppTypography.bodySmall,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  // List toggle icon
+                  IconButton(
+                    onPressed: () {},
+                    icon: const Icon(Icons.view_list, size: 20),
+                    tooltip: 'Switch to list view',
+                  ),
+                  const SizedBox(width: AppSpacing.xs),
+                  // New Hypothesis button
+                  FilledButton.icon(
+                    onPressed: () {},
+                    icon: const Icon(Icons.add, size: 18),
+                    label: const Text('New Hypothesis'),
+                  ),
+                ],
               ),
             ],
           ),
@@ -71,8 +150,8 @@ class HypothesesScreen extends ConsumerWidget {
         // Content - Kanban Board
         Expanded(
           child: hypothesesAsync.when(
-            data: (hypotheses) => HypothesisKanban(
-              hypotheses: hypotheses,
+            data: (response) => HypothesisKanban(
+              hypotheses: response.content,
             ),
             loading: () =>
                 const LoadingIndicator(message: 'Loading hypotheses...'),

@@ -14,10 +14,24 @@ class DecisionCard extends StatelessWidget {
 
   const DecisionCard({super.key, required this.decision});
 
-  Color get _priorityColor {
-    final urgencyColor =
-        Color(int.parse(decision.urgency.color.replaceFirst('#', '0xFF')));
-    return urgencyColor;
+  Color get _typeColor {
+    // Color-coded by DecisionType
+    switch (decision.type) {
+      case DecisionType.ARCHITECTURAL:
+        return const Color(0xFF4F46E5); // Indigo
+      case DecisionType.PRODUCT:
+        return const Color(0xFF3B82F6); // Blue
+      case DecisionType.TECHNICAL:
+        return const Color(0xFF6B7280); // Gray
+      case DecisionType.DESIGN:
+        return const Color(0xFFEC4899); // Pink
+      case DecisionType.BUSINESS:
+        return const Color(0xFFF59E0B); // Amber
+      case DecisionType.PROCESS:
+        return const Color(0xFF14B8A6); // Teal
+      case DecisionType.RESOURCE:
+        return const Color(0xFF8B5CF6); // Purple
+    }
   }
 
   @override
@@ -35,23 +49,119 @@ class DecisionCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Colored top border
-              Container(
-                height: 3,
-                decoration: BoxDecoration(
-                  color: _priorityColor,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(AppSpacing.radiusMd),
-                    topRight: Radius.circular(AppSpacing.radiusMd),
-                  ),
+              // Header row with type badge and three-dot menu
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.sm,
+                  vertical: AppSpacing.xs,
+                ),
+                child: Row(
+                  children: [
+                    // Type badge with colored border
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: _typeColor, width: 1),
+                        borderRadius:
+                            BorderRadius.circular(AppSpacing.radiusSm),
+                      ),
+                      child: Text(
+                        decision.type.displayName.toUpperCase(),
+                        style: AppTypography.labelSmall.copyWith(
+                          fontSize: 9,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.5,
+                          color: _typeColor,
+                        ),
+                      ),
+                    ),
+                    const Spacer(),
+                    // Three-dot menu
+                    PopupMenuButton<String>(
+                      onSelected: (value) {
+                        // TODO: Handle menu actions (edit, delete, etc.)
+                      },
+                      itemBuilder: (BuildContext context) => [
+                        const PopupMenuItem<String>(
+                          value: 'edit',
+                          child: Row(
+                            children: [
+                              Icon(Icons.edit, size: 16),
+                              SizedBox(width: 8),
+                              Text('Edit'),
+                            ],
+                          ),
+                        ),
+                        const PopupMenuItem<String>(
+                          value: 'escalate',
+                          child: Row(
+                            children: [
+                              Icon(Icons.trending_up, size: 16),
+                              SizedBox(width: 8),
+                              Text('Escalate'),
+                            ],
+                          ),
+                        ),
+                        const PopupMenuItem<String>(
+                          value: 'delete',
+                          child: Row(
+                            children: [
+                              Icon(Icons.delete, size: 16),
+                              SizedBox(width: 8),
+                              Text('Delete'),
+                            ],
+                          ),
+                        ),
+                      ],
+                      child: Icon(
+                        Icons.more_vert,
+                        size: 16,
+                        color: AppColors.textTertiary,
+                      ),
+                    ),
+                  ],
                 ),
               ),
+
+              // Title
               Padding(
-                padding: const EdgeInsets.all(AppSpacing.sm),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+                child: Text(
+                  decision.title,
+                  style: AppTypography.labelLarge.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.xs),
+
+              // Assignee + waiting time badge
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+                child: Row(
                   children: [
-                    // Type badge
+                    if (decision.assignedTo != null) ...[
+                      ZAvatar(
+                        name: decision.assignedTo!.fullName,
+                        size: 20,
+                      ),
+                      const SizedBox(width: AppSpacing.xxs),
+                      Expanded(
+                        child: Text(
+                          decision.assignedTo!.fullName,
+                          style: AppTypography.bodySmall,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ] else
+                      const Spacer(),
+                    // Duration badge
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 6,
@@ -62,100 +172,74 @@ class DecisionCard extends StatelessWidget {
                         borderRadius:
                             BorderRadius.circular(AppSpacing.radiusSm),
                       ),
-                      child: Text(
-                        decision.type.displayName.toUpperCase(),
-                        style: AppTypography.labelSmall.copyWith(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-
-                    // Title
-                    Text(
-                      decision.title,
-                      style: AppTypography.labelLarge,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-
-                    // Assignee + waiting time
-                    Row(
-                      children: [
-                        if (decision.assigneeName != null) ...[
-                          ZAvatar(
-                            name: decision.assigneeName!,
-                            size: 20,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.access_time,
+                            size: 10,
+                            color: AppColors.textTertiary,
                           ),
-                          const SizedBox(width: AppSpacing.xxs),
-                          Expanded(
-                            child: Text(
-                              decision.assigneeName!,
-                              style: AppTypography.bodySmall,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                          const SizedBox(width: 2),
+                          Text(
+                            _formatWaitTime(decision.createdAt),
+                            style: AppTypography.labelSmall.copyWith(
+                              fontSize: 10,
+                              color: AppColors.textTertiary,
                             ),
                           ),
-                        ] else
-                          const Spacer(),
-                        Icon(
-                          Icons.access_time,
-                          size: 12,
-                          color: AppColors.textTertiary,
-                        ),
-                        const SizedBox(width: 2),
-                        Text(
-                          _formatWaitTime(decision.createdAt),
-                          style: AppTypography.labelSmall,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-
-                    // SLA indicator
-                    SlaIndicator(decision: decision, compact: true),
-
-                    const SizedBox(height: AppSpacing.xs),
-
-                    // Bottom icons: comments, votes
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.chat_bubble_outline,
-                          size: 14,
-                          color: AppColors.textTertiary,
-                        ),
-                        const SizedBox(width: 2),
-                        Text(
-                          '${decision.commentCount}',
-                          style: AppTypography.labelSmall,
-                        ),
-                        const SizedBox(width: AppSpacing.sm),
-                        Icon(
-                          Icons.thumb_up_outlined,
-                          size: 14,
-                          color: AppColors.textTertiary,
-                        ),
-                        const SizedBox(width: 2),
-                        Text(
-                          '${decision.voteCount}',
-                          style: AppTypography.labelSmall,
-                        ),
-                        const Spacer(),
-                        // Drag handle (visual only)
-                        Icon(
-                          Icons.drag_indicator,
-                          size: 16,
-                          color: AppColors.textTertiary,
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ],
                 ),
               ),
+              const SizedBox(height: AppSpacing.xs),
+
+              // SLA indicator
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+                child: SlaIndicator(decision: decision, compact: true),
+              ),
+              const SizedBox(height: AppSpacing.xs),
+
+              // Bottom icons: comments, votes, drag handle
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.chat_bubble_outline,
+                      size: 14,
+                      color: AppColors.textTertiary,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${decision.commentCount}',
+                      style: AppTypography.labelSmall,
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    Icon(
+                      Icons.thumb_up_outlined,
+                      size: 14,
+                      color: AppColors.textTertiary,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${decision.voteCount}',
+                      style: AppTypography.labelSmall,
+                    ),
+                    const Spacer(),
+                    // Drag handle (visual only)
+                    Icon(
+                      Icons.drag_indicator,
+                      size: 16,
+                      color: AppColors.textTertiary,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: AppSpacing.xs),
             ],
           ),
         ),
