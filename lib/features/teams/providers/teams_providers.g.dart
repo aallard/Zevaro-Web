@@ -21,6 +21,8 @@ final teamsListProvider = AutoDisposeFutureProvider<List<Team>>.internal(
   allTransitiveDependencies: null,
 );
 
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
 typedef TeamsListRef = AutoDisposeFutureProviderRef<List<Team>>;
 String _$teamDetailHash() => r'3031a5acf1b351fcfa434c62dd80699fd23ce408';
 
@@ -170,6 +172,8 @@ class TeamDetailProvider extends AutoDisposeFutureProvider<Team> {
   }
 }
 
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
 mixin TeamDetailRef on AutoDisposeFutureProviderRef<Team> {
   /// The parameter `id` of this provider.
   String get id;
@@ -183,7 +187,7 @@ class _TeamDetailProviderElement extends AutoDisposeFutureProviderElement<Team>
   String get id => (origin as TeamDetailProvider).id;
 }
 
-String _$availableUsersHash() => r'71c112eef8e503324e49bb7adc4fd26cf647fda9';
+String _$availableUsersHash() => r'82fb2aebdd8d65bddb9e7d0eee6b248ccefd0a17';
 
 /// Users available to invite (not already team members)
 ///
@@ -310,6 +314,8 @@ class AvailableUsersProvider extends AutoDisposeFutureProvider<List<User>> {
   }
 }
 
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
 mixin AvailableUsersRef on AutoDisposeFutureProviderRef<List<User>> {
   /// The parameter `teamId` of this provider.
   String get teamId;
@@ -396,4 +402,4 @@ final createTeamProvider =
 
 typedef _$CreateTeam = AutoDisposeAsyncNotifier<void>;
 // ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member
+// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

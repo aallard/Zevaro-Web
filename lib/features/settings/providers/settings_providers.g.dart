@@ -6,7 +6,7 @@ part of 'settings_providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$themeModeSettingHash() => r'e2851b201f984ebfb83749349e4467a17438367d';
+String _$themeModeSettingHash() => r'b158c8f370a5bd28d481a79c6a8b969ccb70bb25';
 
 /// Theme mode preference
 ///
@@ -80,4 +80,4 @@ final changePasswordProvider =
 
 typedef _$ChangePassword = AutoDisposeAsyncNotifier<void>;
 // ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member
+// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

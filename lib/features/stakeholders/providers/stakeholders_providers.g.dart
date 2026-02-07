@@ -154,6 +154,8 @@ class StakeholderDetailProvider extends AutoDisposeFutureProvider<Stakeholder> {
   }
 }
 
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
 mixin StakeholderDetailRef on AutoDisposeFutureProviderRef<Stakeholder> {
   /// The parameter `id` of this provider.
   String get id;
@@ -186,6 +188,8 @@ final myStakeholderProfileProvider =
   allTransitiveDependencies: null,
 );
 
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
 typedef MyStakeholderProfileRef = AutoDisposeFutureProviderRef<Stakeholder>;
 String _$stakeholderPendingResponsesHash() =>
     r'da4f07c96b93773568d3cee7763d1816b21267a6';
@@ -320,6 +324,8 @@ class StakeholderPendingResponsesProvider
   }
 }
 
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
 mixin StakeholderPendingResponsesRef
     on AutoDisposeFutureProviderRef<List<StakeholderResponse>> {
   /// The parameter `stakeholderId` of this provider.
@@ -469,6 +475,8 @@ class StakeholderResponseHistoryProvider
   }
 }
 
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
 mixin StakeholderResponseHistoryRef
     on AutoDisposeFutureProviderRef<List<StakeholderResponse>> {
   /// The parameter `stakeholderId` of this provider.
@@ -521,4 +529,4 @@ final sendReminderProvider =
 
 typedef _$SendReminder = AutoDisposeAsyncNotifier<void>;
 // ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member
+// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

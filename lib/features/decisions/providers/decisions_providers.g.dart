@@ -23,6 +23,8 @@ final decisionsByStatusProvider =
   allTransitiveDependencies: null,
 );
 
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
 typedef DecisionsByStatusRef
     = AutoDisposeFutureProviderRef<Map<DecisionStatus, List<Decision>>>;
 String _$decisionDetailHash() => r'79e2b04f492ef3f82f3589ac399eefe2b461e9dd';
@@ -173,6 +175,8 @@ class DecisionDetailProvider extends AutoDisposeFutureProvider<Decision> {
   }
 }
 
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
 mixin DecisionDetailRef on AutoDisposeFutureProviderRef<Decision> {
   /// The parameter `id` of this provider.
   String get id;
@@ -297,4 +301,4 @@ final addDecisionCommentProvider =
 
 typedef _$AddDecisionComment = AutoDisposeAsyncNotifier<void>;
 // ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member
+// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

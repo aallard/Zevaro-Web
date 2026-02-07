@@ -24,6 +24,8 @@ final filteredHypothesesProvider =
   allTransitiveDependencies: null,
 );
 
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
 typedef FilteredHypothesesRef = AutoDisposeFutureProviderRef<List<Hypothesis>>;
 String _$hypothesisDetailHash() => r'f41f7926a6a517f4adeafa2c28a8e72b3905a76a';
 
@@ -173,6 +175,8 @@ class HypothesisDetailProvider extends AutoDisposeFutureProvider<Hypothesis> {
   }
 }
 
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
 mixin HypothesisDetailRef on AutoDisposeFutureProviderRef<Hypothesis> {
   /// The parameter `id` of this provider.
   String get id;
@@ -185,6 +189,441 @@ class _HypothesisDetailProviderElement
 
   @override
   String get id => (origin as HypothesisDetailProvider).id;
+}
+
+String _$hypothesisListHash() => r'e9f7f718785948cad8c4d279b87c97cd3a8de010';
+
+/// Hypothesis list provider (for kanban board)
+///
+/// Copied from [hypothesisList].
+@ProviderFor(hypothesisList)
+const hypothesisListProvider = HypothesisListFamily();
+
+/// Hypothesis list provider (for kanban board)
+///
+/// Copied from [hypothesisList].
+class HypothesisListFamily extends Family<AsyncValue<List<Hypothesis>>> {
+  /// Hypothesis list provider (for kanban board)
+  ///
+  /// Copied from [hypothesisList].
+  const HypothesisListFamily();
+
+  /// Hypothesis list provider (for kanban board)
+  ///
+  /// Copied from [hypothesisList].
+  HypothesisListProvider call({
+    required String? projectId,
+  }) {
+    return HypothesisListProvider(
+      projectId: projectId,
+    );
+  }
+
+  @override
+  HypothesisListProvider getProviderOverride(
+    covariant HypothesisListProvider provider,
+  ) {
+    return call(
+      projectId: provider.projectId,
+    );
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'hypothesisListProvider';
+}
+
+/// Hypothesis list provider (for kanban board)
+///
+/// Copied from [hypothesisList].
+class HypothesisListProvider
+    extends AutoDisposeFutureProvider<List<Hypothesis>> {
+  /// Hypothesis list provider (for kanban board)
+  ///
+  /// Copied from [hypothesisList].
+  HypothesisListProvider({
+    required String? projectId,
+  }) : this._internal(
+          (ref) => hypothesisList(
+            ref as HypothesisListRef,
+            projectId: projectId,
+          ),
+          from: hypothesisListProvider,
+          name: r'hypothesisListProvider',
+          debugGetCreateSourceHash:
+              const bool.fromEnvironment('dart.vm.product')
+                  ? null
+                  : _$hypothesisListHash,
+          dependencies: HypothesisListFamily._dependencies,
+          allTransitiveDependencies:
+              HypothesisListFamily._allTransitiveDependencies,
+          projectId: projectId,
+        );
+
+  HypothesisListProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.projectId,
+  }) : super.internal();
+
+  final String? projectId;
+
+  @override
+  Override overrideWith(
+    FutureOr<List<Hypothesis>> Function(HypothesisListRef provider) create,
+  ) {
+    return ProviderOverride(
+      origin: this,
+      override: HypothesisListProvider._internal(
+        (ref) => create(ref as HypothesisListRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        projectId: projectId,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeFutureProviderElement<List<Hypothesis>> createElement() {
+    return _HypothesisListProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is HypothesisListProvider && other.projectId == projectId;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, projectId.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin HypothesisListRef on AutoDisposeFutureProviderRef<List<Hypothesis>> {
+  /// The parameter `projectId` of this provider.
+  String? get projectId;
+}
+
+class _HypothesisListProviderElement
+    extends AutoDisposeFutureProviderElement<List<Hypothesis>>
+    with HypothesisListRef {
+  _HypothesisListProviderElement(super.provider);
+
+  @override
+  String? get projectId => (origin as HypothesisListProvider).projectId;
+}
+
+String _$hypothesisHash() => r'85cd257943b92344bdad955a711d3f41e2abf258';
+
+/// Single hypothesis provider (for detail screen)
+///
+/// Copied from [hypothesis].
+@ProviderFor(hypothesis)
+const hypothesisProvider = HypothesisFamily();
+
+/// Single hypothesis provider (for detail screen)
+///
+/// Copied from [hypothesis].
+class HypothesisFamily extends Family<AsyncValue<Hypothesis>> {
+  /// Single hypothesis provider (for detail screen)
+  ///
+  /// Copied from [hypothesis].
+  const HypothesisFamily();
+
+  /// Single hypothesis provider (for detail screen)
+  ///
+  /// Copied from [hypothesis].
+  HypothesisProvider call(
+    String id,
+  ) {
+    return HypothesisProvider(
+      id,
+    );
+  }
+
+  @override
+  HypothesisProvider getProviderOverride(
+    covariant HypothesisProvider provider,
+  ) {
+    return call(
+      provider.id,
+    );
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'hypothesisProvider';
+}
+
+/// Single hypothesis provider (for detail screen)
+///
+/// Copied from [hypothesis].
+class HypothesisProvider extends AutoDisposeFutureProvider<Hypothesis> {
+  /// Single hypothesis provider (for detail screen)
+  ///
+  /// Copied from [hypothesis].
+  HypothesisProvider(
+    String id,
+  ) : this._internal(
+          (ref) => hypothesis(
+            ref as HypothesisRef,
+            id,
+          ),
+          from: hypothesisProvider,
+          name: r'hypothesisProvider',
+          debugGetCreateSourceHash:
+              const bool.fromEnvironment('dart.vm.product')
+                  ? null
+                  : _$hypothesisHash,
+          dependencies: HypothesisFamily._dependencies,
+          allTransitiveDependencies:
+              HypothesisFamily._allTransitiveDependencies,
+          id: id,
+        );
+
+  HypothesisProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.id,
+  }) : super.internal();
+
+  final String id;
+
+  @override
+  Override overrideWith(
+    FutureOr<Hypothesis> Function(HypothesisRef provider) create,
+  ) {
+    return ProviderOverride(
+      origin: this,
+      override: HypothesisProvider._internal(
+        (ref) => create(ref as HypothesisRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        id: id,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeFutureProviderElement<Hypothesis> createElement() {
+    return _HypothesisProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is HypothesisProvider && other.id == id;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, id.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin HypothesisRef on AutoDisposeFutureProviderRef<Hypothesis> {
+  /// The parameter `id` of this provider.
+  String get id;
+}
+
+class _HypothesisProviderElement
+    extends AutoDisposeFutureProviderElement<Hypothesis> with HypothesisRef {
+  _HypothesisProviderElement(super.provider);
+
+  @override
+  String get id => (origin as HypothesisProvider).id;
+}
+
+String _$hypothesisExperimentsHash() =>
+    r'da861764716c29ec39b9681879dd0863aa530379';
+
+/// Hypothesis experiments provider
+///
+/// Copied from [hypothesisExperiments].
+@ProviderFor(hypothesisExperiments)
+const hypothesisExperimentsProvider = HypothesisExperimentsFamily();
+
+/// Hypothesis experiments provider
+///
+/// Copied from [hypothesisExperiments].
+class HypothesisExperimentsFamily extends Family<AsyncValue<List<Experiment>>> {
+  /// Hypothesis experiments provider
+  ///
+  /// Copied from [hypothesisExperiments].
+  const HypothesisExperimentsFamily();
+
+  /// Hypothesis experiments provider
+  ///
+  /// Copied from [hypothesisExperiments].
+  HypothesisExperimentsProvider call(
+    String hypothesisId,
+  ) {
+    return HypothesisExperimentsProvider(
+      hypothesisId,
+    );
+  }
+
+  @override
+  HypothesisExperimentsProvider getProviderOverride(
+    covariant HypothesisExperimentsProvider provider,
+  ) {
+    return call(
+      provider.hypothesisId,
+    );
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'hypothesisExperimentsProvider';
+}
+
+/// Hypothesis experiments provider
+///
+/// Copied from [hypothesisExperiments].
+class HypothesisExperimentsProvider
+    extends AutoDisposeFutureProvider<List<Experiment>> {
+  /// Hypothesis experiments provider
+  ///
+  /// Copied from [hypothesisExperiments].
+  HypothesisExperimentsProvider(
+    String hypothesisId,
+  ) : this._internal(
+          (ref) => hypothesisExperiments(
+            ref as HypothesisExperimentsRef,
+            hypothesisId,
+          ),
+          from: hypothesisExperimentsProvider,
+          name: r'hypothesisExperimentsProvider',
+          debugGetCreateSourceHash:
+              const bool.fromEnvironment('dart.vm.product')
+                  ? null
+                  : _$hypothesisExperimentsHash,
+          dependencies: HypothesisExperimentsFamily._dependencies,
+          allTransitiveDependencies:
+              HypothesisExperimentsFamily._allTransitiveDependencies,
+          hypothesisId: hypothesisId,
+        );
+
+  HypothesisExperimentsProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.hypothesisId,
+  }) : super.internal();
+
+  final String hypothesisId;
+
+  @override
+  Override overrideWith(
+    FutureOr<List<Experiment>> Function(HypothesisExperimentsRef provider)
+        create,
+  ) {
+    return ProviderOverride(
+      origin: this,
+      override: HypothesisExperimentsProvider._internal(
+        (ref) => create(ref as HypothesisExperimentsRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        hypothesisId: hypothesisId,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeFutureProviderElement<List<Experiment>> createElement() {
+    return _HypothesisExperimentsProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is HypothesisExperimentsProvider &&
+        other.hypothesisId == hypothesisId;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, hypothesisId.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin HypothesisExperimentsRef
+    on AutoDisposeFutureProviderRef<List<Experiment>> {
+  /// The parameter `hypothesisId` of this provider.
+  String get hypothesisId;
+}
+
+class _HypothesisExperimentsProviderElement
+    extends AutoDisposeFutureProviderElement<List<Experiment>>
+    with HypothesisExperimentsRef {
+  _HypothesisExperimentsProviderElement(super.provider);
+
+  @override
+  String get hypothesisId =>
+      (origin as HypothesisExperimentsProvider).hypothesisId;
 }
 
 String _$hypothesisFiltersHash() => r'5e4882b87371ba0a61ffd0acb4e7aeec1a1f37c1';
@@ -281,4 +720,4 @@ final createHypothesisProvider =
 
 typedef _$CreateHypothesis = AutoDisposeAsyncNotifier<void>;
 // ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member
+// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

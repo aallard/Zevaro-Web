@@ -23,6 +23,8 @@ final filteredOutcomesProvider =
   allTransitiveDependencies: null,
 );
 
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
 typedef FilteredOutcomesRef = AutoDisposeFutureProviderRef<List<Outcome>>;
 String _$outcomeDetailHash() => r'b2697881a3eb51d3032175fe0d02fa7e70bfb74f';
 
@@ -172,6 +174,8 @@ class OutcomeDetailProvider extends AutoDisposeFutureProvider<Outcome> {
   }
 }
 
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
 mixin OutcomeDetailRef on AutoDisposeFutureProviderRef<Outcome> {
   /// The parameter `id` of this provider.
   String get id;
@@ -313,6 +317,8 @@ class OutcomeHypothesesProvider
   }
 }
 
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
 mixin OutcomeHypothesesRef on AutoDisposeFutureProviderRef<List<Hypothesis>> {
   /// The parameter `outcomeId` of this provider.
   String get outcomeId;
@@ -419,4 +425,4 @@ final addKeyResultProvider =
 
 typedef _$AddKeyResult = AutoDisposeAsyncNotifier<void>;
 // ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member
+// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
