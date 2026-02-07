@@ -2,13 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:zevaro_flutter_sdk/zevaro_flutter_sdk.dart';
+
 import '../../../core/router/routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../providers/shell_providers.dart';
-import 'sidebar_item.dart';
-import 'sidebar_section.dart';
 
 class Sidebar extends ConsumerWidget {
   final String currentRoute;
@@ -21,11 +20,8 @@ class Sidebar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isCollapsed = ref.watch(sidebarCollapsedProvider);
-    final pendingDecisions = ref.watch(decisionQueueProvider());
-    final myPendingResponses = ref.watch(myPendingResponsesProvider);
-
-    final pendingCount = pendingDecisions.valueOrNull?.length ?? 0;
-    final myPendingCount = myPendingResponses.valueOrNull?.length ?? 0;
+    final selectedProjectId = ref.watch(selectedProjectIdProvider);
+    final selectedProject = ref.watch(selectedProjectProvider);
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
@@ -33,10 +29,7 @@ class Sidebar extends ConsumerWidget {
           ? AppSpacing.sidebarCollapsedWidth
           : AppSpacing.sidebarWidth,
       decoration: const BoxDecoration(
-        color: AppColors.surface,
-        border: Border(
-          right: BorderSide(color: AppColors.border),
-        ),
+        color: AppColors.sidebarBg,
       ),
       child: Column(
         children: [
@@ -52,7 +45,7 @@ class Sidebar extends ConsumerWidget {
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(
-                    color: AppColors.primary,
+                    color: AppColors.sidebarAccent,
                     borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                   ),
                   child: const Center(
@@ -68,10 +61,12 @@ class Sidebar extends ConsumerWidget {
                 ),
                 if (!isCollapsed) ...[
                   const SizedBox(width: AppSpacing.sm),
-                  Text(
+                  const Text(
                     'Zevaro',
-                    style: AppTypography.h4.copyWith(
-                      color: AppColors.primary,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ],
@@ -79,101 +74,301 @@ class Sidebar extends ConsumerWidget {
             ),
           ),
 
-          const Divider(height: 1),
+          Container(height: 1, color: AppColors.sidebarDivider),
+
+          // Project selector
+          if (!isCollapsed) ...[
+            _ProjectSelector(
+              selectedProject: selectedProject.valueOrNull,
+              onTap: () => context.go(Routes.projects),
+            ),
+            Container(height: 1, color: AppColors.sidebarDivider),
+          ],
 
           // Navigation items
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(AppSpacing.sm),
+              padding: const EdgeInsets.symmetric(
+                vertical: AppSpacing.xs,
+                horizontal: AppSpacing.xs,
+              ),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Main section
-                  SidebarSection(
+                  // Always visible
+                  _SidebarNavItem(
+                    icon: Icons.folder_outlined,
+                    label: 'Projects',
+                    isSelected: currentRoute == Routes.projects,
                     isCollapsed: isCollapsed,
-                    children: [
-                      SidebarItem(
-                        icon: Icons.dashboard_outlined,
-                        label: 'Dashboard',
-                        isSelected: currentRoute == Routes.dashboard,
-                        isCollapsed: isCollapsed,
-                        onTap: () => context.go(Routes.dashboard),
-                      ),
-                    ],
+                    onTap: () => context.go(Routes.projects),
                   ),
 
-                  // Core section
-                  SidebarSection(
-                    title: 'Core',
-                    isCollapsed: isCollapsed,
-                    children: [
-                      SidebarItem(
-                        icon: Icons.how_to_vote_outlined,
-                        label: 'Decisions',
-                        isSelected: currentRoute.startsWith('/decisions'),
-                        isCollapsed: isCollapsed,
-                        badgeCount: pendingCount,
-                        badgeColor: AppColors.error,
-                        onTap: () => context.go(Routes.decisions),
+                  // Project-scoped items (only when project selected)
+                  if (selectedProjectId != null) ...[
+                    const SizedBox(height: AppSpacing.xs),
+                    if (!isCollapsed)
+                      Padding(
+                        padding: const EdgeInsets.only(
+                          left: AppSpacing.sm,
+                          top: AppSpacing.xs,
+                          bottom: AppSpacing.xxs,
+                        ),
+                        child: Text(
+                          'PROJECT',
+                          style: TextStyle(
+                            color: AppColors.sidebarText.withOpacity(0.5),
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 1.2,
+                          ),
+                        ),
                       ),
-                      SidebarItem(
-                        icon: Icons.flag_outlined,
-                        label: 'Outcomes',
-                        isSelected: currentRoute.startsWith('/outcomes'),
-                        isCollapsed: isCollapsed,
-                        onTap: () => context.go(Routes.outcomes),
-                      ),
-                      SidebarItem(
-                        icon: Icons.science_outlined,
-                        label: 'Hypotheses',
-                        isSelected: currentRoute.startsWith('/hypotheses'),
-                        isCollapsed: isCollapsed,
-                        onTap: () => context.go(Routes.hypotheses),
-                      ),
-                    ],
-                  ),
-
-                  // Organization section
-                  SidebarSection(
-                    title: 'Organization',
-                    isCollapsed: isCollapsed,
-                    children: [
-                      SidebarItem(
-                        icon: Icons.groups_outlined,
-                        label: 'Teams',
-                        isSelected: currentRoute.startsWith('/teams'),
-                        isCollapsed: isCollapsed,
-                        onTap: () => context.go(Routes.teams),
-                      ),
-                      SidebarItem(
-                        icon: Icons.person_search_outlined,
-                        label: 'Stakeholders',
-                        isSelected: currentRoute.startsWith('/stakeholders'),
-                        isCollapsed: isCollapsed,
-                        badgeCount: myPendingCount,
-                        badgeColor: AppColors.warning,
-                        onTap: () => context.go(Routes.stakeholders),
-                      ),
-                    ],
-                  ),
+                    _SidebarNavItem(
+                      icon: Icons.dashboard_outlined,
+                      label: 'Dashboard',
+                      isSelected: currentRoute == Routes.dashboard ||
+                          currentRoute.startsWith('/dashboard'),
+                      isCollapsed: isCollapsed,
+                      onTap: () => context.go(Routes.dashboard),
+                    ),
+                    _SidebarNavItem(
+                      icon: Icons.how_to_vote_outlined,
+                      label: 'Decision Queue',
+                      isSelected: currentRoute.startsWith('/decisions'),
+                      isCollapsed: isCollapsed,
+                      onTap: () => context.go(Routes.decisions),
+                    ),
+                    _SidebarNavItem(
+                      icon: Icons.flag_outlined,
+                      label: 'Outcomes',
+                      isSelected: currentRoute.startsWith('/outcomes'),
+                      isCollapsed: isCollapsed,
+                      onTap: () => context.go(Routes.outcomes),
+                    ),
+                    _SidebarNavItem(
+                      icon: Icons.science_outlined,
+                      label: 'Hypotheses',
+                      isSelected: currentRoute.startsWith('/hypotheses'),
+                      isCollapsed: isCollapsed,
+                      onTap: () => context.go(Routes.hypotheses),
+                    ),
+                    _SidebarNavItem(
+                      icon: Icons.biotech_outlined,
+                      label: 'Experiments',
+                      isSelected: currentRoute.startsWith('/experiments'),
+                      isCollapsed: isCollapsed,
+                      onTap: () => context.go(Routes.experiments),
+                    ),
+                    _SidebarNavItem(
+                      icon: Icons.groups_outlined,
+                      label: 'Team',
+                      isSelected: currentRoute.startsWith('/teams'),
+                      isCollapsed: isCollapsed,
+                      onTap: () => context.go(Routes.teams),
+                    ),
+                  ],
                 ],
               ),
             ),
           ),
 
-          const Divider(height: 1),
+          Container(height: 1, color: AppColors.sidebarDivider),
 
-          // Collapse toggle
+          // Bottom: Settings + Collapse
           Padding(
-            padding: const EdgeInsets.all(AppSpacing.sm),
-            child: SidebarItem(
-              icon: isCollapsed ? Icons.chevron_right : Icons.chevron_left,
-              label: 'Collapse',
-              isSelected: false,
-              isCollapsed: isCollapsed,
-              onTap: () => ref.read(sidebarCollapsedProvider.notifier).toggle(),
+            padding: const EdgeInsets.all(AppSpacing.xs),
+            child: Column(
+              children: [
+                _SidebarNavItem(
+                  icon: Icons.settings_outlined,
+                  label: 'Settings',
+                  isSelected: currentRoute.startsWith('/settings'),
+                  isCollapsed: isCollapsed,
+                  onTap: () => context.go(Routes.settings),
+                ),
+                _SidebarNavItem(
+                  icon: isCollapsed
+                      ? Icons.chevron_right
+                      : Icons.chevron_left,
+                  label: 'Collapse',
+                  isSelected: false,
+                  isCollapsed: isCollapsed,
+                  onTap: () =>
+                      ref.read(sidebarCollapsedProvider.notifier).toggle(),
+                ),
+              ],
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ProjectSelector extends StatelessWidget {
+  final Project? selectedProject;
+  final VoidCallback onTap;
+
+  const _ProjectSelector({
+    required this.selectedProject,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.sm,
+        ),
+        child: Row(
+          children: [
+            if (selectedProject != null) ...[
+              Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: _projectColor(selectedProject!.color),
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+            ],
+            Expanded(
+              child: Text(
+                selectedProject?.name ?? 'Select a project...',
+                style: TextStyle(
+                  color: selectedProject != null
+                      ? AppColors.sidebarTextActive
+                      : AppColors.sidebarText.withOpacity(0.7),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            Icon(
+              Icons.unfold_more,
+              size: 16,
+              color: AppColors.sidebarText.withOpacity(0.5),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Color _projectColor(String? hex) {
+    if (hex != null) {
+      try {
+        return Color(
+            int.parse('FF${hex.replaceFirst('#', '')}', radix: 16));
+      } catch (_) {}
+    }
+    return AppColors.sidebarAccent;
+  }
+}
+
+class _SidebarNavItem extends StatefulWidget {
+  final IconData icon;
+  final String label;
+  final bool isSelected;
+  final bool isCollapsed;
+  final VoidCallback onTap;
+  final int? badgeCount;
+
+  const _SidebarNavItem({
+    required this.icon,
+    required this.label,
+    required this.isSelected,
+    required this.isCollapsed,
+    required this.onTap,
+    this.badgeCount,
+  });
+
+  @override
+  State<_SidebarNavItem> createState() => _SidebarNavItemState();
+}
+
+class _SidebarNavItemState extends State<_SidebarNavItem> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: Container(
+          margin: const EdgeInsets.symmetric(vertical: 1),
+          padding: EdgeInsets.symmetric(
+            horizontal: widget.isCollapsed ? AppSpacing.sm : AppSpacing.sm,
+            vertical: AppSpacing.xs,
+          ),
+          decoration: BoxDecoration(
+            color: widget.isSelected
+                ? AppColors.sidebarAccent.withOpacity(0.15)
+                : _isHovered
+                    ? AppColors.sidebarBgHover
+                    : Colors.transparent,
+            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+          ),
+          child: Row(
+            mainAxisAlignment: widget.isCollapsed
+                ? MainAxisAlignment.center
+                : MainAxisAlignment.start,
+            children: [
+              Icon(
+                widget.icon,
+                size: 20,
+                color: widget.isSelected
+                    ? AppColors.sidebarAccent
+                    : AppColors.sidebarText,
+              ),
+              if (!widget.isCollapsed) ...[
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: Text(
+                    widget.label,
+                    style: TextStyle(
+                      color: widget.isSelected
+                          ? AppColors.sidebarTextActive
+                          : AppColors.sidebarText,
+                      fontSize: 14,
+                      fontWeight: widget.isSelected
+                          ? FontWeight.w600
+                          : FontWeight.w400,
+                    ),
+                  ),
+                ),
+                if (widget.badgeCount != null && widget.badgeCount! > 0)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: AppColors.error,
+                      borderRadius:
+                          BorderRadius.circular(AppSpacing.radiusFull),
+                    ),
+                    child: Text(
+                      '${widget.badgeCount}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+              ],
+            ],
+          ),
+        ),
       ),
     );
   }

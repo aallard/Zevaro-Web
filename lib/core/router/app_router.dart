@@ -7,8 +7,10 @@ import 'package:zevaro_flutter_sdk/zevaro_flutter_sdk.dart';
 import '../../features/auth/auth.dart';
 import '../../features/dashboard/dashboard.dart';
 import '../../features/decisions/decisions.dart';
+import '../../features/experiments/experiments.dart';
 import '../../features/hypotheses/hypotheses.dart';
 import '../../features/outcomes/outcomes.dart';
+import '../../features/projects/projects.dart';
 import '../../features/settings/settings.dart';
 import '../../features/stakeholders/stakeholders.dart';
 import '../../features/teams/teams.dart';
@@ -18,6 +20,14 @@ import 'guards/auth_guard.dart';
 import 'routes.dart';
 
 part 'app_router.g.dart';
+
+/// Creates a page with no transition animation.
+Page<void> noTransitionPage(Widget child, GoRouterState state) {
+  return NoTransitionPage<void>(
+    key: state.pageKey,
+    child: child,
+  );
+}
 
 /// Notifier that triggers router refresh when auth state changes.
 class AuthChangeNotifier extends ChangeNotifier {
@@ -46,24 +56,27 @@ GoRouter appRouter(Ref ref) {
       GoRoute(
         path: Routes.login,
         name: 'login',
-        builder: (context, state) => const LoginScreen(),
+        pageBuilder: (context, state) =>
+            noTransitionPage(const LoginScreen(), state),
       ),
       GoRoute(
         path: Routes.register,
         name: 'register',
-        builder: (context, state) => const RegisterScreen(),
+        pageBuilder: (context, state) =>
+            noTransitionPage(const RegisterScreen(), state),
       ),
       GoRoute(
         path: Routes.forgotPassword,
         name: 'forgotPassword',
-        builder: (context, state) => const ForgotPasswordScreen(),
+        pageBuilder: (context, state) =>
+            noTransitionPage(const ForgotPasswordScreen(), state),
       ),
       GoRoute(
         path: Routes.resetPassword,
         name: 'resetPassword',
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           final token = state.uri.queryParameters['token'];
-          return ResetPasswordScreen(token: token);
+          return noTransitionPage(ResetPasswordScreen(token: token), state);
         },
       ),
 
@@ -73,14 +86,18 @@ GoRouter appRouter(Ref ref) {
           // Determine title based on route
           String title = 'Dashboard';
           final location = state.matchedLocation;
-          if (location.startsWith('/decisions')) {
-            title = 'Decisions';
+          if (location.startsWith('/projects')) {
+            title = 'Projects';
+          } else if (location.startsWith('/decisions')) {
+            title = 'Decision Queue';
           } else if (location.startsWith('/outcomes')) {
             title = 'Outcomes';
           } else if (location.startsWith('/hypotheses')) {
             title = 'Hypotheses';
+          } else if (location.startsWith('/experiments')) {
+            title = 'Experiments';
           } else if (location.startsWith('/teams')) {
-            title = 'Teams';
+            title = 'Team';
           } else if (location.startsWith('/stakeholders')) {
             title = 'Stakeholders';
           } else if (location.startsWith('/settings')) {
@@ -92,25 +109,45 @@ GoRouter appRouter(Ref ref) {
           return AppShell(title: title, child: child);
         },
         routes: [
+          // Projects
+          GoRoute(
+            path: Routes.projects,
+            name: 'projects',
+            pageBuilder: (context, state) =>
+                noTransitionPage(const ProjectsScreen(), state),
+            routes: [
+              GoRoute(
+                path: ':id',
+                name: 'projectDetail',
+                pageBuilder: (context, state) {
+                  final id = state.pathParameters['id']!;
+                  return noTransitionPage(ProjectsScreen(projectId: id), state);
+                },
+              ),
+            ],
+          ),
+
           // Dashboard
           GoRoute(
             path: Routes.dashboard,
             name: 'dashboard',
-            builder: (context, state) => const DashboardScreen(),
+            pageBuilder: (context, state) =>
+                noTransitionPage(const DashboardScreen(), state),
           ),
 
           // Decisions (CORE)
           GoRoute(
             path: Routes.decisions,
             name: 'decisions',
-            builder: (context, state) => const DecisionsScreen(),
+            pageBuilder: (context, state) =>
+                noTransitionPage(const DecisionsScreen(), state),
             routes: [
               GoRoute(
                 path: ':id',
                 name: 'decisionDetail',
-                builder: (context, state) {
+                pageBuilder: (context, state) {
                   final id = state.pathParameters['id']!;
-                  return DecisionDetailScreen(id: id);
+                  return noTransitionPage(DecisionDetailScreen(id: id), state);
                 },
               ),
             ],
@@ -120,14 +157,15 @@ GoRouter appRouter(Ref ref) {
           GoRoute(
             path: Routes.outcomes,
             name: 'outcomes',
-            builder: (context, state) => const OutcomesScreen(),
+            pageBuilder: (context, state) =>
+                noTransitionPage(const OutcomesScreen(), state),
             routes: [
               GoRoute(
                 path: ':id',
                 name: 'outcomeDetail',
-                builder: (context, state) {
+                pageBuilder: (context, state) {
                   final id = state.pathParameters['id']!;
-                  return OutcomeDetailScreen(id: id);
+                  return noTransitionPage(OutcomeDetailScreen(id: id), state);
                 },
               ),
             ],
@@ -137,14 +175,33 @@ GoRouter appRouter(Ref ref) {
           GoRoute(
             path: Routes.hypotheses,
             name: 'hypotheses',
-            builder: (context, state) => const HypothesesScreen(),
+            pageBuilder: (context, state) =>
+                noTransitionPage(const HypothesesScreen(), state),
             routes: [
               GoRoute(
                 path: ':id',
                 name: 'hypothesisDetail',
-                builder: (context, state) {
+                pageBuilder: (context, state) {
                   final id = state.pathParameters['id']!;
-                  return HypothesisDetailScreen(id: id);
+                  return noTransitionPage(HypothesisDetailScreen(id: id), state);
+                },
+              ),
+            ],
+          ),
+
+          // Experiments (placeholder - route defined but no feature yet)
+          GoRoute(
+            path: Routes.experiments,
+            name: 'experiments',
+            pageBuilder: (context, state) =>
+                noTransitionPage(const ExperimentsPlaceholder(), state),
+            routes: [
+              GoRoute(
+                path: ':id',
+                name: 'experimentDetail',
+                pageBuilder: (context, state) {
+                  final id = state.pathParameters['id']!;
+                  return noTransitionPage(ExperimentsDetailPlaceholder(id: id), state);
                 },
               ),
             ],
@@ -154,14 +211,15 @@ GoRouter appRouter(Ref ref) {
           GoRoute(
             path: Routes.teams,
             name: 'teams',
-            builder: (context, state) => const TeamsScreen(),
+            pageBuilder: (context, state) =>
+                noTransitionPage(const TeamsScreen(), state),
             routes: [
               GoRoute(
                 path: ':id',
                 name: 'teamDetail',
-                builder: (context, state) {
+                pageBuilder: (context, state) {
                   final id = state.pathParameters['id']!;
-                  return TeamDetailScreen(id: id);
+                  return noTransitionPage(TeamDetailScreen(id: id), state);
                 },
               ),
             ],
@@ -171,14 +229,15 @@ GoRouter appRouter(Ref ref) {
           GoRoute(
             path: Routes.stakeholders,
             name: 'stakeholders',
-            builder: (context, state) => const StakeholdersScreen(),
+            pageBuilder: (context, state) =>
+                noTransitionPage(const StakeholdersScreen(), state),
             routes: [
               GoRoute(
                 path: ':id',
                 name: 'stakeholderDetail',
-                builder: (context, state) {
+                pageBuilder: (context, state) {
                   final id = state.pathParameters['id']!;
-                  return StakeholderDetailScreen(id: id);
+                  return noTransitionPage(StakeholderDetailScreen(id: id), state);
                 },
               ),
             ],
@@ -188,27 +247,31 @@ GoRouter appRouter(Ref ref) {
           GoRoute(
             path: Routes.settings,
             name: 'settings',
-            builder: (context, state) => const SettingsScreen(),
+            pageBuilder: (context, state) =>
+                noTransitionPage(const SettingsScreen(), state),
           ),
 
           // Organization Settings
           GoRoute(
             path: Routes.organizationSettings,
             name: 'organizationSettings',
-            builder: (context, state) => const OrganizationSettingsScreen(),
+            pageBuilder: (context, state) =>
+                noTransitionPage(const OrganizationSettingsScreen(), state),
           ),
 
           // Profile
           GoRoute(
             path: Routes.profile,
             name: 'profile',
-            builder: (context, state) => const ProfileScreen(),
+            pageBuilder: (context, state) =>
+                noTransitionPage(const ProfileScreen(), state),
           ),
         ],
       ),
     ],
-    errorBuilder: (context, state) => NotFoundScreen(
-      path: state.uri.toString(),
+    errorPageBuilder: (context, state) => noTransitionPage(
+      NotFoundScreen(path: state.uri.toString()),
+      state,
     ),
   );
 }

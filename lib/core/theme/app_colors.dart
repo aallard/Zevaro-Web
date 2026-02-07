@@ -54,4 +54,12 @@ abstract class AppColors {
   static const backgroundDark = Color(0xFF111827);
   static const surfaceDark = Color(0xFF1F2937);
   static const textPrimaryDark = Color(0xFFF9FAFB);
+
+  // Sidebar (dark theme)
+  static const sidebarBg = Color(0xFF1F2937); // Dark charcoal
+  static const sidebarBgHover = Color(0xFF374151);
+  static const sidebarText = Color(0xFFD1D5DB);
+  static const sidebarTextActive = Color(0xFFFFFFFF);
+  static const sidebarAccent = Color(0xFF4F46E5); // Indigo accent
+  static const sidebarDivider = Color(0xFF374151);
 }

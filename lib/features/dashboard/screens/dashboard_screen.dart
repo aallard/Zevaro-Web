@@ -1,188 +1,221 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import '../../../core/router/routes.dart';
+import 'package:zevaro_flutter_sdk/zevaro_flutter_sdk.dart';
+
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
-import '../../../core/constants/app_constants.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../shared/widgets/common/loading_indicator.dart';
 import '../../../shared/widgets/common/error_view.dart';
+import '../widgets/metric_card.dart';
+import '../widgets/decision_queue_panel.dart';
+import '../widgets/decision_velocity_chart.dart';
+import '../widgets/outcomes_progress_panel.dart';
+import '../widgets/activity_feed_panel.dart';
 import '../providers/dashboard_providers.dart';
-import '../widgets/stat_card.dart';
-import '../widgets/decision_queue_preview.dart';
-import '../widgets/my_pending_responses.dart';
-import '../widgets/quick_actions.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final statsAsync = ref.watch(dashboardStatsProvider);
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isWide = screenWidth >= AppConstants.desktopBreakpoint;
+    final selectedProjectId = ref.watch(selectedProjectIdProvider);
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      child: statsAsync.when(
-        data: (stats) => Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Urgent alert banner
-            if (stats.hasUrgentItems) _buildUrgentBanner(context, stats),
+    if (selectedProjectId == null) {
+      return _NoProjectSelected();
+    }
 
-            // Stats grid
-            _buildStatsGrid(context, stats, isWide),
-            const SizedBox(height: AppSpacing.lg),
+    final dashboardAsync = ref.watch(projectDashboardProvider(selectedProjectId));
 
-            // Main content
-            if (isWide)
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Expanded(
-                    flex: 2,
-                    child: Column(
-                      children: [
-                        DecisionQueuePreview(),
-                        SizedBox(height: AppSpacing.lg),
-                        MyPendingResponses(),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.lg),
-                  const Expanded(
-                    flex: 1,
-                    child: Column(
-                      children: [
-                        QuickActions(),
-                      ],
-                    ),
-                  ),
-                ],
-              )
-            else ...[
-              const QuickActions(),
-              const SizedBox(height: AppSpacing.lg),
-              const DecisionQueuePreview(),
-              const SizedBox(height: AppSpacing.lg),
-              const MyPendingResponses(),
-            ],
-          ],
-        ),
-        loading: () => const Center(
-            child: LoadingIndicator(message: 'Loading dashboard...')),
-        error: (e, _) => ErrorView(
-          message: e.toString(),
-          onRetry: () => ref.invalidate(dashboardStatsProvider),
-        ),
+    return dashboardAsync.when(
+      data: (dashboard) => _DashboardContent(dashboard: dashboard),
+      loading: () => const LoadingIndicator(message: 'Loading dashboard...'),
+      error: (e, _) => ErrorView(
+        message: e.toString(),
+        onRetry: () =>
+            ref.invalidate(projectDashboardProvider(selectedProjectId)),
       ),
     );
   }
+}
 
-  Widget _buildUrgentBanner(BuildContext context, DashboardStats stats) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: AppSpacing.lg),
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: AppColors.error.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        border: Border.all(color: AppColors.error.withOpacity(0.3)),
-      ),
-      child: Row(
+class _NoProjectSelected extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.warning_amber_rounded, color: AppColors.error),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: Text(
-              _getUrgentMessage(stats),
-              style: const TextStyle(color: AppColors.error),
-            ),
+          Icon(Icons.dashboard_outlined, size: 64, color: AppColors.textTertiary),
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            'Select a project',
+            style: AppTypography.h3.copyWith(color: AppColors.textSecondary),
           ),
-          TextButton(
-            onPressed: () => context.go(Routes.decisions),
-            child: const Text(
-              'View',
-              style: TextStyle(color: AppColors.error),
-            ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            'Choose a project from the sidebar to view its dashboard.',
+            style: AppTypography.bodyMedium.copyWith(color: AppColors.textTertiary),
           ),
         ],
       ),
     );
   }
+}
 
-  String _getUrgentMessage(DashboardStats stats) {
-    final parts = <String>[];
-    if (stats.blockingDecisions > 0) {
-      parts.add(
-          '${stats.blockingDecisions} blocking decision${stats.blockingDecisions > 1 ? 's' : ''}');
-    }
-    if (stats.myPendingResponses > 0) {
-      parts.add(
-          '${stats.myPendingResponses} response${stats.myPendingResponses > 1 ? 's' : ''} needed from you');
-    }
-    return parts.join(' • ');
-  }
+class _DashboardContent extends StatelessWidget {
+  final ProjectDashboard dashboard;
 
-  Widget _buildStatsGrid(
-      BuildContext context, DashboardStats stats, bool isWide) {
-    final cards = [
-      StatCard(
-        title: 'Pending Decisions',
-        value: stats.pendingDecisions.toString(),
-        icon: Icons.how_to_vote_outlined,
-        color: AppColors.primary,
-        subtitle: '${stats.blockingDecisions} blocking',
-        isUrgent: stats.blockingDecisions > 0,
-        onTap: () => context.go(Routes.decisions),
-      ),
-      StatCard(
-        title: 'My Pending Responses',
-        value: stats.myPendingResponses.toString(),
-        icon: Icons.pending_actions,
-        color: AppColors.warning,
-        subtitle: 'Awaiting your input',
-        isUrgent: stats.myPendingResponses > 0,
-        onTap: () => context.go(Routes.stakeholders),
-      ),
-      StatCard(
-        title: 'Active Outcomes',
-        value: stats.activeOutcomes.toString(),
-        icon: Icons.flag_outlined,
-        color: AppColors.success,
-        onTap: () => context.go(Routes.outcomes),
-      ),
-      StatCard(
-        title: 'Active Hypotheses',
-        value: stats.activeHypotheses.toString(),
-        icon: Icons.science_outlined,
-        color: AppColors.secondary,
-        subtitle: '${stats.blockedHypotheses} blocked',
-        onTap: () => context.go(Routes.hypotheses),
-      ),
-    ];
+  const _DashboardContent({required this.dashboard});
 
-    if (isWide) {
-      return Row(
-        children: cards
-            .map((card) => Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: AppSpacing.md),
-                    child: card,
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(AppSpacing.pagePaddingHorizontal),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Row 1: Metric cards
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final cardWidth = (constraints.maxWidth - AppSpacing.md * 3) / 4;
+              return Wrap(
+                spacing: AppSpacing.md,
+                runSpacing: AppSpacing.md,
+                children: [
+                  SizedBox(
+                    width: cardWidth.clamp(160, 300),
+                    child: MetricCard(
+                      title: 'Pending Decisions',
+                      value: '${dashboard.pendingDecisionCount}',
+                      icon: Icons.how_to_vote_outlined,
+                      color: dashboard.slaBreachedDecisionCount > 0
+                          ? AppColors.warning
+                          : AppColors.primary,
+                      subtitle: dashboard.slaBreachedDecisionCount > 0
+                          ? '${dashboard.slaBreachedDecisionCount} SLA breached'
+                          : null,
+                      subtitleColor: AppColors.error,
+                    ),
                   ),
-                ))
-            .toList(),
-      );
-    }
+                  SizedBox(
+                    width: cardWidth.clamp(160, 300),
+                    child: MetricCard(
+                      title: 'Active Outcomes',
+                      value: '${dashboard.activeOutcomeCount}',
+                      icon: Icons.flag_outlined,
+                      color: AppColors.success,
+                      subtitle:
+                          '${dashboard.outcomeValidationPercentage.toStringAsFixed(0)}% validated',
+                    ),
+                  ),
+                  SizedBox(
+                    width: cardWidth.clamp(160, 300),
+                    child: MetricCard(
+                      title: 'Running Experiments',
+                      value: '${dashboard.runningExperimentCount}',
+                      icon: Icons.biotech_outlined,
+                      color: AppColors.secondary,
+                    ),
+                  ),
+                  SizedBox(
+                    width: cardWidth.clamp(160, 300),
+                    child: MetricCard(
+                      title: 'Avg Decision Time',
+                      value: '${dashboard.avgDecisionTimeHours.toStringAsFixed(1)}h',
+                      icon: Icons.timer_outlined,
+                      color: AppColors.info,
+                      subtitle: dashboard.avgDecisionTimeTrend < 0
+                          ? 'Improving'
+                          : dashboard.avgDecisionTimeTrend > 0
+                              ? 'Slowing down'
+                              : null,
+                      subtitleColor: dashboard.avgDecisionTimeTrend < 0
+                          ? AppColors.success
+                          : AppColors.warning,
+                      trendIcon: dashboard.avgDecisionTimeTrend < 0
+                          ? Icons.trending_down
+                          : dashboard.avgDecisionTimeTrend > 0
+                              ? Icons.trending_up
+                              : null,
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
 
-    return GridView.count(
-      crossAxisCount: 2,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisSpacing: AppSpacing.md,
-      mainAxisSpacing: AppSpacing.md,
-      childAspectRatio: 1.3,
-      children: cards,
+          const SizedBox(height: AppSpacing.lg),
+
+          // Row 2: Decision Queue + Velocity Chart
+          LayoutBuilder(
+            builder: (context, constraints) {
+              if (constraints.maxWidth > 900) {
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      flex: 3,
+                      child: DecisionQueuePanel(
+                        decisions: dashboard.decisionQueue,
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      flex: 2,
+                      child: DecisionVelocityChart(
+                        metrics: dashboard.decisionVelocity,
+                      ),
+                    ),
+                  ],
+                );
+              }
+              return Column(
+                children: [
+                  DecisionQueuePanel(decisions: dashboard.decisionQueue),
+                  const SizedBox(height: AppSpacing.md),
+                  DecisionVelocityChart(metrics: dashboard.decisionVelocity),
+                ],
+              );
+            },
+          ),
+
+          const SizedBox(height: AppSpacing.lg),
+
+          // Row 3: Outcomes Progress + Activity Feed
+          LayoutBuilder(
+            builder: (context, constraints) {
+              if (constraints.maxWidth > 900) {
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: OutcomesProgressPanel(
+                        outcomes: dashboard.outcomeProgress,
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: ActivityFeedPanel(
+                        activities: dashboard.activityFeed,
+                      ),
+                    ),
+                  ],
+                );
+              }
+              return Column(
+                children: [
+                  OutcomesProgressPanel(outcomes: dashboard.outcomeProgress),
+                  const SizedBox(height: AppSpacing.md),
+                  ActivityFeedPanel(activities: dashboard.activityFeed),
+                ],
+              );
+            },
+          ),
+
+          const SizedBox(height: AppSpacing.xl),
+        ],
+      ),
     );
   }
 }

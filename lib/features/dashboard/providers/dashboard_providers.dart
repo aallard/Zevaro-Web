@@ -24,6 +24,15 @@ Future<DashboardStats> dashboardStats(DashboardStatsRef ref) async {
   );
 }
 
+/// Project-scoped dashboard data
+@riverpod
+Future<ProjectDashboard> projectDashboard(
+  ProjectDashboardRef ref,
+  String projectId,
+) async {
+  return ref.watch(projectDashboardProvider(projectId).future);
+}
+
 class DashboardStats {
   final int pendingDecisions;
   final int blockingDecisions;

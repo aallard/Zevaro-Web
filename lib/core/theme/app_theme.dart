@@ -4,10 +4,39 @@ import 'app_colors.dart';
 import 'app_spacing.dart';
 import 'app_typography.dart';
 
+/// Custom page transitions that are instant (no animation).
+class NoTransitionsBuilder extends PageTransitionsBuilder {
+  const NoTransitionsBuilder();
+
+  @override
+  Widget buildTransitions<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    return child;
+  }
+}
+
 abstract class AppTheme {
+  /// Page transitions theme with no animations for all platforms.
+  static const _noTransitions = PageTransitionsTheme(
+    builders: {
+      TargetPlatform.android: NoTransitionsBuilder(),
+      TargetPlatform.iOS: NoTransitionsBuilder(),
+      TargetPlatform.linux: NoTransitionsBuilder(),
+      TargetPlatform.macOS: NoTransitionsBuilder(),
+      TargetPlatform.windows: NoTransitionsBuilder(),
+      TargetPlatform.fuchsia: NoTransitionsBuilder(),
+    },
+  );
+
   static ThemeData get light => ThemeData(
         useMaterial3: true,
         brightness: Brightness.light,
+        pageTransitionsTheme: _noTransitions,
 
         // Colors
         colorScheme: ColorScheme.light(
@@ -45,7 +74,7 @@ abstract class AppTheme {
         ),
 
         // Cards
-        cardTheme: CardTheme(
+        cardTheme: CardThemeData(
           color: AppColors.surface,
           elevation: 0,
           shape: RoundedRectangleBorder(
@@ -151,6 +180,7 @@ abstract class AppTheme {
   static ThemeData get dark => ThemeData(
         useMaterial3: true,
         brightness: Brightness.dark,
+        pageTransitionsTheme: _noTransitions,
 
         // Colors
         colorScheme: ColorScheme.dark(
@@ -188,7 +218,7 @@ abstract class AppTheme {
         ),
 
         // Cards
-        cardTheme: CardTheme(
+        cardTheme: CardThemeData(
           color: const Color(0xFF1E1E1E),
           elevation: 1,
           shape: RoundedRectangleBorder(
@@ -321,7 +351,7 @@ abstract class AppTheme {
         ),
 
         // Dialog
-        dialogTheme: DialogTheme(
+        dialogTheme: DialogThemeData(
           backgroundColor: const Color(0xFF1E1E1E),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
