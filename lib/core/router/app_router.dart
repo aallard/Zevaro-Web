@@ -189,19 +189,19 @@ GoRouter appRouter(Ref ref) {
             ],
           ),
 
-          // Experiments (placeholder - route defined but no feature yet)
+          // Experiments
           GoRoute(
             path: Routes.experiments,
             name: 'experiments',
             pageBuilder: (context, state) =>
-                noTransitionPage(const ExperimentsPlaceholder(), state),
+                noTransitionPage(const ExperimentsScreen(), state),
             routes: [
               GoRoute(
                 path: ':id',
                 name: 'experimentDetail',
                 pageBuilder: (context, state) {
                   final id = state.pathParameters['id']!;
-                  return noTransitionPage(ExperimentsDetailPlaceholder(id: id), state);
+                  return noTransitionPage(ExperimentDetailScreen(id: id), state);
                 },
               ),
             ],
