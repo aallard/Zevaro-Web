@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:zevaro_flutter_sdk/zevaro_flutter_sdk.dart';
+
 import '../../../core/router/routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -11,6 +12,7 @@ import '../../../shared/widgets/common/error_view.dart';
 import '../providers/decisions_providers.dart';
 import '../widgets/decision_header.dart';
 import '../widgets/decision_description.dart';
+import '../widgets/decision_sidebar_panel.dart';
 import '../widgets/decision_votes.dart';
 import '../widgets/decision_comments.dart';
 import '../widgets/decision_resolution.dart';
@@ -74,6 +76,8 @@ class DecisionDetailScreen extends ConsumerWidget {
                   Expanded(
                     child: Column(
                       children: [
+                        DecisionSidebarPanel(decision: decision),
+                        const SizedBox(height: AppSpacing.lg),
                         DecisionVotes(decision: decision),
                         if (decision.status != DecisionStatus.DECIDED) ...[
                           const SizedBox(height: AppSpacing.lg),

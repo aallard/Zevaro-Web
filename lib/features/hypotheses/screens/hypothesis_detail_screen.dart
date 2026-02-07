@@ -2,18 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:zevaro_flutter_sdk/zevaro_flutter_sdk.dart';
+
 import '../../../core/router/routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
-import '../../../core/constants/app_constants.dart';
 import '../../../shared/widgets/common/loading_indicator.dart';
 import '../../../shared/widgets/common/error_view.dart';
-import '../providers/hypotheses_providers.dart';
-import '../widgets/hypothesis_status_badge.dart';
-import '../widgets/hypothesis_effort_impact.dart';
-import '../widgets/hypothesis_blocking.dart';
-import '../widgets/hypothesis_workflow.dart';
+import '../../../shared/widgets/common/avatar.dart';
 
 class HypothesisDetailScreen extends ConsumerWidget {
   final String id;
@@ -22,9 +18,9 @@ class HypothesisDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final hypothesisAsync = ref.watch(hypothesisDetailProvider(id));
+    final hypothesisAsync = ref.watch(hypothesisProvider(id));
     final screenWidth = MediaQuery.of(context).size.width;
-    final isWide = screenWidth > AppConstants.tabletBreakpoint;
+    final isWide = screenWidth > 900;
 
     return hypothesisAsync.when(
       data: (hypothesis) => SingleChildScrollView(
@@ -32,7 +28,7 @@ class HypothesisDetailScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Back button
+            // Back
             TextButton.icon(
               onPressed: () => context.go(Routes.hypotheses),
               icon: const Icon(Icons.arrow_back, size: 18),
@@ -44,48 +40,8 @@ class HypothesisDetailScreen extends ConsumerWidget {
             ),
             const SizedBox(height: AppSpacing.md),
 
-            // Blocking alert
-            HypothesisBlockingAlert(hypothesis: hypothesis),
-            if (hypothesis.status == HypothesisStatus.BLOCKED)
-              const SizedBox(height: AppSpacing.md),
-
-            // Header card
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.lg),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        HypothesisStatusBadge(status: hypothesis.status),
-                        const Spacer(),
-                        if (hypothesis.outcomeId != null)
-                          TextButton.icon(
-                            onPressed: () =>
-                                context.go(Routes.outcomeById(hypothesis.outcomeId!)),
-                            icon: const Icon(Icons.flag_outlined, size: 16),
-                            label: const Text('View Outcome'),
-                          ),
-                      ],
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    Text(hypothesis.statement, style: AppTypography.h2),
-                    if (hypothesis.description?.isNotEmpty ?? false) ...[
-                      const SizedBox(height: AppSpacing.sm),
-                      Text(
-                        hypothesis.description!,
-                        style: AppTypography.bodyMedium.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                    const SizedBox(height: AppSpacing.lg),
-                    HypothesisEffortImpact(hypothesis: hypothesis),
-                  ],
-                ),
-              ),
-            ),
+            // Header with status
+            _HypothesisHeader(hypothesis: hypothesis),
             const SizedBox(height: AppSpacing.lg),
 
             // Content
@@ -94,19 +50,37 @@ class HypothesisDetailScreen extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
-                    flex: 2,
-                    child: HypothesisWorkflow(hypothesis: hypothesis),
+                    flex: 3,
+                    child: Column(
+                      children: [
+                        _BeliefSection(hypothesis: hypothesis),
+                        const SizedBox(height: AppSpacing.lg),
+                        _DescriptionSection(hypothesis: hypothesis),
+                        const SizedBox(height: AppSpacing.lg),
+                        _ExperimentsSection(
+                          hypothesisId: hypothesis.id,
+                          ref: ref,
+                        ),
+                      ],
+                    ),
                   ),
                   const SizedBox(width: AppSpacing.lg),
                   Expanded(
-                    child: _buildMetadataCard(hypothesis),
+                    child: _SidebarPanel(hypothesis: hypothesis),
                   ),
                 ],
               )
             else ...[
-              HypothesisWorkflow(hypothesis: hypothesis),
+              _SidebarPanel(hypothesis: hypothesis),
               const SizedBox(height: AppSpacing.lg),
-              _buildMetadataCard(hypothesis),
+              _BeliefSection(hypothesis: hypothesis),
+              const SizedBox(height: AppSpacing.lg),
+              _DescriptionSection(hypothesis: hypothesis),
+              const SizedBox(height: AppSpacing.lg),
+              _ExperimentsSection(
+                hypothesisId: hypothesis.id,
+                ref: ref,
+              ),
             ],
           ],
         ),
@@ -114,116 +88,529 @@ class HypothesisDetailScreen extends ConsumerWidget {
       loading: () => const LoadingIndicator(message: 'Loading hypothesis...'),
       error: (e, _) => ErrorView(
         message: e.toString(),
-        onRetry: () => ref.invalidate(hypothesisDetailProvider(id)),
+        onRetry: () => ref.invalidate(hypothesisProvider(id)),
       ),
     );
   }
+}
 
-  Widget _buildMetadataCard(Hypothesis hypothesis) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+class _HypothesisHeader extends StatelessWidget {
+  final Hypothesis hypothesis;
+
+  const _HypothesisHeader({required this.hypothesis});
+
+  Color get _statusColor {
+    switch (hypothesis.status) {
+      case HypothesisStatus.VALIDATED:
+        return AppColors.success;
+      case HypothesisStatus.INVALIDATED:
+        return AppColors.error;
+      case HypothesisStatus.MEASURING:
+      case HypothesisStatus.DEPLOYED:
+        return AppColors.warning;
+      case HypothesisStatus.BUILDING:
+        return AppColors.secondary;
+      case HypothesisStatus.BLOCKED:
+        return AppColors.error;
+      default:
+        return AppColors.primary;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
           children: [
-            Text('Details', style: AppTypography.h4),
-            const SizedBox(height: AppSpacing.md),
-            _MetadataRow(
-              icon: Icons.calendar_today_outlined,
-              label: 'Created',
-              value: _formatDate(hypothesis.createdAt),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: _statusColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+              ),
+              child: Text(
+                hypothesis.status.displayName.toUpperCase(),
+                style: AppTypography.labelSmall.copyWith(
+                  color: _statusColor,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.5,
+                ),
+              ),
             ),
-            const SizedBox(height: AppSpacing.sm),
-            _MetadataRow(
-              icon: Icons.timer_outlined,
-              label: 'Time in Status',
-              value: _formatDuration(hypothesis.timeInStatus),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            _MetadataRow(
-              icon: Icons.psychology_outlined,
-              label: 'Confidence',
-              value: hypothesis.confidence.displayName,
-            ),
-            if (hypothesis.validatedAt != null) ...[
-              const SizedBox(height: AppSpacing.sm),
-              _MetadataRow(
-                icon: Icons.verified,
-                label: 'Validated',
-                value: _formatDate(hypothesis.validatedAt!),
+            if (hypothesis.effort != null) ...[
+              const SizedBox(width: AppSpacing.xs),
+              _MetaBadge(
+                label: 'Effort: ${hypothesis.effort}',
+                color: AppColors.secondary,
               ),
             ],
-            if (hypothesis.invalidatedAt != null) ...[
-              const SizedBox(height: AppSpacing.sm),
-              _MetadataRow(
-                icon: Icons.cancel,
-                label: 'Invalidated',
-                value: _formatDate(hypothesis.invalidatedAt!),
-              ),
-            ],
-            if (hypothesis.teamName != null) ...[
-              const SizedBox(height: AppSpacing.sm),
-              _MetadataRow(
-                icon: Icons.group_outlined,
-                label: 'Team',
-                value: hypothesis.teamName!,
-              ),
-            ],
-            if (hypothesis.ownerName != null) ...[
-              const SizedBox(height: AppSpacing.sm),
-              _MetadataRow(
-                icon: Icons.person_outlined,
-                label: 'Owner',
-                value: hypothesis.ownerName!,
+            if (hypothesis.impact != null) ...[
+              const SizedBox(width: AppSpacing.xs),
+              _MetaBadge(
+                label: 'Impact: ${hypothesis.impact}',
+                color: AppColors.success,
               ),
             ],
           ],
         ),
+        const SizedBox(height: AppSpacing.sm),
+        Text(hypothesis.title, style: AppTypography.h2),
+        if (hypothesis.outcomeName != null) ...[
+          const SizedBox(height: AppSpacing.xxs),
+          Row(
+            children: [
+              Icon(Icons.flag_outlined, size: 14, color: AppColors.textTertiary),
+              const SizedBox(width: 4),
+              Text(
+                'Linked to: ${hypothesis.outcomeName}',
+                style: AppTypography.bodySmall.copyWith(
+                  color: AppColors.textTertiary,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _MetaBadge extends StatelessWidget {
+  final String label;
+  final Color color;
+
+  const _MetaBadge({required this.label, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+      ),
+      child: Text(
+        label,
+        style: AppTypography.labelSmall.copyWith(
+          color: color,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+}
+
+class _BeliefSection extends StatelessWidget {
+  final Hypothesis hypothesis;
+
+  const _BeliefSection({required this.hypothesis});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.cardPaddingLarge),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withOpacity(0.03),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+        border: Border.all(color: AppColors.primary.withOpacity(0.15)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Hypothesis Statement', style: AppTypography.h4),
+          const SizedBox(height: AppSpacing.md),
+          if (hypothesis.beliefStatement != null) ...[
+            _BeliefRow(
+              label: 'We believe',
+              content: hypothesis.beliefStatement!,
+            ),
+          ],
+          if (hypothesis.expectedOutcome != null) ...[
+            const SizedBox(height: AppSpacing.sm),
+            _BeliefRow(
+              label: 'Will result in',
+              content: hypothesis.expectedOutcome!,
+            ),
+          ],
+          if (hypothesis.measurementCriteria != null) ...[
+            const SizedBox(height: AppSpacing.sm),
+            _BeliefRow(
+              label: 'Measured by',
+              content: hypothesis.measurementCriteria!,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _BeliefRow extends StatelessWidget {
+  final String label;
+  final String content;
+
+  const _BeliefRow({required this.label, required this.content});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 120,
+          child: Text(
+            label,
+            style: AppTypography.labelMedium.copyWith(
+              color: AppColors.primary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        Expanded(
+          child: Text(
+            content,
+            style: AppTypography.bodyMedium,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _DescriptionSection extends StatelessWidget {
+  final Hypothesis hypothesis;
+
+  const _DescriptionSection({required this.hypothesis});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.cardPadding),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Description', style: AppTypography.h4),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            hypothesis.description ?? 'No description provided.',
+            style: AppTypography.bodyMedium.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ExperimentsSection extends StatelessWidget {
+  final String hypothesisId;
+  final WidgetRef ref;
+
+  const _ExperimentsSection({
+    required this.hypothesisId,
+    required this.ref,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final experimentsAsync =
+        ref.watch(hypothesisExperimentsProvider(hypothesisId));
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.cardPadding),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text('Experiments', style: AppTypography.h4),
+              const Spacer(),
+              TextButton.icon(
+                onPressed: () {},
+                icon: const Icon(Icons.add, size: 16),
+                label: const Text('Add Experiment'),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          experimentsAsync.when(
+            data: (experiments) {
+              if (experiments.isEmpty) {
+                return Padding(
+                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  child: Center(
+                    child: Text(
+                      'No experiments linked yet.',
+                      style: AppTypography.bodySmall,
+                    ),
+                  ),
+                );
+              }
+              return Column(
+                children: experiments
+                    .map((e) => _ExperimentRow(experiment: e))
+                    .toList(),
+              );
+            },
+            loading: () => const Center(
+              child: Padding(
+                padding: EdgeInsets.all(AppSpacing.lg),
+                child: CircularProgressIndicator(),
+              ),
+            ),
+            error: (e, _) => Text('Failed to load experiments',
+                style: AppTypography.bodySmall),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ExperimentRow extends StatelessWidget {
+  final Experiment experiment;
+
+  const _ExperimentRow({required this.experiment});
+
+  Color get _typeColor {
+    switch (experiment.type) {
+      case ExperimentType.A_B_TEST:
+        return const Color(0xFF8B5CF6);
+      case ExperimentType.FEATURE_FLAG:
+        return const Color(0xFF14B8A6);
+      case ExperimentType.CANARY:
+        return const Color(0xFFF59E0B);
+      case ExperimentType.MANUAL:
+        return const Color(0xFF6B7280);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+      decoration: const BoxDecoration(
+        border: Border(
+          bottom: BorderSide(color: AppColors.borderLight),
+        ),
+      ),
+      child: Row(
+        children: [
+          // Type badge
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            decoration: BoxDecoration(
+              color: _typeColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+            ),
+            child: Text(
+              experiment.type.displayName,
+              style: AppTypography.labelSmall.copyWith(
+                color: _typeColor,
+                fontWeight: FontWeight.w600,
+                fontSize: 10,
+              ),
+            ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          // Name
+          Expanded(
+            child: Text(
+              experiment.name,
+              style: AppTypography.labelLarge,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          // Status
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            decoration: BoxDecoration(
+              color: _statusColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+            ),
+            child: Text(
+              experiment.status.displayName,
+              style: AppTypography.labelSmall.copyWith(
+                color: _statusColor,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          // Confidence
+          if (experiment.confidenceLevel != null) ...[
+            const SizedBox(width: AppSpacing.sm),
+            Text(
+              '${experiment.confidenceLevel!.toStringAsFixed(0)}% conf.',
+              style: AppTypography.labelSmall.copyWith(
+                color: experiment.isSignificant
+                    ? AppColors.success
+                    : AppColors.textTertiary,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Color get _statusColor {
+    switch (experiment.status) {
+      case ExperimentStatus.RUNNING:
+        return AppColors.secondary;
+      case ExperimentStatus.CONCLUDED:
+        return AppColors.success;
+      case ExperimentStatus.CANCELLED:
+        return AppColors.error;
+      default:
+        return AppColors.textTertiary;
+    }
+  }
+}
+
+class _SidebarPanel extends StatelessWidget {
+  final Hypothesis hypothesis;
+
+  const _SidebarPanel({required this.hypothesis});
+
+  Color get _statusColor {
+    switch (hypothesis.status) {
+      case HypothesisStatus.VALIDATED:
+        return AppColors.success;
+      case HypothesisStatus.INVALIDATED:
+        return AppColors.error;
+      case HypothesisStatus.MEASURING:
+      case HypothesisStatus.DEPLOYED:
+        return AppColors.warning;
+      case HypothesisStatus.BUILDING:
+        return AppColors.secondary;
+      default:
+        return AppColors.primary;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.cardPadding),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _Field(
+            label: 'Status',
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: _statusColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+              ),
+              child: Text(
+                hypothesis.status.displayName,
+                style: AppTypography.labelMedium.copyWith(
+                  color: _statusColor,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+          const Divider(height: AppSpacing.lg),
+          _Field(
+            label: 'Owner',
+            child: Row(
+              children: [
+                ZAvatar(
+                  name: hypothesis.ownerName ?? 'Unassigned',
+                  size: 28,
+                ),
+                const SizedBox(width: AppSpacing.xs),
+                Text(hypothesis.ownerName ?? 'Unassigned',
+                    style: AppTypography.bodyMedium),
+              ],
+            ),
+          ),
+          if (hypothesis.effort != null) ...[
+            const Divider(height: AppSpacing.lg),
+            _Field(
+              label: 'Effort',
+              child: Text(hypothesis.effort!,
+                  style: AppTypography.bodyMedium),
+            ),
+          ],
+          if (hypothesis.impact != null) ...[
+            const Divider(height: AppSpacing.lg),
+            _Field(
+              label: 'Impact',
+              child: Text(hypothesis.impact!,
+                  style: AppTypography.bodyMedium),
+            ),
+          ],
+          if (hypothesis.project != null) ...[
+            const Divider(height: AppSpacing.lg),
+            _Field(
+              label: 'Project',
+              child: Text(hypothesis.project!.name,
+                  style: AppTypography.bodyMedium),
+            ),
+          ],
+          const Divider(height: AppSpacing.lg),
+          _Field(
+            label: 'Created',
+            child: Text(
+              _formatDate(hypothesis.createdAt),
+              style: AppTypography.bodyMedium,
+            ),
+          ),
+        ],
       ),
     );
   }
 
   String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year}';
-  }
-
-  String _formatDuration(Duration? duration) {
-    if (duration == null) return 'Unknown';
-    if (duration.inDays > 0) {
-      return '${duration.inDays}d ${duration.inHours % 24}h';
-    } else if (duration.inHours > 0) {
-      return '${duration.inHours}h ${duration.inMinutes % 60}m';
-    } else {
-      return '${duration.inMinutes}m';
-    }
+    final months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
+    return '${months[date.month - 1]} ${date.day}, ${date.year}';
   }
 }
 
-class _MetadataRow extends StatelessWidget {
-  final IconData icon;
+class _Field extends StatelessWidget {
   final String label;
-  final String value;
+  final Widget child;
 
-  const _MetadataRow({
-    required this.icon,
-    required this.label,
-    required this.value,
-  });
+  const _Field({required this.label, required this.child});
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 16, color: AppColors.textTertiary),
-        const SizedBox(width: AppSpacing.sm),
-        Text(
-          label,
-          style: AppTypography.bodySmall.copyWith(
-            color: AppColors.textSecondary,
-          ),
-        ),
-        const Spacer(),
-        Text(value, style: AppTypography.bodySmall),
+        Text(label,
+            style: AppTypography.labelSmall
+                .copyWith(color: AppColors.textTertiary)),
+        const SizedBox(height: AppSpacing.xxs),
+        child,
       ],
     );
   }

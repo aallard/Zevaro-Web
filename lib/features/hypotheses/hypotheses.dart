@@ -11,6 +11,8 @@ export 'widgets/hypothesis_status_badge.dart';
 export 'widgets/hypothesis_effort_impact.dart';
 export 'widgets/hypothesis_blocking.dart';
 export 'widgets/hypothesis_workflow.dart';
+export 'widgets/hypothesis_kanban.dart';
+export 'widgets/hypothesis_card_enhanced.dart';
 
 // Providers
 export 'providers/hypotheses_providers.dart';

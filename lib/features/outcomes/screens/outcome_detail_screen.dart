@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:zevaro_flutter_sdk/zevaro_flutter_sdk.dart';
+
 import '../../../core/router/routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -9,10 +10,9 @@ import '../../../core/theme/app_typography.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../shared/widgets/common/loading_indicator.dart';
 import '../../../shared/widgets/common/error_view.dart';
+import '../../../shared/widgets/common/avatar.dart';
 import '../../hypotheses/widgets/create_hypothesis_dialog.dart';
 import '../providers/outcomes_providers.dart';
-import '../widgets/outcome_status_badge.dart';
-import '../widgets/outcome_key_results.dart';
 
 class OutcomeDetailScreen extends ConsumerWidget {
   final String id;
@@ -22,7 +22,6 @@ class OutcomeDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final outcomeAsync = ref.watch(outcomeDetailProvider(id));
-    final hypothesesAsync = ref.watch(outcomeHypothesesProvider(id));
     final screenWidth = MediaQuery.of(context).size.width;
     final isWide = screenWidth > AppConstants.tabletBreakpoint;
 
@@ -32,7 +31,7 @@ class OutcomeDetailScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Back button
+            // Back
             TextButton.icon(
               onPressed: () => context.go(Routes.outcomes),
               icon: const Icon(Icons.arrow_back, size: 18),
@@ -44,8 +43,8 @@ class OutcomeDetailScreen extends ConsumerWidget {
             ),
             const SizedBox(height: AppSpacing.md),
 
-            // Header card
-            _OutcomeHeader(outcome: outcome, ref: ref),
+            // Header
+            _OutcomeHeader(outcome: outcome),
             const SizedBox(height: AppSpacing.lg),
 
             // Content
@@ -54,36 +53,32 @@ class OutcomeDetailScreen extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
-                    flex: 2,
+                    flex: 3,
                     child: Column(
                       children: [
-                        OutcomeKeyResults(outcome: outcome),
+                        _DescriptionSection(outcome: outcome),
                         const SizedBox(height: AppSpacing.lg),
-                        _OutcomeHypotheses(
-                          hypothesesAsync: hypothesesAsync,
-                          outcomeId: outcome.id,
-                        ),
+                        _KeyResultsSection(outcome: outcome),
+                        const SizedBox(height: AppSpacing.lg),
+                        _HypothesesSection(outcome: outcome),
                       ],
                     ),
                   ),
                   const SizedBox(width: AppSpacing.lg),
                   Expanded(
-                    child: _OutcomeMetadata(outcome: outcome),
+                    child: _SidebarPanel(outcome: outcome),
                   ),
                 ],
               )
             else ...[
-              OutcomeKeyResults(outcome: outcome),
+              _SidebarPanel(outcome: outcome),
               const SizedBox(height: AppSpacing.lg),
-              _OutcomeMetadata(outcome: outcome),
+              _DescriptionSection(outcome: outcome),
               const SizedBox(height: AppSpacing.lg),
-              _OutcomeHypotheses(
-                hypothesesAsync: hypothesesAsync,
-                outcomeId: outcome.id,
-              ),
+              _KeyResultsSection(outcome: outcome),
+              const SizedBox(height: AppSpacing.lg),
+              _HypothesesSection(outcome: outcome),
             ],
-
-            const SizedBox(height: AppSpacing.xl),
           ],
         ),
       ),
@@ -98,231 +93,425 @@ class OutcomeDetailScreen extends ConsumerWidget {
 
 class _OutcomeHeader extends StatelessWidget {
   final Outcome outcome;
-  final WidgetRef ref;
 
-  const _OutcomeHeader({required this.outcome, required this.ref});
+  const _OutcomeHeader({required this.outcome});
 
-  @override
-  Widget build(BuildContext context) {
-    final priorityColor =
-        Color(int.parse(outcome.priority.color.replaceFirst('#', '0xFF')));
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                OutcomeStatusBadge(status: outcome.status),
-                const SizedBox(width: AppSpacing.sm),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.sm, vertical: AppSpacing.xxs),
-                  decoration: BoxDecoration(
-                    color: priorityColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
-                  ),
-                  child: Text(
-                    outcome.priority.displayName,
-                    style:
-                        AppTypography.labelMedium.copyWith(color: priorityColor),
-                  ),
-                ),
-                const Spacer(),
-                if (outcome.status.isEditable)
-                  PopupMenuButton<OutcomeStatus>(
-                    icon: const Icon(Icons.more_vert),
-                    onSelected: (newStatus) {
-                      ref
-                          .read(updateOutcomeStatusProvider.notifier)
-                          .updateStatus(outcome.id, newStatus);
-                    },
-                    itemBuilder: (context) => OutcomeStatus.values
-                        .where((s) => s != outcome.status)
-                        .map((s) => PopupMenuItem(
-                              value: s,
-                              child: Text('Mark as ${s.displayName}'),
-                            ))
-                        .toList(),
-                  ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Text(outcome.title, style: AppTypography.h2),
-            if (outcome.description?.isNotEmpty ?? false) ...[
-              const SizedBox(height: AppSpacing.sm),
-              Text(
-                outcome.description!,
-                style: AppTypography.bodyMedium
-                    .copyWith(color: AppColors.textSecondary),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
+  Color get _statusColor {
+    switch (outcome.status) {
+      case OutcomeStatus.VALIDATED:
+        return AppColors.success;
+      case OutcomeStatus.INVALIDATED:
+        return AppColors.error;
+      case OutcomeStatus.IN_PROGRESS:
+      case OutcomeStatus.VALIDATING:
+        return AppColors.warning;
+      default:
+        return AppColors.primary;
+    }
   }
-}
-
-class _OutcomeMetadata extends StatelessWidget {
-  final Outcome outcome;
-
-  const _OutcomeMetadata({required this.outcome});
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Details', style: AppTypography.h4),
-            const SizedBox(height: AppSpacing.md),
-            _MetadataRow(
-                icon: Icons.calendar_today_outlined,
-                label: 'Created',
-                value: _formatDate(outcome.createdAt)),
-            const SizedBox(height: AppSpacing.sm),
-            _MetadataRow(
-                icon: Icons.update_outlined,
-                label: 'Updated',
-                value: _formatDate(outcome.updatedAt)),
-            if (outcome.targetDate != null) ...[
-              const SizedBox(height: AppSpacing.sm),
-              _MetadataRow(
-                  icon: Icons.flag_outlined,
-                  label: 'Target',
-                  value: _formatDate(outcome.targetDate!)),
-            ],
-            if (outcome.teamName != null) ...[
-              const SizedBox(height: AppSpacing.sm),
-              _MetadataRow(
-                  icon: Icons.group_outlined,
-                  label: 'Team',
-                  value: outcome.teamName!),
-            ],
-            if (outcome.ownerName != null) ...[
-              const SizedBox(height: AppSpacing.sm),
-              _MetadataRow(
-                  icon: Icons.person_outlined,
-                  label: 'Owner',
-                  value: outcome.ownerName!),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-
-  String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year}';
-  }
-}
-
-class _MetadataRow extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-
-  const _MetadataRow(
-      {required this.icon, required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 16, color: AppColors.textTertiary),
-        const SizedBox(width: AppSpacing.sm),
-        Text(label,
-            style: AppTypography.bodySmall
-                .copyWith(color: AppColors.textSecondary)),
-        const Spacer(),
-        Text(value, style: AppTypography.bodySmall),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: _statusColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+                ),
+                child: Text(
+                  outcome.status.displayName.toUpperCase(),
+                  style: AppTypography.labelSmall.copyWith(
+                    color: _statusColor,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Text(outcome.title, style: AppTypography.h2),
+            ],
+          ),
+        ),
       ],
     );
   }
 }
 
-class _OutcomeHypotheses extends StatelessWidget {
-  final AsyncValue<List<Hypothesis>> hypothesesAsync;
-  final String outcomeId;
+class _DescriptionSection extends StatelessWidget {
+  final Outcome outcome;
 
-  const _OutcomeHypotheses({
-    required this.hypothesesAsync,
-    required this.outcomeId,
+  const _DescriptionSection({required this.outcome});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.cardPadding),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Description', style: AppTypography.h4),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            outcome.description ?? 'No description provided.',
+            style: AppTypography.bodyMedium.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _KeyResultsSection extends StatelessWidget {
+  final Outcome outcome;
+
+  const _KeyResultsSection({required this.outcome});
+
+  @override
+  Widget build(BuildContext context) {
+    final keyResults = outcome.keyResults ?? [];
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.cardPadding),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Key Results', style: AppTypography.h4),
+          const SizedBox(height: AppSpacing.md),
+          if (keyResults.isEmpty)
+            Text('No key results defined.',
+                style: AppTypography.bodySmall)
+          else
+            ...keyResults.map((kr) => _KeyResultRow(keyResult: kr)),
+        ],
+      ),
+    );
+  }
+}
+
+class _KeyResultRow extends StatelessWidget {
+  final KeyResult keyResult;
+
+  const _KeyResultRow({required this.keyResult});
+
+  @override
+  Widget build(BuildContext context) {
+    final progress = keyResult.progressPercent / 100;
+    final color = progress >= 1.0
+        ? AppColors.success
+        : progress >= 0.5
+            ? AppColors.warning
+            : AppColors.primary;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.md),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(keyResult.description,
+                    style: AppTypography.labelLarge),
+              ),
+              Text(
+                '${keyResult.currentValue.toStringAsFixed(1)} / ${keyResult.targetValue.toStringAsFixed(1)} ${keyResult.unit}',
+                style: AppTypography.labelSmall.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.xxs),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+            child: LinearProgressIndicator(
+              value: progress.clamp(0, 1),
+              backgroundColor: AppColors.surfaceVariant,
+              valueColor: AlwaysStoppedAnimation<Color>(color),
+              minHeight: 8,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HypothesesSection extends StatelessWidget {
+  final Outcome outcome;
+
+  const _HypothesesSection({required this.outcome});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.cardPadding),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Linked Hypotheses', style: AppTypography.h4),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            '${outcome.hypothesisCount} total · '
+            '${outcome.validatedHypothesisCount} validated · '
+            '${outcome.activeHypothesisCount} active',
+            style: AppTypography.bodySmall,
+          ),
+          const SizedBox(height: AppSpacing.md),
+          // Summary stats
+          Row(
+            children: [
+              _StatChip(
+                label: 'Validated',
+                count: outcome.validatedHypothesisCount,
+                color: AppColors.success,
+              ),
+              const SizedBox(width: AppSpacing.xs),
+              _StatChip(
+                label: 'Active',
+                count: outcome.activeHypothesisCount,
+                color: AppColors.warning,
+              ),
+              const SizedBox(width: AppSpacing.xs),
+              _StatChip(
+                label: 'Failed',
+                count: outcome.hypothesisCount -
+                    outcome.validatedHypothesisCount -
+                    outcome.activeHypothesisCount,
+                color: AppColors.error,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StatChip extends StatelessWidget {
+  final String label;
+  final int count;
+  final Color color;
+
+  const _StatChip({
+    required this.label,
+    required this.count,
+    required this.color,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 6,
+            height: 6,
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+          ),
+          const SizedBox(width: 4),
+          Text(
+            '$count $label',
+            style: AppTypography.labelSmall.copyWith(
+              color: color,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SidebarPanel extends StatelessWidget {
+  final Outcome outcome;
+
+  const _SidebarPanel({required this.outcome});
+
+  Color get _statusColor {
+    switch (outcome.status) {
+      case OutcomeStatus.VALIDATED:
+        return AppColors.success;
+      case OutcomeStatus.INVALIDATED:
+        return AppColors.error;
+      case OutcomeStatus.IN_PROGRESS:
+      case OutcomeStatus.VALIDATING:
+        return AppColors.warning;
+      default:
+        return AppColors.primary;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.cardPadding),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _Field(
+            label: 'Status',
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: _statusColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+              ),
+              child: Text(
+                outcome.status.displayName,
+                style: AppTypography.labelMedium
+                    .copyWith(color: _statusColor, fontWeight: FontWeight.w600),
+              ),
+            ),
+          ),
+          const Divider(height: AppSpacing.lg),
+          _Field(
+            label: 'Priority',
+            child: Text(outcome.priority.displayName,
+                style: AppTypography.bodyMedium),
+          ),
+          const Divider(height: AppSpacing.lg),
+          _Field(
+            label: 'Owner',
+            child: Row(
               children: [
-                Text('Hypotheses', style: AppTypography.h4),
-                const Spacer(),
-                TextButton.icon(
-                  onPressed: () => showCreateHypothesisDialog(
-                    context,
-                    outcomeId: outcomeId,
+                ZAvatar(
+                  name: outcome.ownerName ?? 'Unassigned',
+                  size: 28,
+                ),
+                const SizedBox(width: AppSpacing.xs),
+                Text(outcome.ownerName ?? 'Unassigned',
+                    style: AppTypography.bodyMedium),
+              ],
+            ),
+          ),
+          if (outcome.targetDate != null) ...[
+            const Divider(height: AppSpacing.lg),
+            _Field(
+              label: 'Target Date',
+              child: Row(
+                children: [
+                  Icon(Icons.calendar_today,
+                      size: 16, color: AppColors.textTertiary),
+                  const SizedBox(width: AppSpacing.xxs),
+                  Text(
+                    _formatDate(outcome.targetDate!),
+                    style: AppTypography.bodyMedium,
                   ),
-                  icon: const Icon(Icons.add, size: 16),
-                  label: const Text('Add'),
+                ],
+              ),
+            ),
+          ],
+          const Divider(height: AppSpacing.lg),
+          _Field(
+            label: 'Validation Rate',
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: ClipRRect(
+                        borderRadius:
+                            BorderRadius.circular(AppSpacing.radiusFull),
+                        child: LinearProgressIndicator(
+                          value: outcome.validationRate / 100,
+                          backgroundColor: AppColors.surfaceVariant,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                              _statusColor),
+                          minHeight: 6,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.xs),
+                    Text(
+                      '${outcome.validationRate.toStringAsFixed(0)}%',
+                      style: AppTypography.labelMedium.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
-            const SizedBox(height: AppSpacing.md),
-            hypothesesAsync.when(
-              data: (hypotheses) {
-                if (hypotheses.isEmpty) {
-                  return Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(AppSpacing.lg),
-                      child: Column(
-                        children: [
-                          Icon(Icons.science_outlined,
-                              size: 32, color: AppColors.textTertiary),
-                          const SizedBox(height: AppSpacing.sm),
-                          Text(
-                            'No hypotheses yet',
-                            style: AppTypography.bodyMedium
-                                .copyWith(color: AppColors.textTertiary),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }
-                return ListView.separated(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: hypotheses.length,
-                  separatorBuilder: (_, __) =>
-                      const SizedBox(height: AppSpacing.sm),
-                  itemBuilder: (context, index) {
-                    final h = hypotheses[index];
-                    return ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: Text(h.statement, style: AppTypography.labelMedium),
-                      subtitle: Text(h.status.displayName),
-                      trailing: const Icon(Icons.chevron_right),
-                      onTap: () => context.go(Routes.hypothesisById(h.id)),
-                    );
-                  },
-                );
-              },
-              loading: () => const LoadingIndicator(),
-              error: (e, _) => Text('Error: $e'),
+          ),
+          if (outcome.project != null) ...[
+            const Divider(height: AppSpacing.lg),
+            _Field(
+              label: 'Project',
+              child: Text(outcome.project!.name,
+                  style: AppTypography.bodyMedium),
             ),
           ],
-        ),
+        ],
       ),
+    );
+  }
+
+  String _formatDate(DateTime date) {
+    final months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
+    return '${months[date.month - 1]} ${date.day}, ${date.year}';
+  }
+}
+
+class _Field extends StatelessWidget {
+  final String label;
+  final Widget child;
+
+  const _Field({required this.label, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label,
+            style: AppTypography.labelSmall
+                .copyWith(color: AppColors.textTertiary)),
+        const SizedBox(height: AppSpacing.xxs),
+        child,
+      ],
     );
   }
 }

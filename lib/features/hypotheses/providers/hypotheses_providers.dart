@@ -220,3 +220,38 @@ class CreateHypothesis extends _$CreateHypothesis {
     }
   }
 }
+
+/// Hypothesis list provider (for kanban board)
+@riverpod
+Future<List<Hypothesis>> hypothesisList(
+  HypothesisListRef ref, {
+  required String? projectId,
+}) async {
+  final hypothesisService = ref.watch(hypothesisServiceProvider);
+
+  if (projectId == null) {
+    return [];
+  }
+
+  final response = await hypothesisService.listHypotheses();
+  return response.content;
+}
+
+/// Single hypothesis provider (for detail screen)
+@riverpod
+Future<Hypothesis> hypothesis(HypothesisRef ref, String id) async {
+  final hypothesisService = ref.watch(hypothesisServiceProvider);
+  return hypothesisService.getHypothesis(id);
+}
+
+/// Hypothesis experiments provider
+@riverpod
+Future<List<Experiment>> hypothesisExperiments(
+  HypothesisExperimentsRef ref,
+  String hypothesisId,
+) async {
+  final hypothesisService = ref.watch(hypothesisServiceProvider);
+  final experiments =
+      await hypothesisService.getHypothesisExperiments(hypothesisId);
+  return experiments;
+}

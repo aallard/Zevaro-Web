@@ -6,6 +6,7 @@ export 'screens/outcome_detail_screen.dart';
 export 'widgets/add_key_result_dialog.dart';
 export 'widgets/create_outcome_dialog.dart';
 export 'widgets/outcome_card.dart';
+export 'widgets/outcome_card_enhanced.dart';
 export 'widgets/outcome_list.dart';
 export 'widgets/outcome_filters.dart';
 export 'widgets/outcome_status_badge.dart';

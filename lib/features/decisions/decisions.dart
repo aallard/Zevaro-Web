@@ -14,6 +14,7 @@ export 'widgets/urgency_badge.dart';
 export 'widgets/sla_indicator.dart';
 export 'widgets/decision_header.dart';
 export 'widgets/decision_description.dart';
+export 'widgets/decision_sidebar_panel.dart';
 export 'widgets/decision_votes.dart';
 export 'widgets/decision_comments.dart';
 export 'widgets/decision_resolution.dart';
