@@ -169,7 +169,7 @@ GoRouter appRouter(Ref ref) {
                 name: 'programDetail',
                 pageBuilder: (context, state) {
                   final id = state.pathParameters['id']!;
-                  return noTransitionPage(ProgramsScreen(programId: id), state);
+                  return noTransitionPage(ProgramDetailScreen(id: id), state);
                 },
               ),
             ],

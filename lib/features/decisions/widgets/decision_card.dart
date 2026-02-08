@@ -130,7 +130,48 @@ class DecisionCard extends StatelessWidget {
                 ),
               ),
 
-              // Title
+              // Parent type + title
+              if (decision.parentType != null)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 4,
+                          vertical: 1,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.textTertiary.withOpacity(0.1),
+                          borderRadius:
+                              BorderRadius.circular(AppSpacing.radiusSm),
+                        ),
+                        child: Text(
+                          decision.parentType!,
+                          style: AppTypography.labelSmall.copyWith(
+                            fontSize: 8,
+                            color: AppColors.textTertiary,
+                          ),
+                        ),
+                      ),
+                      if (decision.parentTitle != null) ...[
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            decision.parentTitle!,
+                            style: AppTypography.labelSmall.copyWith(
+                              fontSize: 9,
+                              color: AppColors.textSecondary,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
                 child: Text(

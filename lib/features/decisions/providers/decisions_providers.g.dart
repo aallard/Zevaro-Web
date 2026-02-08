@@ -6,7 +6,28 @@ part of 'decisions_providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$decisionsByStatusHash() => r'25eda2e8437a01357dfc1959dafe43b8c305ddfd';
+String _$v2FilteredDecisionsHash() =>
+    r'9e4da4ceb12f5ee0c8d984e8724fd7130b8b227a';
+
+/// V2 filtered decisions using server-side filtering
+///
+/// Copied from [v2FilteredDecisions].
+@ProviderFor(v2FilteredDecisions)
+final v2FilteredDecisionsProvider =
+    AutoDisposeFutureProvider<List<Decision>>.internal(
+  v2FilteredDecisions,
+  name: r'v2FilteredDecisionsProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$v2FilteredDecisionsHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef V2FilteredDecisionsRef = AutoDisposeFutureProviderRef<List<Decision>>;
+String _$decisionsByStatusHash() => r'1d8d4db2f16cc025805c2fa923b48d7a74190459';
 
 /// Filtered decisions grouped by status (for board view)
 ///
@@ -27,6 +48,26 @@ final decisionsByStatusProvider =
 // ignore: unused_element
 typedef DecisionsByStatusRef
     = AutoDisposeFutureProviderRef<Map<DecisionStatus, List<Decision>>>;
+String _$queueSummaryStatsHash() => r'3074b3dd71c7e0db6ffa16d1ad26493d2c423d83';
+
+/// Queue summary stats
+///
+/// Copied from [queueSummaryStats].
+@ProviderFor(queueSummaryStats)
+final queueSummaryStatsProvider =
+    AutoDisposeFutureProvider<QueueSummaryStats>.internal(
+  queueSummaryStats,
+  name: r'queueSummaryStatsProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$queueSummaryStatsHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef QueueSummaryStatsRef = AutoDisposeFutureProviderRef<QueueSummaryStats>;
 String _$decisionDetailHash() => r'79e2b04f492ef3f82f3589ac399eefe2b461e9dd';
 
 /// Copied from Dart SDK
@@ -208,9 +249,9 @@ final decisionViewModeProvider =
 );
 
 typedef _$DecisionViewMode = AutoDisposeNotifier<ViewMode>;
-String _$decisionFiltersHash() => r'dbf78a2e934814dc0a7fcd6a25c985b82f5e44c6';
+String _$decisionFiltersHash() => r'290f59a3e0b25d834a0e7f29acdd8fb752fa63b2';
 
-/// Filter state
+/// V2 filter state with cascading filters
 ///
 /// Copied from [DecisionFilters].
 @ProviderFor(DecisionFilters)
@@ -226,7 +267,7 @@ final decisionFiltersProvider =
 );
 
 typedef _$DecisionFilters = AutoDisposeNotifier<DecisionFilterState>;
-String _$createDecisionHash() => r'817f93ae26209a77f5e2c08558d8379b58739ff5';
+String _$createDecisionHash() => r'e2c3177fcdcff4d4cc67fe557534cefa948a4b5d';
 
 /// Create decision action
 ///
@@ -263,7 +304,7 @@ final voteOnDecisionProvider =
 
 typedef _$VoteOnDecision = AutoDisposeAsyncNotifier<void>;
 String _$resolveDecisionActionHash() =>
-    r'699cb0a61daadd51ed5bab592e22e9d9933dd68b';
+    r'837ca72d265c402a8ae541b041b297c809f7c01f';
 
 /// Resolve a decision
 ///

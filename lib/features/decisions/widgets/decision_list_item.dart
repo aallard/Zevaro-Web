@@ -55,6 +55,32 @@ class DecisionListItem extends StatelessWidget {
                 style: AppTypography.labelSmall.copyWith(color: statusColor),
               ),
             ),
+            if (decision.parentType != null) ...[
+              const SizedBox(width: AppSpacing.xs),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                decoration: BoxDecoration(
+                  color: AppColors.textTertiary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+                ),
+                child: Text(
+                  decision.parentType!,
+                  style: AppTypography.labelSmall.copyWith(fontSize: 9),
+                ),
+              ),
+            ],
+            if (decision.workstreamName != null) ...[
+              const SizedBox(width: AppSpacing.xs),
+              Flexible(
+                child: Text(
+                  decision.workstreamName!,
+                  style: AppTypography.labelSmall
+                      .copyWith(color: AppColors.textTertiary, fontSize: 10),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
             const SizedBox(width: AppSpacing.sm),
             Expanded(child: SlaIndicator(decision: decision)),
           ],

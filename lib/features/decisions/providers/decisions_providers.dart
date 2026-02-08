@@ -19,7 +19,7 @@ class DecisionViewMode extends _$DecisionViewMode {
 
 enum ViewMode { board, list }
 
-/// Filter state
+/// V2 filter state with cascading filters
 @riverpod
 class DecisionFilters extends _$DecisionFilters {
   @override
@@ -41,6 +41,72 @@ class DecisionFilters extends _$DecisionFilters {
     state = state.copyWith(search: search);
   }
 
+  void setPortfolio(String? portfolioId) {
+    // Cascade: clear program and workstream when portfolio changes
+    state = DecisionFilterState(
+      urgency: state.urgency,
+      type: state.type,
+      teamId: state.teamId,
+      search: state.search,
+      portfolioId: portfolioId,
+      parentType: state.parentType,
+      executionMode: state.executionMode,
+      slaStatus: state.slaStatus,
+      status: state.status,
+    );
+  }
+
+  void setProgram(String? programId) {
+    // Cascade: clear workstream when program changes
+    state = DecisionFilterState(
+      urgency: state.urgency,
+      type: state.type,
+      teamId: state.teamId,
+      search: state.search,
+      portfolioId: state.portfolioId,
+      programId: programId,
+      parentType: state.parentType,
+      executionMode: state.executionMode,
+      slaStatus: state.slaStatus,
+      status: state.status,
+    );
+  }
+
+  void setWorkstream(String? workstreamId) {
+    state = state.copyWith(
+      workstreamId: workstreamId,
+      clearWorkstreamId: workstreamId == null,
+    );
+  }
+
+  void setParentType(String? parentType) {
+    state = state.copyWith(
+      parentType: parentType,
+      clearParentType: parentType == null,
+    );
+  }
+
+  void setExecutionMode(String? executionMode) {
+    state = state.copyWith(
+      executionMode: executionMode,
+      clearExecutionMode: executionMode == null,
+    );
+  }
+
+  void setSlaStatus(String? slaStatus) {
+    state = state.copyWith(
+      slaStatus: slaStatus,
+      clearSlaStatus: slaStatus == null,
+    );
+  }
+
+  void setStatus(String? status) {
+    state = state.copyWith(
+      status: status,
+      clearStatus: status == null,
+    );
+  }
+
   void clearAll() {
     state = const DecisionFilterState();
   }
@@ -51,12 +117,26 @@ class DecisionFilterState {
   final DecisionType? type;
   final String? teamId;
   final String? search;
+  final String? portfolioId;
+  final String? programId;
+  final String? workstreamId;
+  final String? parentType;
+  final String? executionMode;
+  final String? slaStatus;
+  final String? status;
 
   const DecisionFilterState({
     this.urgency,
     this.type,
     this.teamId,
     this.search,
+    this.portfolioId,
+    this.programId,
+    this.workstreamId,
+    this.parentType,
+    this.executionMode,
+    this.slaStatus,
+    this.status,
   });
 
   DecisionFilterState copyWith({
@@ -64,15 +144,39 @@ class DecisionFilterState {
     DecisionType? type,
     String? teamId,
     String? search,
+    String? portfolioId,
+    String? programId,
+    String? workstreamId,
+    String? parentType,
+    String? executionMode,
+    String? slaStatus,
+    String? status,
     bool clearUrgency = false,
     bool clearType = false,
     bool clearTeamId = false,
+    bool clearPortfolioId = false,
+    bool clearProgramId = false,
+    bool clearWorkstreamId = false,
+    bool clearParentType = false,
+    bool clearExecutionMode = false,
+    bool clearSlaStatus = false,
+    bool clearStatus = false,
   }) {
     return DecisionFilterState(
       urgency: clearUrgency ? null : (urgency ?? this.urgency),
       type: clearType ? null : (type ?? this.type),
       teamId: clearTeamId ? null : (teamId ?? this.teamId),
       search: search ?? this.search,
+      portfolioId:
+          clearPortfolioId ? null : (portfolioId ?? this.portfolioId),
+      programId: clearProgramId ? null : (programId ?? this.programId),
+      workstreamId:
+          clearWorkstreamId ? null : (workstreamId ?? this.workstreamId),
+      parentType: clearParentType ? null : (parentType ?? this.parentType),
+      executionMode:
+          clearExecutionMode ? null : (executionMode ?? this.executionMode),
+      slaStatus: clearSlaStatus ? null : (slaStatus ?? this.slaStatus),
+      status: clearStatus ? null : (status ?? this.status),
     );
   }
 
@@ -80,21 +184,56 @@ class DecisionFilterState {
       urgency != null ||
       type != null ||
       teamId != null ||
-      (search?.isNotEmpty ?? false);
+      (search?.isNotEmpty ?? false) ||
+      portfolioId != null ||
+      programId != null ||
+      workstreamId != null ||
+      parentType != null ||
+      executionMode != null ||
+      slaStatus != null ||
+      status != null;
+
+  bool get hasV2Filters =>
+      portfolioId != null ||
+      programId != null ||
+      workstreamId != null ||
+      parentType != null ||
+      executionMode != null ||
+      slaStatus != null;
 }
 
-/// Filtered decisions grouped by status (for board view)
+/// V2 filtered decisions using server-side filtering
 @riverpod
-Future<Map<DecisionStatus, List<Decision>>> decisionsByStatus(
-  DecisionsByStatusRef ref,
+Future<List<Decision>> v2FilteredDecisions(
+  V2FilteredDecisionsRef ref,
 ) async {
-  final decisions = await ref.watch(decisionQueueProvider().future);
+  final service = ref.watch(decisionServiceProvider);
   final filters = ref.watch(decisionFiltersProvider);
 
-  var filtered = decisions.where((d) {
+  List<Decision> decisions;
+
+  if (filters.hasV2Filters) {
+    decisions = await service.listFiltered(
+      portfolioId: filters.portfolioId,
+      programId: filters.programId,
+      workstreamId: filters.workstreamId,
+      parentType: filters.parentType,
+      executionMode: filters.executionMode,
+      slaStatus: filters.slaStatus,
+    );
+  } else {
+    decisions = await service.getPendingDecisions();
+  }
+
+  // Apply client-side filters (urgency, type, team, search, status)
+  return decisions.where((d) {
     if (filters.urgency != null && d.urgency != filters.urgency) return false;
     if (filters.type != null && d.type != filters.type) return false;
     if (filters.teamId != null && d.teamId != filters.teamId) return false;
+    if (filters.status != null &&
+        d.status.name != filters.status) {
+      return false;
+    }
     if (filters.search != null && filters.search!.isNotEmpty) {
       final searchLower = filters.search!.toLowerCase();
       if (!d.title.toLowerCase().contains(searchLower) &&
@@ -104,6 +243,14 @@ Future<Map<DecisionStatus, List<Decision>>> decisionsByStatus(
     }
     return true;
   }).toList();
+}
+
+/// Filtered decisions grouped by status (for board view)
+@riverpod
+Future<Map<DecisionStatus, List<Decision>>> decisionsByStatus(
+  DecisionsByStatusRef ref,
+) async {
+  final filtered = await ref.watch(v2FilteredDecisionsProvider.future);
 
   // Group by status
   return {
@@ -115,6 +262,45 @@ Future<Map<DecisionStatus, List<Decision>>> decisionsByStatus(
     DecisionStatus.DECIDED:
         filtered.where((d) => d.status == DecisionStatus.DECIDED).toList(),
   };
+}
+
+/// Queue summary stats
+@riverpod
+Future<QueueSummaryStats> queueSummaryStats(
+  QueueSummaryStatsRef ref,
+) async {
+  final decisions = await ref.watch(v2FilteredDecisionsProvider.future);
+
+  final total = decisions.length;
+  final breached = decisions.where((d) => d.isSlaBreached).length;
+  final atRisk = decisions
+      .where((d) =>
+          !d.isSlaBreached &&
+          d.timeToSla != null &&
+          d.timeToSla!.inHours < 2)
+      .length;
+  final onTrack = total - breached - atRisk;
+
+  return QueueSummaryStats(
+    total: total,
+    breached: breached,
+    atRisk: atRisk,
+    onTrack: onTrack,
+  );
+}
+
+class QueueSummaryStats {
+  final int total;
+  final int breached;
+  final int atRisk;
+  final int onTrack;
+
+  const QueueSummaryStats({
+    required this.total,
+    required this.breached,
+    required this.atRisk,
+    required this.onTrack,
+  });
 }
 
 /// Create decision action
@@ -133,6 +319,7 @@ class CreateDecision extends _$CreateDecision {
       // Invalidate related providers
       ref.invalidate(decisionQueueProvider);
       ref.invalidate(decisionsByStatusProvider);
+      ref.invalidate(v2FilteredDecisionsProvider);
 
       state = const AsyncValue.data(null);
       return decision;
@@ -195,6 +382,7 @@ class ResolveDecisionAction extends _$ResolveDecisionAction {
       ref.invalidate(decisionDetailProvider(decisionId));
       ref.invalidate(decisionQueueProvider);
       ref.invalidate(decisionsByStatusProvider);
+      ref.invalidate(v2FilteredDecisionsProvider);
 
       state = const AsyncValue.data(null);
       return true;

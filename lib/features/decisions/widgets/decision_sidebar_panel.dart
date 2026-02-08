@@ -145,6 +145,55 @@ class DecisionSidebarPanel extends StatelessWidget {
             ),
           ),
 
+          // Parent entity
+          if (decision.parentType != null) ...[
+            const Divider(height: AppSpacing.lg),
+            _SidebarField(
+              label: 'Parent Entity',
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+                    ),
+                    child: Text(
+                      decision.parentType!,
+                      style: AppTypography.labelSmall.copyWith(
+                        fontSize: 10,
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  if (decision.parentTitle != null) ...[
+                    const SizedBox(height: AppSpacing.xxs),
+                    Text(
+                      decision.parentTitle!,
+                      style: AppTypography.bodyMedium,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+
+          // Workstream
+          if (decision.workstreamName != null) ...[
+            const Divider(height: AppSpacing.lg),
+            _SidebarField(
+              label: 'Workstream',
+              child: Text(
+                decision.workstreamName!,
+                style: AppTypography.bodyMedium,
+              ),
+            ),
+          ],
+
           if (decision.program != null) ...[
             const Divider(height: AppSpacing.lg),
             _SidebarField(

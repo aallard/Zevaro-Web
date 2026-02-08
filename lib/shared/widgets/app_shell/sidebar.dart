@@ -112,6 +112,16 @@ class Sidebar extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // PLAN section
+                  if (!isCollapsed)
+                    _SectionHeader(label: 'PLAN'),
+                  _SidebarNavItem(
+                    icon: Icons.dashboard_outlined,
+                    label: 'Dashboard',
+                    isSelected: currentRoute == Routes.dashboard,
+                    isCollapsed: isCollapsed,
+                    onTap: () => context.go(Routes.dashboard),
+                  ),
                   _SidebarNavItem(
                     icon: Icons.business_center_outlined,
                     label: 'Portfolios',
@@ -129,34 +139,14 @@ class Sidebar extends ConsumerWidget {
                     onTap: () => context.go(Routes.programs),
                   ),
 
+                  // Program context section
                   const SizedBox(height: AppSpacing.xs),
                   if (!isCollapsed && selectedProgramId != null)
-                    Padding(
-                      padding: const EdgeInsets.only(
-                        left: AppSpacing.sm,
-                        top: AppSpacing.xs,
-                        bottom: AppSpacing.xxs,
-                      ),
-                      child: Text(
-                        (selectedProgram.valueOrNull?.name ?? 'PROGRAM')
-                            .toUpperCase(),
-                        style: TextStyle(
-                          color: AppColors.sidebarText.withOpacity(0.5),
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 1.2,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                    _SectionHeader(
+                      label: (selectedProgram.valueOrNull?.name ?? 'PROGRAM')
+                          .toUpperCase(),
+                      maxLines: 1,
                     ),
-                  _SidebarNavItem(
-                    icon: Icons.account_tree_outlined,
-                    label: 'Workstreams',
-                    isSelected: currentRoute.startsWith('/workstreams'),
-                    isCollapsed: isCollapsed,
-                    onTap: () => context.go(Routes.workstreams),
-                  ),
                   _SidebarNavItem(
                     icon: Icons.bolt_outlined,
                     label: 'Decision Queue',
@@ -186,31 +176,17 @@ class Sidebar extends ConsumerWidget {
                     onTap: () => context.go(Routes.experiments),
                   ),
                   _SidebarNavItem(
-                    icon: Icons.people_outlined,
-                    label: 'Team',
-                    isSelected: currentRoute.startsWith('/teams'),
+                    icon: Icons.account_tree_outlined,
+                    label: 'Workstreams',
+                    isSelected: currentRoute.startsWith('/workstreams'),
                     isCollapsed: isCollapsed,
-                    onTap: () => context.go(Routes.teams),
+                    onTap: () => context.go(Routes.workstreams),
                   ),
 
+                  // KNOWLEDGE section
                   const SizedBox(height: AppSpacing.xs),
                   if (!isCollapsed)
-                    Padding(
-                      padding: const EdgeInsets.only(
-                        left: AppSpacing.sm,
-                        top: AppSpacing.xs,
-                        bottom: AppSpacing.xxs,
-                      ),
-                      child: Text(
-                        'KNOWLEDGE',
-                        style: TextStyle(
-                          color: AppColors.sidebarText.withOpacity(0.5),
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 1.2,
-                        ),
-                      ),
-                    ),
+                    _SectionHeader(label: 'KNOWLEDGE'),
                   _SidebarNavItem(
                     icon: Icons.library_books_outlined,
                     label: 'Wiki',
@@ -219,25 +195,37 @@ class Sidebar extends ConsumerWidget {
                     isCollapsed: isCollapsed,
                     onTap: () => context.go(Routes.spaces),
                   ),
+                  _SidebarNavItem(
+                    icon: Icons.search_outlined,
+                    label: 'Search',
+                    isSelected: currentRoute.startsWith('/search'),
+                    isCollapsed: isCollapsed,
+                    onTap: () => context.go(Routes.search),
+                  ),
 
+                  // MANAGE section
                   const SizedBox(height: AppSpacing.xs),
                   if (!isCollapsed)
-                    Padding(
-                      padding: const EdgeInsets.only(
-                        left: AppSpacing.sm,
-                        top: AppSpacing.xs,
-                        bottom: AppSpacing.xxs,
-                      ),
-                      child: Text(
-                        'INSIGHTS',
-                        style: TextStyle(
-                          color: AppColors.sidebarText.withOpacity(0.5),
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 1.2,
-                        ),
-                      ),
-                    ),
+                    _SectionHeader(label: 'MANAGE'),
+                  _SidebarNavItem(
+                    icon: Icons.people_outlined,
+                    label: 'Teams',
+                    isSelected: currentRoute.startsWith('/teams'),
+                    isCollapsed: isCollapsed,
+                    onTap: () => context.go(Routes.teams),
+                  ),
+                  _SidebarNavItem(
+                    icon: Icons.person_pin_outlined,
+                    label: 'Stakeholders',
+                    isSelected: currentRoute.startsWith('/stakeholders'),
+                    isCollapsed: isCollapsed,
+                    onTap: () => context.go(Routes.stakeholders),
+                  ),
+
+                  // INSIGHTS section
+                  const SizedBox(height: AppSpacing.xs),
+                  if (!isCollapsed)
+                    _SectionHeader(label: 'INSIGHTS'),
                   _SidebarNavItem(
                     icon: Icons.history_outlined,
                     label: 'Activity',
@@ -427,6 +415,35 @@ class _ProgramSelector extends StatelessWidget {
       } catch (_) {}
     }
     return AppColors.sidebarAccent;
+  }
+}
+
+class _SectionHeader extends StatelessWidget {
+  final String label;
+  final int maxLines;
+
+  const _SectionHeader({required this.label, this.maxLines = 0});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(
+        left: AppSpacing.sm,
+        top: AppSpacing.xs,
+        bottom: AppSpacing.xxs,
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: AppColors.sidebarText.withOpacity(0.5),
+          fontSize: 10,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 1.2,
+        ),
+        maxLines: maxLines > 0 ? maxLines : null,
+        overflow: maxLines > 0 ? TextOverflow.ellipsis : null,
+      ),
+    );
   }
 }
 

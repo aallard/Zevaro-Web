@@ -1,5 +1,6 @@
 // Screens
 export 'screens/programs_screen.dart';
+export 'screens/program_detail_screen.dart';
 
 // Widgets
 export 'widgets/program_card.dart';
