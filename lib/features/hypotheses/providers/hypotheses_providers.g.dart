@@ -191,7 +191,7 @@ class _HypothesisDetailProviderElement
   String get id => (origin as HypothesisDetailProvider).id;
 }
 
-String _$hypothesisListHash() => r'e9f7f718785948cad8c4d279b87c97cd3a8de010';
+String _$hypothesisListHash() => r'9f8dcc434a3da66215d3224852ad91ce1fba89d8';
 
 /// Hypothesis list provider (for kanban board)
 ///
@@ -212,10 +212,10 @@ class HypothesisListFamily extends Family<AsyncValue<List<Hypothesis>>> {
   ///
   /// Copied from [hypothesisList].
   HypothesisListProvider call({
-    required String? projectId,
+    required String? programId,
   }) {
     return HypothesisListProvider(
-      projectId: projectId,
+      programId: programId,
     );
   }
 
@@ -224,7 +224,7 @@ class HypothesisListFamily extends Family<AsyncValue<List<Hypothesis>>> {
     covariant HypothesisListProvider provider,
   ) {
     return call(
-      projectId: provider.projectId,
+      programId: provider.programId,
     );
   }
 
@@ -252,11 +252,11 @@ class HypothesisListProvider
   ///
   /// Copied from [hypothesisList].
   HypothesisListProvider({
-    required String? projectId,
+    required String? programId,
   }) : this._internal(
           (ref) => hypothesisList(
             ref as HypothesisListRef,
-            projectId: projectId,
+            programId: programId,
           ),
           from: hypothesisListProvider,
           name: r'hypothesisListProvider',
@@ -267,7 +267,7 @@ class HypothesisListProvider
           dependencies: HypothesisListFamily._dependencies,
           allTransitiveDependencies:
               HypothesisListFamily._allTransitiveDependencies,
-          projectId: projectId,
+          programId: programId,
         );
 
   HypothesisListProvider._internal(
@@ -277,10 +277,10 @@ class HypothesisListProvider
     required super.allTransitiveDependencies,
     required super.debugGetCreateSourceHash,
     required super.from,
-    required this.projectId,
+    required this.programId,
   }) : super.internal();
 
-  final String? projectId;
+  final String? programId;
 
   @override
   Override overrideWith(
@@ -295,7 +295,7 @@ class HypothesisListProvider
         dependencies: null,
         allTransitiveDependencies: null,
         debugGetCreateSourceHash: null,
-        projectId: projectId,
+        programId: programId,
       ),
     );
   }
@@ -307,13 +307,13 @@ class HypothesisListProvider
 
   @override
   bool operator ==(Object other) {
-    return other is HypothesisListProvider && other.projectId == projectId;
+    return other is HypothesisListProvider && other.programId == programId;
   }
 
   @override
   int get hashCode {
     var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, projectId.hashCode);
+    hash = _SystemHash.combine(hash, programId.hashCode);
 
     return _SystemHash.finish(hash);
   }
@@ -322,8 +322,8 @@ class HypothesisListProvider
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 mixin HypothesisListRef on AutoDisposeFutureProviderRef<List<Hypothesis>> {
-  /// The parameter `projectId` of this provider.
-  String? get projectId;
+  /// The parameter `programId` of this provider.
+  String? get programId;
 }
 
 class _HypothesisListProviderElement
@@ -332,7 +332,7 @@ class _HypothesisListProviderElement
   _HypothesisListProviderElement(super.provider);
 
   @override
-  String? get projectId => (origin as HypothesisListProvider).projectId;
+  String? get programId => (origin as HypothesisListProvider).programId;
 }
 
 String _$hypothesisHash() => r'85cd257943b92344bdad955a711d3f41e2abf258';

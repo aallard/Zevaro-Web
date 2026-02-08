@@ -225,11 +225,11 @@ class CreateHypothesis extends _$CreateHypothesis {
 @riverpod
 Future<List<Hypothesis>> hypothesisList(
   HypothesisListRef ref, {
-  required String? projectId,
+  required String? programId,
 }) async {
   final hypothesisService = ref.watch(hypothesisServiceProvider);
 
-  if (projectId == null) {
+  if (programId == null) {
     return [];
   }
 

@@ -7,25 +7,25 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../shared/widgets/common/loading_indicator.dart';
 import '../../../shared/widgets/common/error_view.dart';
-import '../providers/projects_providers.dart';
-import '../widgets/project_card.dart';
-import '../widgets/project_list_view.dart';
-import '../widgets/create_project_dialog.dart';
-import '../widgets/project_filters_bar.dart';
+import '../providers/programs_providers.dart';
+import '../widgets/program_card.dart';
+import '../widgets/program_list_view.dart';
+import '../widgets/create_program_dialog.dart';
+import '../widgets/program_filters_bar.dart';
 
-class ProjectsScreen extends ConsumerWidget {
-  final String? projectId;
+class ProgramsScreen extends ConsumerWidget {
+  final String? programId;
 
-  const ProjectsScreen({super.key, this.projectId});
+  const ProgramsScreen({super.key, this.programId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final viewMode = ref.watch(projectViewModeNotifierProvider);
-    final projectsAsync = ref.watch(filteredProjectsProvider);
+    final viewMode = ref.watch(programViewModeNotifierProvider);
+    final programsAsync = ref.watch(filteredProgramsProvider);
 
     return Column(
       children: [
-        // ── Row 1: Title + Search + View Toggle + New Project ──
+        // ── Row 1: Title + Search + View Toggle + New Program ──
         Container(
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.pagePaddingHorizontal,
@@ -38,7 +38,7 @@ class ProjectsScreen extends ConsumerWidget {
             children: [
               // Title
               Text(
-                'Projects',
+                'Programs',
                 style: AppTypography.h2,
               ),
 
@@ -72,7 +72,7 @@ class ProjectsScreen extends ConsumerWidget {
                     ),
                   ),
                   onChanged: (value) {
-                    ref.read(projectFiltersProvider.notifier).setSearch(
+                    ref.read(programFiltersProvider.notifier).setSearch(
                           value.isEmpty ? null : value,
                         );
                   },
@@ -84,23 +84,23 @@ class ProjectsScreen extends ConsumerWidget {
               // View toggle – plain icon buttons
               _ViewToggleButton(
                 icon: Icons.view_list_rounded,
-                isActive: viewMode == ProjectViewMode.list,
-                onTap: () => ref.read(projectViewModeNotifierProvider.notifier).setList(),
+                isActive: viewMode == ProgramViewMode.list,
+                onTap: () => ref.read(programViewModeNotifierProvider.notifier).setList(),
               ),
               const SizedBox(width: AppSpacing.xxs),
               _ViewToggleButton(
                 icon: Icons.grid_view_rounded,
-                isActive: viewMode == ProjectViewMode.card,
-                onTap: () => ref.read(projectViewModeNotifierProvider.notifier).setCard(),
+                isActive: viewMode == ProgramViewMode.card,
+                onTap: () => ref.read(programViewModeNotifierProvider.notifier).setCard(),
               ),
 
               const SizedBox(width: AppSpacing.md),
 
-              // New project button
+              // New program button
               FilledButton.icon(
                 onPressed: () => _showCreateDialog(context),
                 icon: const Icon(Icons.add, size: 18),
-                label: const Text('New Project'),
+                label: const Text('New Program'),
                 style: FilledButton.styleFrom(
                   backgroundColor: AppColors.sidebarAccent,
                   foregroundColor: Colors.white,
@@ -132,7 +132,7 @@ class ProjectsScreen extends ConsumerWidget {
           child: Row(
             children: [
               // Filter pills (no search – search is in row 1 now)
-              const ProjectFiltersBar(),
+              const ProgramFiltersBar(),
 
               const SizedBox(width: AppSpacing.sm),
 
@@ -209,23 +209,23 @@ class ProjectsScreen extends ConsumerWidget {
 
         // ── Content ──
         Expanded(
-          child: projectsAsync.when(
-            data: (projects) {
-              if (projects.isEmpty) {
+          child: programsAsync.when(
+            data: (programs) {
+              if (programs.isEmpty) {
                 return _EmptyState(
-                  onCreateProject: () => _showCreateDialog(context),
+                  onCreateProgram: () => _showCreateDialog(context),
                 );
               }
 
-              return viewMode == ProjectViewMode.card
-                  ? _ProjectCardGrid(projects: projects)
-                  : ProjectListView(projects: projects);
+              return viewMode == ProgramViewMode.card
+                  ? _ProgramCardGrid(programs: programs)
+                  : ProgramListView(programs: programs);
             },
             loading: () =>
-                const LoadingIndicator(message: 'Loading projects...'),
+                const LoadingIndicator(message: 'Loading programs...'),
             error: (e, _) => ErrorView(
               message: e.toString(),
-              onRetry: () => ref.invalidate(filteredProjectsProvider),
+              onRetry: () => ref.invalidate(filteredProgramsProvider),
             ),
           ),
         ),
@@ -236,7 +236,7 @@ class ProjectsScreen extends ConsumerWidget {
   void _showCreateDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => const CreateProjectDialog(),
+      builder: (context) => const CreateProgramDialog(),
     );
   }
 }
@@ -278,10 +278,10 @@ class _ViewToggleButton extends StatelessWidget {
   }
 }
 
-class _ProjectCardGrid extends StatelessWidget {
-  final List<Project> projects;
+class _ProgramCardGrid extends StatelessWidget {
+  final List<Program> programs;
 
-  const _ProjectCardGrid({required this.projects});
+  const _ProgramCardGrid({required this.programs});
 
   @override
   Widget build(BuildContext context) {
@@ -301,9 +301,9 @@ class _ProjectCardGrid extends StatelessWidget {
             mainAxisSpacing: AppSpacing.md,
             childAspectRatio: 1.6,
           ),
-          itemCount: projects.length,
+          itemCount: programs.length,
           itemBuilder: (context, index) =>
-              ProjectCard(project: projects[index]),
+              ProgramCard(program: programs[index]),
         );
       },
     );
@@ -311,9 +311,9 @@ class _ProjectCardGrid extends StatelessWidget {
 }
 
 class _EmptyState extends StatelessWidget {
-  final VoidCallback onCreateProject;
+  final VoidCallback onCreateProgram;
 
-  const _EmptyState({required this.onCreateProject});
+  const _EmptyState({required this.onCreateProgram});
 
   @override
   Widget build(BuildContext context) {
@@ -328,12 +328,12 @@ class _EmptyState extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.md),
           Text(
-            'No projects yet',
+            'No programs yet',
             style: AppTypography.h3.copyWith(color: AppColors.textSecondary),
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(
-            'Create your first project to start organizing\nyour outcomes, hypotheses, and decisions.',
+            'Create your first program to start organizing\nyour outcomes, hypotheses, and decisions.',
             style: AppTypography.bodyMedium.copyWith(
               color: AppColors.textTertiary,
             ),
@@ -341,9 +341,9 @@ class _EmptyState extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.lg),
           FilledButton.icon(
-            onPressed: onCreateProject,
+            onPressed: onCreateProgram,
             icon: const Icon(Icons.add),
-            label: const Text('Create Project'),
+            label: const Text('Create Program'),
           ),
         ],
       ),

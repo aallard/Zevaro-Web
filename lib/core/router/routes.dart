@@ -7,8 +7,11 @@ abstract class Routes {
 
   // Main
   static const dashboard = '/';
-  static const projects = '/projects';
-  static const projectDetail = '/projects/:id';
+  static const portfolios = '/portfolios';
+  static const portfolioDetail = '/portfolios/:id';
+  static const portfolioNew = '/portfolios/new';
+  static const programs = '/programs';
+  static const programDetail = '/programs/:id';
   static const decisions = '/decisions';
   static const decisionDetail = '/decisions/:id';
   static const outcomes = '/outcomes';
@@ -26,7 +29,8 @@ abstract class Routes {
   static const profile = '/profile';
 
   // Helpers
-  static String projectById(String id) => '/projects/$id';
+  static String portfolioById(String id) => '/portfolios/$id';
+  static String programById(String id) => '/programs/$id';
   static String decisionById(String id) => '/decisions/$id';
   static String outcomeById(String id) => '/outcomes/$id';
   static String hypothesisById(String id) => '/hypotheses/$id';

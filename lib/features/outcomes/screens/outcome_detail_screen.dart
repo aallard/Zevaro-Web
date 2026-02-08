@@ -764,11 +764,11 @@ class _SidebarPanel extends StatelessWidget {
               ),
             ),
           ),
-          if (outcome.project != null) ...[
+          if (outcome.program != null) ...[
             const Divider(height: AppSpacing.lg),
             _Field(
-              label: 'Project',
-              child: Text(outcome.project!.name,
+              label: 'Program',
+              child: Text(outcome.program!.name,
                   style: AppTypography.bodyMedium),
             ),
           ],

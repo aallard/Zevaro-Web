@@ -21,8 +21,8 @@ class Sidebar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isCollapsed = ref.watch(sidebarCollapsedProvider);
-    final selectedProjectId = ref.watch(selectedProjectIdProvider);
-    final selectedProject = ref.watch(selectedProjectProvider);
+    final selectedProgramId = ref.watch(selectedProgramIdProvider);
+    final selectedProgram = ref.watch(selectedProgramProvider);
     final currentUser = ref.watch(currentUserProvider);
 
     return AnimatedContainer(
@@ -93,11 +93,11 @@ class Sidebar extends ConsumerWidget {
 
           Container(height: 1, color: AppColors.sidebarDivider),
 
-          // Project selector with accent bar
+          // Program selector with accent bar
           if (!isCollapsed) ...[
-            _ProjectSelector(
-              selectedProject: selectedProject.valueOrNull,
-              onTap: () => context.go(Routes.projects),
+            _ProgramSelector(
+              selectedProgram: selectedProgram.valueOrNull,
+              onTap: () => context.go(Routes.programs),
             ),
             Container(height: 1, color: AppColors.sidebarDivider),
           ],
@@ -113,16 +113,24 @@ class Sidebar extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _SidebarNavItem(
-                    icon: Icons.folder_outlined,
-                    label: 'Projects',
-                    isSelected: currentRoute == Routes.projects ||
-                        currentRoute.startsWith('/projects'),
+                    icon: Icons.business_center_outlined,
+                    label: 'Portfolios',
+                    isSelected: currentRoute == Routes.portfolios ||
+                        currentRoute.startsWith('/portfolios'),
                     isCollapsed: isCollapsed,
-                    onTap: () => context.go(Routes.projects),
+                    onTap: () => context.go(Routes.portfolios),
+                  ),
+                  _SidebarNavItem(
+                    icon: Icons.folder_outlined,
+                    label: 'Programs',
+                    isSelected: currentRoute == Routes.programs ||
+                        currentRoute.startsWith('/programs'),
+                    isCollapsed: isCollapsed,
+                    onTap: () => context.go(Routes.programs),
                   ),
 
                   const SizedBox(height: AppSpacing.xs),
-                  if (!isCollapsed && selectedProjectId != null)
+                  if (!isCollapsed && selectedProgramId != null)
                     Padding(
                       padding: const EdgeInsets.only(
                         left: AppSpacing.sm,
@@ -130,7 +138,7 @@ class Sidebar extends ConsumerWidget {
                         bottom: AppSpacing.xxs,
                       ),
                       child: Text(
-                        (selectedProject.valueOrNull?.name ?? 'PROJECT')
+                        (selectedProgram.valueOrNull?.name ?? 'PROGRAM')
                             .toUpperCase(),
                         style: TextStyle(
                           color: AppColors.sidebarText.withOpacity(0.5),
@@ -288,12 +296,12 @@ class _UserProfileState extends State<_UserProfile> {
   }
 }
 
-class _ProjectSelector extends StatelessWidget {
-  final Project? selectedProject;
+class _ProgramSelector extends StatelessWidget {
+  final Program? selectedProgram;
   final VoidCallback onTap;
 
-  const _ProjectSelector({
-    required this.selectedProject,
+  const _ProgramSelector({
+    required this.selectedProgram,
     required this.onTap,
   });
 
@@ -308,12 +316,12 @@ class _ProjectSelector extends StatelessWidget {
         ),
         child: Row(
           children: [
-            if (selectedProject != null) ...[
+            if (selectedProgram != null) ...[
               Container(
                 width: 8,
                 height: 8,
                 decoration: BoxDecoration(
-                  color: _projectColor(selectedProject!.color),
+                  color: _programColor(selectedProgram!.color),
                   shape: BoxShape.circle,
                 ),
               ),
@@ -321,9 +329,9 @@ class _ProjectSelector extends StatelessWidget {
             ],
             Expanded(
               child: Text(
-                selectedProject?.name ?? 'Select a project...',
+                selectedProgram?.name ?? 'Select a program...',
                 style: TextStyle(
-                  color: selectedProject != null
+                  color: selectedProgram != null
                       ? AppColors.sidebarTextActive
                       : AppColors.sidebarText.withOpacity(0.7),
                   fontSize: 14,
@@ -344,7 +352,7 @@ class _ProjectSelector extends StatelessWidget {
     );
   }
 
-  Color _projectColor(String? hex) {
+  Color _programColor(String? hex) {
     if (hex != null) {
       try {
         return Color(

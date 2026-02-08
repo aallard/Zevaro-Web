@@ -40,8 +40,8 @@ class AuthGuard {
 
     // Authenticated and trying to access auth route
     if (isAuthenticated && isAuthRoute) {
-      print('[AUTH_GUARD] Redirecting to projects');
-      return Routes.projects;
+      print('[AUTH_GUARD] Redirecting to programs');
+      return Routes.programs;
     }
 
     print('[AUTH_GUARD] No redirect needed');

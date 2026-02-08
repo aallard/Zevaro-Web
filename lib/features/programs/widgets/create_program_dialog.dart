@@ -7,23 +7,23 @@ import '../../../core/router/routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
-import '../providers/projects_providers.dart';
+import '../providers/programs_providers.dart';
 
-class CreateProjectDialog extends ConsumerStatefulWidget {
-  const CreateProjectDialog({super.key});
+class CreateProgramDialog extends ConsumerStatefulWidget {
+  const CreateProgramDialog({super.key});
 
   @override
-  ConsumerState<CreateProjectDialog> createState() =>
-      _CreateProjectDialogState();
+  ConsumerState<CreateProgramDialog> createState() =>
+      _CreateProgramDialogState();
 }
 
-class _CreateProjectDialogState extends ConsumerState<CreateProjectDialog> {
+class _CreateProgramDialogState extends ConsumerState<CreateProgramDialog> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
   String? _selectedColor;
 
-  static const _projectColors = [
+  static const _programColors = [
     '#4F46E5', // Indigo
     '#10B981', // Emerald
     '#F59E0B', // Amber
@@ -44,18 +44,18 @@ class _CreateProjectDialogState extends ConsumerState<CreateProjectDialog> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final project = await ref.read(createProjectProvider.notifier).create(
-          CreateProjectRequest(
+    final program = await ref.read(createProgramProvider.notifier).create(
+          CreateProgramRequest(
             name: _nameController.text.trim(),
             description: _descriptionController.text.trim().isEmpty
                 ? null
                 : _descriptionController.text.trim(),
-            color: _selectedColor ?? _projectColors[0],
+            color: _selectedColor ?? _programColors[0],
           ),
         );
 
-    if (project != null && mounted) {
-      ref.read(selectedProjectIdProvider.notifier).select(project.id);
+    if (program != null && mounted) {
+      ref.read(selectedProgramIdProvider.notifier).select(program.id);
       Navigator.pop(context);
       context.go(Routes.dashboard);
     }
@@ -63,11 +63,11 @@ class _CreateProjectDialogState extends ConsumerState<CreateProjectDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final createState = ref.watch(createProjectProvider);
+    final createState = ref.watch(createProgramProvider);
     final isLoading = createState.isLoading;
 
     return AlertDialog(
-      title: const Text('Create Project'),
+      title: const Text('Create Program'),
       content: SizedBox(
         width: 480,
         child: Form(
@@ -80,7 +80,7 @@ class _CreateProjectDialogState extends ConsumerState<CreateProjectDialog> {
               TextFormField(
                 controller: _nameController,
                 decoration: const InputDecoration(
-                  labelText: 'Project Name',
+                  labelText: 'Program Name',
                   hintText: 'e.g., Mobile App Redesign',
                 ),
                 autofocus: true,
@@ -94,7 +94,7 @@ class _CreateProjectDialogState extends ConsumerState<CreateProjectDialog> {
                 controller: _descriptionController,
                 decoration: const InputDecoration(
                   labelText: 'Description',
-                  hintText: 'Brief description of the project',
+                  hintText: 'Brief description of the program',
                 ),
                 maxLines: 3,
               ),
@@ -105,7 +105,7 @@ class _CreateProjectDialogState extends ConsumerState<CreateProjectDialog> {
               const SizedBox(height: AppSpacing.xs),
               Wrap(
                 spacing: AppSpacing.xs,
-                children: _projectColors.map((hex) {
+                children: _programColors.map((hex) {
                   final color = Color(
                       int.parse('FF${hex.replaceFirst('#', '')}', radix: 16));
                   final isSelected = _selectedColor == hex;

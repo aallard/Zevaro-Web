@@ -9,15 +9,15 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../shared/widgets/common/avatar.dart';
 
-class ProjectCard extends ConsumerWidget {
-  final Project project;
+class ProgramCard extends ConsumerWidget {
+  final Program program;
 
-  const ProjectCard({super.key, required this.project});
+  const ProgramCard({super.key, required this.program});
 
   Color get _accentColor {
-    if (project.color != null) {
+    if (program.color != null) {
       try {
-        final hex = project.color!.replaceFirst('#', '');
+        final hex = program.color!.replaceFirst('#', '');
         return Color(int.parse('FF$hex', radix: 16));
       } catch (_) {}
     }
@@ -30,7 +30,7 @@ class ProjectCard extends ConsumerWidget {
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
         onTap: () {
-          ref.read(selectedProjectIdProvider.notifier).select(project.id);
+          ref.read(selectedProgramIdProvider.notifier).select(program.id);
           context.go(Routes.dashboard);
         },
         child: Container(
@@ -75,7 +75,7 @@ class ProjectCard extends ConsumerWidget {
                               children: [
                                 Expanded(
                                   child: Text(
-                                    project.name,
+                                    program.name,
                                     style: AppTypography.h4.copyWith(
                                       fontWeight: FontWeight.w600,
                                     ),
@@ -83,8 +83,8 @@ class ProjectCard extends ConsumerWidget {
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
-                                // Completion checkmark for COMPLETED projects
-                                if (project.status == ProjectStatus.COMPLETED)
+                                // Completion checkmark for COMPLETED programs
+                                if (program.status == ProgramStatus.COMPLETED)
                                   Container(
                                     width: 24,
                                     height: 24,
@@ -103,9 +103,9 @@ class ProjectCard extends ConsumerWidget {
                             const SizedBox(height: AppSpacing.xs),
 
                             // Description (1-2 lines with ellipsis)
-                            if (project.description != null)
+                            if (program.description != null)
                               Text(
-                                project.description!,
+                                program.description!,
                                 style: AppTypography.bodySmall.copyWith(
                                   color: AppColors.textSecondary,
                                 ),
@@ -116,7 +116,7 @@ class ProjectCard extends ConsumerWidget {
                             const SizedBox(height: AppSpacing.sm),
 
                             // Member avatars
-                            _MemberAvatarsRow(project: project),
+                            _MemberAvatarsRow(program: program),
 
                             const SizedBox(height: AppSpacing.md),
 
@@ -130,7 +130,7 @@ class ProjectCard extends ConsumerWidget {
                                 ),
                                 children: [
                                   TextSpan(
-                                    text: '${project.decisionCount}',
+                                    text: '${program.decisionCount}',
                                     style: const TextStyle(
                                       fontWeight: FontWeight.w600,
                                       color: AppColors.textPrimary,
@@ -138,7 +138,7 @@ class ProjectCard extends ConsumerWidget {
                                   ),
                                   const TextSpan(text: ' Decisions · '),
                                   TextSpan(
-                                    text: '${project.outcomeCount}',
+                                    text: '${program.outcomeCount}',
                                     style: const TextStyle(
                                       fontWeight: FontWeight.w600,
                                       color: AppColors.textPrimary,
@@ -146,7 +146,7 @@ class ProjectCard extends ConsumerWidget {
                                   ),
                                   const TextSpan(text: ' Outcomes · '),
                                   TextSpan(
-                                    text: '${project.hypothesisCount}',
+                                    text: '${program.hypothesisCount}',
                                     style: const TextStyle(
                                       fontWeight: FontWeight.w600,
                                       color: AppColors.textPrimary,
@@ -160,7 +160,7 @@ class ProjectCard extends ConsumerWidget {
                             const Spacer(),
 
                             // Status badge at bottom-left
-                            _StatusBadge(status: project.status),
+                            _StatusBadge(status: program.status),
                           ],
                         ),
                       ),
@@ -212,34 +212,38 @@ class ProjectCard extends ConsumerWidget {
   }
 
   double _getProgressFraction() {
-    switch (project.status) {
-      case ProjectStatus.COMPLETED:
+    switch (program.status) {
+      case ProgramStatus.COMPLETED:
         return 1.0;
-      case ProjectStatus.ACTIVE:
+      case ProgramStatus.ACTIVE:
         return 0.5;
-      case ProjectStatus.PLANNING:
+      case ProgramStatus.PLANNING:
         return 0.2;
-      case ProjectStatus.ARCHIVED:
+      case ProgramStatus.ARCHIVED:
+      case ProgramStatus.ON_HOLD:
+      case ProgramStatus.CANCELLED:
         return 0.0;
     }
   }
 
   Color _getProgressColor() {
-    switch (project.status) {
-      case ProjectStatus.COMPLETED:
+    switch (program.status) {
+      case ProgramStatus.COMPLETED:
         return AppColors.success;
-      case ProjectStatus.ACTIVE:
+      case ProgramStatus.ACTIVE:
         return _accentColor;
-      case ProjectStatus.PLANNING:
+      case ProgramStatus.PLANNING:
         return _accentColor;
-      case ProjectStatus.ARCHIVED:
+      case ProgramStatus.ARCHIVED:
+      case ProgramStatus.ON_HOLD:
+      case ProgramStatus.CANCELLED:
         return AppColors.textTertiary;
     }
   }
 }
 
 class _StatusBadge extends StatelessWidget {
-  final ProjectStatus status;
+  final ProgramStatus status;
 
   const _StatusBadge({required this.status});
 
@@ -268,7 +272,7 @@ class _StatusBadge extends StatelessWidget {
               fontWeight: FontWeight.w600,
             ),
           ),
-          if (status == ProjectStatus.COMPLETED) ...[
+          if (status == ProgramStatus.COMPLETED) ...[
             const SizedBox(width: AppSpacing.xs),
             Icon(
               Icons.check,
@@ -283,63 +287,69 @@ class _StatusBadge extends StatelessWidget {
 
   Color _getBackgroundColor() {
     switch (status) {
-      case ProjectStatus.ACTIVE:
+      case ProgramStatus.ACTIVE:
         return AppColors.success;
-      case ProjectStatus.PLANNING:
-      case ProjectStatus.COMPLETED:
-      case ProjectStatus.ARCHIVED:
+      case ProgramStatus.PLANNING:
+      case ProgramStatus.COMPLETED:
+      case ProgramStatus.ARCHIVED:
+      case ProgramStatus.ON_HOLD:
+      case ProgramStatus.CANCELLED:
         return AppColors.surface;
     }
   }
 
   Color _getTextColor() {
     switch (status) {
-      case ProjectStatus.ACTIVE:
+      case ProgramStatus.ACTIVE:
         return Colors.white;
-      case ProjectStatus.PLANNING:
+      case ProgramStatus.PLANNING:
         return AppColors.warning;
-      case ProjectStatus.COMPLETED:
+      case ProgramStatus.COMPLETED:
         return AppColors.textPrimary;
-      case ProjectStatus.ARCHIVED:
+      case ProgramStatus.ARCHIVED:
+      case ProgramStatus.ON_HOLD:
+      case ProgramStatus.CANCELLED:
         return AppColors.textTertiary;
     }
   }
 
   Border? _getBorder() {
     switch (status) {
-      case ProjectStatus.ACTIVE:
+      case ProgramStatus.ACTIVE:
         return null;
-      case ProjectStatus.PLANNING:
+      case ProgramStatus.PLANNING:
         return Border.all(color: AppColors.warning);
-      case ProjectStatus.COMPLETED:
-      case ProjectStatus.ARCHIVED:
+      case ProgramStatus.COMPLETED:
+      case ProgramStatus.ARCHIVED:
+      case ProgramStatus.ON_HOLD:
+      case ProgramStatus.CANCELLED:
         return Border.all(color: AppColors.textTertiary);
     }
   }
 }
 
 class _MemberAvatarsRow extends StatelessWidget {
-  final Project project;
+  final Program program;
 
-  const _MemberAvatarsRow({required this.project});
+  const _MemberAvatarsRow({required this.program});
 
   @override
   Widget build(BuildContext context) {
     // Calculate number of avatars to show
-    final totalMembers = (project.memberCount > 0 ? project.memberCount : 1);
+    final totalMembers = (program.memberCount > 0 ? program.memberCount : 1);
 
     return SizedBox(
       height: 32,
       child: Stack(
         children: [
           // Owner avatar (first position)
-          if (project.ownerName != null)
+          if (program.ownerName != null)
             Positioned(
               left: 0,
               top: 0,
               child: ZAvatar(
-                name: project.ownerName!,
-                imageUrl: project.ownerAvatarUrl,
+                name: program.ownerName!,
+                imageUrl: program.ownerAvatarUrl,
                 size: 32,
               ),
             ),

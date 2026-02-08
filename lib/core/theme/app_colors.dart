@@ -89,8 +89,8 @@ abstract class AppColors {
   static const Color kanbanMeasuring = Color(0xFFECFDF5);  // emerald-50
   static const Color kanbanConcluded = Color(0xFFF9FAFB);  // gray-50
 
-  // Card accent colors for projects
-  static const List<Color> projectAccentColors = [
+  // Card accent colors for programs
+  static const List<Color> programAccentColors = [
     Color(0xFF4F46E5),  // indigo
     Color(0xFF10B981),  // emerald
     Color(0xFFF59E0B),  // amber

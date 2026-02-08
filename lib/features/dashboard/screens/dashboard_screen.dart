@@ -20,13 +20,13 @@ class DashboardScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final selectedProjectId = ref.watch(selectedProjectIdProvider);
+    final selectedProgramId = ref.watch(selectedProgramIdProvider);
 
-    if (selectedProjectId == null) {
-      return _NoProjectSelected();
+    if (selectedProgramId == null) {
+      return _NoProgramSelected();
     }
 
-    final dashboardAsync = ref.watch(projectDashboardProvider(selectedProjectId));
+    final dashboardAsync = ref.watch(programDashboardProvider(selectedProgramId));
 
     return dashboardAsync.when(
       data: (dashboard) => _DashboardContent(dashboard: dashboard),
@@ -34,13 +34,13 @@ class DashboardScreen extends ConsumerWidget {
       error: (e, _) => ErrorView(
         message: e.toString(),
         onRetry: () =>
-            ref.invalidate(projectDashboardProvider(selectedProjectId)),
+            ref.invalidate(programDashboardProvider(selectedProgramId)),
       ),
     );
   }
 }
 
-class _NoProjectSelected extends StatelessWidget {
+class _NoProgramSelected extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -50,12 +50,12 @@ class _NoProjectSelected extends StatelessWidget {
           Icon(Icons.dashboard_outlined, size: 64, color: AppColors.textTertiary),
           const SizedBox(height: AppSpacing.md),
           Text(
-            'Select a project',
+            'Select a program',
             style: AppTypography.h3.copyWith(color: AppColors.textSecondary),
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(
-            'Choose a project from the sidebar to view its dashboard.',
+            'Choose a program from the sidebar to view its dashboard.',
             style: AppTypography.bodyMedium.copyWith(color: AppColors.textTertiary),
           ),
         ],
@@ -65,13 +65,13 @@ class _NoProjectSelected extends StatelessWidget {
 }
 
 class _DashboardContent extends ConsumerWidget {
-  final ProjectDashboard dashboard;
+  final ProgramDashboard dashboard;
 
   const _DashboardContent({required this.dashboard});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final selectedProject = ref.watch(selectedProjectProvider);
+    final selectedProgram = ref.watch(selectedProgramProvider);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(AppSpacing.pagePaddingHorizontal),
@@ -79,15 +79,15 @@ class _DashboardContent extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Breadcrumb
-          selectedProject.when(
-            data: (project) {
-              if (project != null) {
+          selectedProgram.when(
+            data: (program) {
+              if (program != null) {
                 return Padding(
                   padding: const EdgeInsets.only(bottom: AppSpacing.md),
                   child: Row(
                     children: [
                       Text(
-                        'Projects',
+                        'Programs',
                         style: AppTypography.bodySmall.copyWith(
                           color: AppColors.textSecondary,
                         ),
@@ -101,7 +101,7 @@ class _DashboardContent extends ConsumerWidget {
                         ),
                       ),
                       Text(
-                        project.name,
+                        program.name,
                         style: AppTypography.bodySmall.copyWith(
                           color: AppColors.textSecondary,
                         ),

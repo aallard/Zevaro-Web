@@ -5,14 +5,14 @@ import 'package:zevaro_flutter_sdk/zevaro_flutter_sdk.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
-import '../providers/projects_providers.dart';
+import '../providers/programs_providers.dart';
 
-class ProjectFiltersBar extends ConsumerWidget {
-  const ProjectFiltersBar({super.key});
+class ProgramFiltersBar extends ConsumerWidget {
+  const ProgramFiltersBar({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final filters = ref.watch(projectFiltersProvider);
+    final filters = ref.watch(programFiltersProvider);
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -22,34 +22,34 @@ class ProjectFiltersBar extends ConsumerWidget {
           label: 'All',
           isSelected: filters.status == null,
           onTap: () =>
-              ref.read(projectFiltersProvider.notifier).setStatus(null),
+              ref.read(programFiltersProvider.notifier).setStatus(null),
         ),
         const SizedBox(width: AppSpacing.xxs),
         _FilterChip(
           label: 'Active',
-          isSelected: filters.status == ProjectStatus.ACTIVE,
+          isSelected: filters.status == ProgramStatus.ACTIVE,
           color: AppColors.success,
           onTap: () => ref
-              .read(projectFiltersProvider.notifier)
-              .setStatus(ProjectStatus.ACTIVE),
+              .read(programFiltersProvider.notifier)
+              .setStatus(ProgramStatus.ACTIVE),
         ),
         const SizedBox(width: AppSpacing.xxs),
         _FilterChip(
           label: 'Planning',
-          isSelected: filters.status == ProjectStatus.PLANNING,
+          isSelected: filters.status == ProgramStatus.PLANNING,
           color: AppColors.warning,
           onTap: () => ref
-              .read(projectFiltersProvider.notifier)
-              .setStatus(ProjectStatus.PLANNING),
+              .read(programFiltersProvider.notifier)
+              .setStatus(ProgramStatus.PLANNING),
         ),
         const SizedBox(width: AppSpacing.xxs),
         _FilterChip(
           label: 'Completed',
-          isSelected: filters.status == ProjectStatus.COMPLETED,
+          isSelected: filters.status == ProgramStatus.COMPLETED,
           color: AppColors.primary,
           onTap: () => ref
-              .read(projectFiltersProvider.notifier)
-              .setStatus(ProjectStatus.COMPLETED),
+              .read(programFiltersProvider.notifier)
+              .setStatus(ProgramStatus.COMPLETED),
         ),
       ],
     );

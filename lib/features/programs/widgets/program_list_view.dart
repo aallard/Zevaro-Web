@@ -9,38 +9,38 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../shared/widgets/common/avatar.dart';
 
-class ProjectListView extends StatefulWidget {
-  final List<Project> projects;
+class ProgramListView extends StatefulWidget {
+  final List<Program> programs;
 
-  const ProjectListView({super.key, required this.projects});
+  const ProgramListView({super.key, required this.programs});
 
   @override
-  State<ProjectListView> createState() => _ProjectListViewState();
+  State<ProgramListView> createState() => _ProgramListViewState();
 }
 
-class _ProjectListViewState extends State<ProjectListView> {
-  late Map<String, bool> _selectedProjects;
+class _ProgramListViewState extends State<ProgramListView> {
+  late Map<String, bool> _selectedPrograms;
   int _currentPage = 1;
   final int _itemsPerPage = 18;
 
   @override
   void initState() {
     super.initState();
-    _selectedProjects = {
-      for (var project in widget.projects) project.id: false
+    _selectedPrograms = {
+      for (var program in widget.programs) program.id: false
     };
   }
 
-  int get _totalPages => (widget.projects.length / _itemsPerPage).ceil().clamp(1, double.infinity).toInt();
+  int get _totalPages => (widget.programs.length / _itemsPerPage).ceil().clamp(1, double.infinity).toInt();
 
-  List<Project> get _pagedProjects {
+  List<Program> get _pagedPrograms {
     final start = (_currentPage - 1) * _itemsPerPage;
-    final end = (start + _itemsPerPage).clamp(0, widget.projects.length);
-    return widget.projects.sublist(start, end);
+    final end = (start + _itemsPerPage).clamp(0, widget.programs.length);
+    return widget.programs.sublist(start, end);
   }
 
   bool get _allSelected {
-    return _pagedProjects.every((p) => _selectedProjects[p.id] == true);
+    return _pagedPrograms.every((p) => _selectedPrograms[p.id] == true);
   }
 
   @override
@@ -76,20 +76,20 @@ class _ProjectListViewState extends State<ProjectListView> {
                       SizedBox(
                         width: 40,
                         child: Checkbox(
-                          value: _allSelected && _pagedProjects.isNotEmpty,
+                          value: _allSelected && _pagedPrograms.isNotEmpty,
                           onChanged: (val) {
                             setState(() {
-                              for (var p in _pagedProjects) {
-                                _selectedProjects[p.id] = val ?? false;
+                              for (var p in _pagedPrograms) {
+                                _selectedPrograms[p.id] = val ?? false;
                               }
                             });
                           },
                         ),
                       ),
-                      // Project Name column
+                      // Program Name column
                       Expanded(
                         flex: 4,
-                        child: _SortableHeader(label: 'Project Name'),
+                        child: _SortableHeader(label: 'Program Name'),
                       ),
                       // Status
                       SizedBox(
@@ -127,12 +127,12 @@ class _ProjectListViewState extends State<ProjectListView> {
                   ),
                 ),
                 // ── Table rows ──
-                ..._pagedProjects.map((project) => _ProjectRow(
-                      project: project,
-                      isSelected: _selectedProjects[project.id] ?? false,
+                ..._pagedPrograms.map((program) => _ProgramRow(
+                      program: program,
+                      isSelected: _selectedPrograms[program.id] ?? false,
                       onSelectionChanged: (selected) {
                         setState(() {
-                          _selectedProjects[project.id] = selected;
+                          _selectedPrograms[program.id] = selected;
                         });
                       },
                     )),
@@ -142,7 +142,7 @@ class _ProjectListViewState extends State<ProjectListView> {
           const SizedBox(height: AppSpacing.md),
           // ── Pagination ──
           _PaginationFooter(
-            totalCount: widget.projects.length,
+            totalCount: widget.programs.length,
             currentPage: _currentPage,
             totalPages: _totalPages,
             onPageChanged: (page) => setState(() => _currentPage = page),
@@ -157,21 +157,21 @@ class _ProjectListViewState extends State<ProjectListView> {
 // Table row
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _ProjectRow extends ConsumerWidget {
-  final Project project;
+class _ProgramRow extends ConsumerWidget {
+  final Program program;
   final bool isSelected;
   final Function(bool) onSelectionChanged;
 
-  const _ProjectRow({
-    required this.project,
+  const _ProgramRow({
+    required this.program,
     required this.isSelected,
     required this.onSelectionChanged,
   });
 
   Color get _accentColor {
-    if (project.color != null) {
+    if (program.color != null) {
       try {
-        final hex = project.color!.replaceFirst('#', '');
+        final hex = program.color!.replaceFirst('#', '');
         return Color(int.parse('FF$hex', radix: 16));
       } catch (_) {}
     }
@@ -182,7 +182,7 @@ class _ProjectRow extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return InkWell(
       onTap: () {
-        ref.read(selectedProjectIdProvider.notifier).select(project.id);
+        ref.read(selectedProgramIdProvider.notifier).select(program.id);
         context.go(Routes.dashboard);
       },
       child: Container(
@@ -208,7 +208,7 @@ class _ProjectRow extends ConsumerWidget {
                 },
               ),
             ),
-            // Project name with color dot
+            // Program name with color dot
             Expanded(
               flex: 4,
               child: Row(
@@ -227,16 +227,16 @@ class _ProjectRow extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          project.name,
+                          program.name,
                           style: AppTypography.labelLarge.copyWith(
                             fontWeight: FontWeight.w600,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        if (project.description != null)
+                        if (program.description != null)
                           Text(
-                            project.description!,
+                            program.description!,
                             style: AppTypography.bodySmall.copyWith(
                               color: AppColors.textTertiary,
                             ),
@@ -252,7 +252,7 @@ class _ProjectRow extends ConsumerWidget {
             // Status badge
             SizedBox(
               width: 110,
-              child: _StatusChip(status: project.status),
+              child: _StatusChip(status: program.status),
             ),
             // Decisions count with SLA badge
             SizedBox(
@@ -260,12 +260,12 @@ class _ProjectRow extends ConsumerWidget {
               child: Row(
                 children: [
                   Text(
-                    '${project.decisionCount}',
+                    '${program.decisionCount}',
                     style: AppTypography.bodyMedium,
                   ),
                   const SizedBox(width: AppSpacing.xs),
-                  if (project.decisionCount > 0)
-                    _SlaBadge(hours: _slaHours(project.decisionCount)),
+                  if (program.decisionCount > 0)
+                    _SlaBadge(hours: _slaHours(program.decisionCount)),
                 ],
               ),
             ),
@@ -273,7 +273,7 @@ class _ProjectRow extends ConsumerWidget {
             SizedBox(
               width: 100,
               child: Text(
-                '${project.outcomeCount}',
+                '${program.outcomeCount}',
                 style: AppTypography.bodyMedium,
               ),
             ),
@@ -281,20 +281,20 @@ class _ProjectRow extends ConsumerWidget {
             SizedBox(
               width: 120,
               child: Text(
-                '${project.hypothesisCount}',
+                '${program.hypothesisCount}',
                 style: AppTypography.bodyMedium,
               ),
             ),
             // Team avatars
             SizedBox(
               width: 110,
-              child: _TeamAvatarsRow(project: project),
+              child: _TeamAvatarsRow(program: program),
             ),
             // Last updated (relative time)
             SizedBox(
               width: 120,
               child: Text(
-                _relativeTime(project.updatedAt),
+                _relativeTime(program.updatedAt),
                 style: AppTypography.bodySmall,
               ),
             ),
@@ -414,32 +414,36 @@ class _SlaBadge extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _StatusChip extends StatelessWidget {
-  final ProjectStatus status;
+  final ProgramStatus status;
 
   const _StatusChip({required this.status});
 
   Color get _backgroundColor {
     switch (status) {
-      case ProjectStatus.ACTIVE:
+      case ProgramStatus.ACTIVE:
         return AppColors.success.withOpacity(0.1);
-      case ProjectStatus.PLANNING:
+      case ProgramStatus.PLANNING:
         return AppColors.warning.withOpacity(0.1);
-      case ProjectStatus.COMPLETED:
+      case ProgramStatus.COMPLETED:
         return AppColors.textSecondary.withOpacity(0.1);
-      case ProjectStatus.ARCHIVED:
+      case ProgramStatus.ARCHIVED:
+      case ProgramStatus.ON_HOLD:
+      case ProgramStatus.CANCELLED:
         return AppColors.textTertiary.withOpacity(0.1);
     }
   }
 
   Color get _textColor {
     switch (status) {
-      case ProjectStatus.ACTIVE:
+      case ProgramStatus.ACTIVE:
         return AppColors.success;
-      case ProjectStatus.PLANNING:
+      case ProgramStatus.PLANNING:
         return AppColors.warning;
-      case ProjectStatus.COMPLETED:
+      case ProgramStatus.COMPLETED:
         return AppColors.textSecondary;
-      case ProjectStatus.ARCHIVED:
+      case ProgramStatus.ARCHIVED:
+      case ProgramStatus.ON_HOLD:
+      case ProgramStatus.CANCELLED:
         return AppColors.textTertiary;
     }
   }
@@ -471,14 +475,14 @@ class _StatusChip extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _TeamAvatarsRow extends StatelessWidget {
-  final Project project;
+  final Program program;
 
-  const _TeamAvatarsRow({required this.project});
+  const _TeamAvatarsRow({required this.program});
 
   @override
   Widget build(BuildContext context) {
     final maxAvatars = 4;
-    final totalMembers = (project.memberCount > 0 ? project.memberCount : 1);
+    final totalMembers = (program.memberCount > 0 ? program.memberCount : 1);
 
     return SizedBox(
       height: 32,
@@ -486,13 +490,13 @@ class _TeamAvatarsRow extends StatelessWidget {
         clipBehavior: Clip.none,
         children: [
           // Owner avatar (first)
-          if (project.ownerName != null)
+          if (program.ownerName != null)
             Positioned(
               left: 0,
               top: 0,
               child: ZAvatar(
-                name: project.ownerName!,
-                imageUrl: project.ownerAvatarUrl,
+                name: program.ownerName!,
+                imageUrl: program.ownerAvatarUrl,
                 size: 32,
               ),
             ),
@@ -622,7 +626,7 @@ class _PaginationFooter extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          'Showing ${totalCount.clamp(0, 18)} of $totalCount projects',
+          'Showing ${totalCount.clamp(0, 18)} of $totalCount programs',
           style: AppTypography.bodySmall.copyWith(
             color: AppColors.textSecondary,
           ),

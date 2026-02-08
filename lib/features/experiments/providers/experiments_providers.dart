@@ -22,7 +22,7 @@ Future<List<Experiment>> filteredExperiments(
 ) async {
   final service = ref.watch(experimentServiceProvider);
   final tab = ref.watch(experimentFilterNotifierProvider);
-  final selectedProjectId = ref.watch(selectedProjectIdProvider);
+  final selectedProgramId = ref.watch(selectedProgramIdProvider);
 
   ExperimentStatus? status;
   switch (tab) {
@@ -39,7 +39,7 @@ Future<List<Experiment>> filteredExperiments(
 
   return service.listExperiments(
     status: status,
-    projectId: selectedProjectId,
+    programId: selectedProgramId,
   );
 }
 
@@ -49,8 +49,8 @@ Future<List<Experiment>> allExperiments(
   AllExperimentsRef ref,
 ) async {
   final service = ref.watch(experimentServiceProvider);
-  final selectedProjectId = ref.watch(selectedProjectIdProvider);
-  return service.listExperiments(projectId: selectedProjectId);
+  final selectedProgramId = ref.watch(selectedProgramIdProvider);
+  return service.listExperiments(programId: selectedProgramId);
 }
 
 /// Experiment detail

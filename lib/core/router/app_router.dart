@@ -10,7 +10,8 @@ import '../../features/decisions/decisions.dart';
 import '../../features/experiments/experiments.dart';
 import '../../features/hypotheses/hypotheses.dart';
 import '../../features/outcomes/outcomes.dart';
-import '../../features/projects/projects.dart';
+import '../../features/portfolios/portfolios.dart';
+import '../../features/programs/programs.dart';
 import '../../features/settings/settings.dart';
 import '../../features/stakeholders/stakeholders.dart';
 import '../../features/teams/teams.dart';
@@ -48,7 +49,7 @@ GoRouter appRouter(Ref ref) {
 
   return GoRouter(
     refreshListenable: authNotifier,
-    initialLocation: Routes.projects,
+    initialLocation: Routes.programs,
     debugLogDiagnostics: true,
     redirect: authGuard.redirect,
     routes: [
@@ -86,8 +87,10 @@ GoRouter appRouter(Ref ref) {
           // Determine title based on route
           String title = 'Dashboard';
           final location = state.matchedLocation;
-          if (location.startsWith('/projects')) {
-            title = 'Projects';
+          if (location.startsWith('/programs')) {
+            title = 'Programs';
+          } else if (location.startsWith('/portfolios')) {
+            title = 'Portfolios';
           } else if (location.startsWith('/decisions')) {
             title = 'Decision Queue';
           } else if (location.startsWith('/outcomes')) {
@@ -109,19 +112,37 @@ GoRouter appRouter(Ref ref) {
           return AppShell(title: title, child: child);
         },
         routes: [
-          // Projects
+          // Portfolios
           GoRoute(
-            path: Routes.projects,
-            name: 'projects',
+            path: Routes.portfolios,
+            name: 'portfolios',
             pageBuilder: (context, state) =>
-                noTransitionPage(const ProjectsScreen(), state),
+                noTransitionPage(const PortfoliosScreen(), state),
             routes: [
               GoRoute(
                 path: ':id',
-                name: 'projectDetail',
+                name: 'portfolioDetail',
                 pageBuilder: (context, state) {
                   final id = state.pathParameters['id']!;
-                  return noTransitionPage(ProjectsScreen(projectId: id), state);
+                  return noTransitionPage(PortfolioDetailScreen(id: id), state);
+                },
+              ),
+            ],
+          ),
+
+          // Programs
+          GoRoute(
+            path: Routes.programs,
+            name: 'programs',
+            pageBuilder: (context, state) =>
+                noTransitionPage(const ProgramsScreen(), state),
+            routes: [
+              GoRoute(
+                path: ':id',
+                name: 'programDetail',
+                pageBuilder: (context, state) {
+                  final id = state.pathParameters['id']!;
+                  return noTransitionPage(ProgramsScreen(programId: id), state);
                 },
               ),
             ],

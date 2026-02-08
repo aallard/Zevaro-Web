@@ -145,12 +145,12 @@ class DecisionSidebarPanel extends StatelessWidget {
             ),
           ),
 
-          if (decision.project != null) ...[
+          if (decision.program != null) ...[
             const Divider(height: AppSpacing.lg),
             _SidebarField(
-              label: 'Project',
+              label: 'Program',
               child: Text(
-                decision.project!.name,
+                decision.program!.name,
                 style: AppTypography.bodyMedium,
               ),
             ),

@@ -7,7 +7,7 @@ part of 'experiments_providers.dart';
 // **************************************************************************
 
 String _$filteredExperimentsHash() =>
-    r'af5706adad498ba6d128104f5bac9b6f99f66b0d';
+    r'3303c3f6f458f9b36220b98faf1a44d26dc65b3d';
 
 /// Filtered experiments
 ///
@@ -27,7 +27,7 @@ final filteredExperimentsProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef FilteredExperimentsRef = AutoDisposeFutureProviderRef<List<Experiment>>;
-String _$allExperimentsHash() => r'9f007b6df4f37c8e2d4a7907aa48a4405061d381';
+String _$allExperimentsHash() => r'4109877ad88f0600ed62d617de14032ef3675531';
 
 /// All experiments (for summary stats)
 ///

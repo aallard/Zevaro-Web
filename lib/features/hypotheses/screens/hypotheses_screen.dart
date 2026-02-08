@@ -15,9 +15,9 @@ class HypothesesScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final selectedProjectId = ref.watch(selectedProjectIdProvider);
+    final selectedProgramId = ref.watch(selectedProgramIdProvider);
     final hypothesesAsync = ref.watch(
-      hypothesisListProvider(projectId: selectedProjectId),
+      hypothesisListProvider(programId: selectedProgramId),
     );
     final filterState = ref.watch(hypothesisFiltersProvider);
 
@@ -158,7 +158,7 @@ class HypothesesScreen extends ConsumerWidget {
             error: (e, _) => ErrorView(
               message: e.toString(),
               onRetry: () => ref.invalidate(
-                hypothesisListProvider(projectId: selectedProjectId),
+                hypothesisListProvider(programId: selectedProgramId),
               ),
             ),
           ),
