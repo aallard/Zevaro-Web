@@ -151,6 +151,13 @@ class Sidebar extends ConsumerWidget {
                       ),
                     ),
                   _SidebarNavItem(
+                    icon: Icons.account_tree_outlined,
+                    label: 'Workstreams',
+                    isSelected: currentRoute.startsWith('/workstreams'),
+                    isCollapsed: isCollapsed,
+                    onTap: () => context.go(Routes.workstreams),
+                  ),
+                  _SidebarNavItem(
                     icon: Icons.bolt_outlined,
                     label: 'Decision Queue',
                     isSelected: currentRoute.startsWith('/decisions'),

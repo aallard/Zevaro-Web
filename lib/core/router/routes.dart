@@ -24,6 +24,12 @@ abstract class Routes {
   static const teamDetail = '/teams/:id';
   static const stakeholders = '/stakeholders';
   static const stakeholderDetail = '/stakeholders/:id';
+  static const workstreams = '/workstreams';
+  static const workstreamDetail = '/workstreams/:id';
+  static const specifications = '/specifications';
+  static const specificationDetail = '/specifications/:id';
+  static const requirements = '/requirements';
+  static const requirementDetail = '/requirements/:id';
   static const settings = '/settings';
   static const organizationSettings = '/settings/organization';
   static const profile = '/profile';
@@ -37,4 +43,7 @@ abstract class Routes {
   static String experimentById(String id) => '/experiments/$id';
   static String teamById(String id) => '/teams/$id';
   static String stakeholderById(String id) => '/stakeholders/$id';
+  static String workstreamById(String id) => '/workstreams/$id';
+  static String specificationById(String id) => '/specifications/$id';
+  static String requirementById(String id) => '/requirements/$id';
 }

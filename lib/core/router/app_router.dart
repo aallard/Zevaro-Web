@@ -12,7 +12,10 @@ import '../../features/hypotheses/hypotheses.dart';
 import '../../features/outcomes/outcomes.dart';
 import '../../features/portfolios/portfolios.dart';
 import '../../features/programs/programs.dart';
+import '../../features/requirements/requirements.dart';
 import '../../features/settings/settings.dart';
+import '../../features/specifications/specifications.dart';
+import '../../features/workstreams/workstreams.dart';
 import '../../features/stakeholders/stakeholders.dart';
 import '../../features/teams/teams.dart';
 import '../../shared/widgets/app_shell/app_shell.dart';
@@ -99,6 +102,12 @@ GoRouter appRouter(Ref ref) {
             title = 'Hypotheses';
           } else if (location.startsWith('/experiments')) {
             title = 'Experiments';
+          } else if (location.startsWith('/workstreams')) {
+            title = 'Workstreams';
+          } else if (location.startsWith('/specifications')) {
+            title = 'Specifications';
+          } else if (location.startsWith('/requirements')) {
+            title = 'Requirements';
           } else if (location.startsWith('/teams')) {
             title = 'Team';
           } else if (location.startsWith('/stakeholders')) {
@@ -223,6 +232,60 @@ GoRouter appRouter(Ref ref) {
                 pageBuilder: (context, state) {
                   final id = state.pathParameters['id']!;
                   return noTransitionPage(ExperimentDetailScreen(id: id), state);
+                },
+              ),
+            ],
+          ),
+
+          // Workstreams
+          GoRoute(
+            path: Routes.workstreams,
+            name: 'workstreams',
+            pageBuilder: (context, state) =>
+                noTransitionPage(const WorkstreamsScreen(), state),
+            routes: [
+              GoRoute(
+                path: ':id',
+                name: 'workstreamDetail',
+                pageBuilder: (context, state) {
+                  final id = state.pathParameters['id']!;
+                  return noTransitionPage(WorkstreamDetailScreen(id: id), state);
+                },
+              ),
+            ],
+          ),
+
+          // Specifications
+          GoRoute(
+            path: Routes.specifications,
+            name: 'specifications',
+            pageBuilder: (context, state) =>
+                noTransitionPage(const Scaffold(body: Center(child: Text('Specifications'))), state),
+            routes: [
+              GoRoute(
+                path: ':id',
+                name: 'specificationDetail',
+                pageBuilder: (context, state) {
+                  final id = state.pathParameters['id']!;
+                  return noTransitionPage(SpecificationDetailScreen(id: id), state);
+                },
+              ),
+            ],
+          ),
+
+          // Requirements
+          GoRoute(
+            path: Routes.requirements,
+            name: 'requirements',
+            pageBuilder: (context, state) =>
+                noTransitionPage(const Scaffold(body: Center(child: Text('Requirements'))), state),
+            routes: [
+              GoRoute(
+                path: ':id',
+                name: 'requirementDetail',
+                pageBuilder: (context, state) {
+                  final id = state.pathParameters['id']!;
+                  return noTransitionPage(RequirementDetailScreen(id: id), state);
                 },
               ),
             ],
