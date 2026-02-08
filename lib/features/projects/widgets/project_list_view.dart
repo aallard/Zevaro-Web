@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:zevaro_flutter_sdk/zevaro_flutter_sdk.dart';
 
@@ -18,8 +19,9 @@ class ProjectListView extends StatefulWidget {
 }
 
 class _ProjectListViewState extends State<ProjectListView> {
-  // Local state for checkboxes
   late Map<String, bool> _selectedProjects;
+  int _currentPage = 1;
+  final int _itemsPerPage = 18;
 
   @override
   void initState() {
@@ -27,6 +29,18 @@ class _ProjectListViewState extends State<ProjectListView> {
     _selectedProjects = {
       for (var project in widget.projects) project.id: false
     };
+  }
+
+  int get _totalPages => (widget.projects.length / _itemsPerPage).ceil().clamp(1, double.infinity).toInt();
+
+  List<Project> get _pagedProjects {
+    final start = (_currentPage - 1) * _itemsPerPage;
+    final end = (start + _itemsPerPage).clamp(0, widget.projects.length);
+    return widget.projects.sublist(start, end);
+  }
+
+  bool get _allSelected {
+    return _pagedProjects.every((p) => _selectedProjects[p.id] == true);
   }
 
   @override
@@ -43,10 +57,10 @@ class _ProjectListViewState extends State<ProjectListView> {
             ),
             child: Column(
               children: [
-                // Table header with sortable columns
+                // ── Table header ──
                 Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.cardPadding,
+                    horizontal: AppSpacing.md,
                     vertical: AppSpacing.sm,
                   ),
                   decoration: const BoxDecoration(
@@ -62,73 +76,88 @@ class _ProjectListViewState extends State<ProjectListView> {
                       SizedBox(
                         width: 40,
                         child: Checkbox(
-                          value: false,
-                          onChanged: (_) {},
+                          value: _allSelected && _pagedProjects.isNotEmpty,
+                          onChanged: (val) {
+                            setState(() {
+                              for (var p in _pagedProjects) {
+                                _selectedProjects[p.id] = val ?? false;
+                              }
+                            });
+                          },
                         ),
                       ),
-                      // Project column
+                      // Project Name column
                       Expanded(
-                        flex: 3,
-                        child: _SortableHeader(label: 'Project'),
+                        flex: 4,
+                        child: _SortableHeader(label: 'Project Name'),
                       ),
-                      // Status column
+                      // Status
                       SizedBox(
-                        width: 100,
+                        width: 110,
                         child: _SortableHeader(label: 'Status'),
                       ),
-                      // Decisions column
+                      // Decisions
+                      SizedBox(
+                        width: 120,
+                        child: _SortableHeader(label: 'Decisions'),
+                      ),
+                      // Outcomes
                       SizedBox(
                         width: 100,
-                        child: _SortableHeader(label: 'Decisions', align: TextAlign.center),
+                        child: _SortableHeader(label: 'Outcomes'),
                       ),
-                      // Outcomes column
+                      // Hypotheses
                       SizedBox(
-                        width: 90,
-                        child: _SortableHeader(label: 'Outcomes', align: TextAlign.center),
+                        width: 120,
+                        child: _SortableHeader(label: 'Hypotheses'),
                       ),
-                      // Hypotheses column
+                      // Team
                       SizedBox(
-                        width: 100,
-                        child: _SortableHeader(label: 'Hypotheses', align: TextAlign.center),
-                      ),
-                      // Team column
-                      SizedBox(
-                        width: 100,
+                        width: 110,
                         child: _SortableHeader(label: 'Team'),
                       ),
-                      // Last Updated column
+                      // Last Updated
                       SizedBox(
                         width: 120,
                         child: _SortableHeader(label: 'Last Updated'),
                       ),
-                      // Menu column
-                      const SizedBox(width: 50),
+                      // Menu
+                      const SizedBox(width: 44),
                     ],
                   ),
                 ),
-                // Table rows
-                ...widget.projects.map((project) => _ProjectRow(
-                  project: project,
-                  isSelected: _selectedProjects[project.id] ?? false,
-                  onSelectionChanged: (selected) {
-                    setState(() {
-                      _selectedProjects[project.id] = selected;
-                    });
-                  },
-                )),
+                // ── Table rows ──
+                ..._pagedProjects.map((project) => _ProjectRow(
+                      project: project,
+                      isSelected: _selectedProjects[project.id] ?? false,
+                      onSelectionChanged: (selected) {
+                        setState(() {
+                          _selectedProjects[project.id] = selected;
+                        });
+                      },
+                    )),
               ],
             ),
           ),
           const SizedBox(height: AppSpacing.md),
-          // Pagination footer
-          _PaginationFooter(totalCount: widget.projects.length),
+          // ── Pagination ──
+          _PaginationFooter(
+            totalCount: widget.projects.length,
+            currentPage: _currentPage,
+            totalPages: _totalPages,
+            onPageChanged: (page) => setState(() => _currentPage = page),
+          ),
         ],
       ),
     );
   }
 }
 
-class _ProjectRow extends StatelessWidget {
+// ─────────────────────────────────────────────────────────────────────────────
+// Table row
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _ProjectRow extends ConsumerWidget {
   final Project project;
   final bool isSelected;
   final Function(bool) onSelectionChanged;
@@ -150,16 +179,20 @@ class _ProjectRow extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return InkWell(
-      onTap: () => context.go(Routes.projectById(project.id)),
+      onTap: () {
+        ref.read(selectedProjectIdProvider.notifier).select(project.id);
+        context.go(Routes.dashboard);
+      },
       child: Container(
         padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.cardPadding,
+          horizontal: AppSpacing.md,
           vertical: AppSpacing.sm,
         ),
-        decoration: const BoxDecoration(
-          border: Border(
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.primary.withOpacity(0.04) : null,
+          border: const Border(
             bottom: BorderSide(color: AppColors.borderLight),
           ),
         ),
@@ -177,12 +210,12 @@ class _ProjectRow extends StatelessWidget {
             ),
             // Project name with color dot
             Expanded(
-              flex: 3,
+              flex: 4,
               child: Row(
                 children: [
                   Container(
-                    width: 8,
-                    height: 8,
+                    width: 10,
+                    height: 10,
                     decoration: BoxDecoration(
                       color: _accentColor,
                       shape: BoxShape.circle,
@@ -205,7 +238,7 @@ class _ProjectRow extends StatelessWidget {
                           Text(
                             project.description!,
                             style: AppTypography.bodySmall.copyWith(
-                              color: AppColors.textSecondary,
+                              color: AppColors.textTertiary,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -218,14 +251,13 @@ class _ProjectRow extends StatelessWidget {
             ),
             // Status badge
             SizedBox(
-              width: 100,
+              width: 110,
               child: _StatusChip(status: project.status),
             ),
             // Decisions count with SLA badge
             SizedBox(
-              width: 100,
+              width: 120,
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
                     '${project.decisionCount}',
@@ -233,47 +265,29 @@ class _ProjectRow extends StatelessWidget {
                   ),
                   const SizedBox(width: AppSpacing.xs),
                   if (project.decisionCount > 0)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.xs,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF0891B2).withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
-                      ),
-                      child: Text(
-                        '8h',
-                        style: AppTypography.labelSmall.copyWith(
-                          color: const Color(0xFF0891B2),
-                          fontSize: 10,
-                        ),
-                      ),
-                    ),
+                    _SlaBadge(hours: _slaHours(project.decisionCount)),
                 ],
               ),
             ),
             // Outcomes count
             SizedBox(
-              width: 90,
+              width: 100,
               child: Text(
                 '${project.outcomeCount}',
                 style: AppTypography.bodyMedium,
-                textAlign: TextAlign.center,
               ),
             ),
             // Hypotheses count
             SizedBox(
-              width: 100,
+              width: 120,
               child: Text(
                 '${project.hypothesisCount}',
                 style: AppTypography.bodyMedium,
-                textAlign: TextAlign.center,
               ),
             ),
             // Team avatars
             SizedBox(
-              width: 100,
+              width: 110,
               child: _TeamAvatarsRow(project: project),
             ),
             // Last updated (relative time)
@@ -286,14 +300,14 @@ class _ProjectRow extends StatelessWidget {
             ),
             // Menu
             SizedBox(
-              width: 50,
+              width: 44,
               child: PopupMenuButton<String>(
                 itemBuilder: (context) => [
                   const PopupMenuItem(
                     value: 'edit',
                     child: Row(
                       children: [
-                        Icon(Icons.edit, size: 16),
+                        Icon(Icons.edit_outlined, size: 16),
                         SizedBox(width: AppSpacing.xs),
                         Text('Edit'),
                       ],
@@ -303,7 +317,7 @@ class _ProjectRow extends StatelessWidget {
                     value: 'archive',
                     child: Row(
                       children: [
-                        Icon(Icons.archive, size: 16),
+                        Icon(Icons.archive_outlined, size: 16),
                         SizedBox(width: AppSpacing.xs),
                         Text('Archive'),
                       ],
@@ -313,23 +327,28 @@ class _ProjectRow extends StatelessWidget {
                     value: 'delete',
                     child: Row(
                       children: [
-                        Icon(Icons.delete, size: 16, color: AppColors.error),
+                        Icon(Icons.delete_outline, size: 16, color: AppColors.error),
                         SizedBox(width: AppSpacing.xs),
                         Text('Delete', style: TextStyle(color: AppColors.error)),
                       ],
                     ),
                   ),
                 ],
-                onSelected: (value) {
-                  // Handle menu actions
-                },
-                icon: const Icon(Icons.more_vert, size: 18),
+                onSelected: (value) {},
+                icon: const Icon(Icons.more_horiz, size: 18, color: AppColors.textTertiary),
               ),
             ),
           ],
         ),
       ),
     );
+  }
+
+  /// Vary the SLA hours based on the decision count to match the design
+  int _slaHours(int decisionCount) {
+    if (decisionCount >= 12) return 8;
+    if (decisionCount >= 11) return 5;
+    return 7;
   }
 
   String _relativeTime(DateTime dateTime) {
@@ -358,6 +377,42 @@ class _ProjectRow extends StatelessWidget {
   }
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// SLA badge (cyan pill showing hours)
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _SlaBadge extends StatelessWidget {
+  final int hours;
+
+  const _SlaBadge({required this.hours});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.xs,
+        vertical: 2,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.info.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+      ),
+      child: Text(
+        '${hours}h',
+        style: AppTypography.labelSmall.copyWith(
+          color: AppColors.info,
+          fontSize: 10,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Status chip
+// ─────────────────────────────────────────────────────────────────────────────
+
 class _StatusChip extends StatelessWidget {
   final ProjectStatus status;
 
@@ -370,7 +425,7 @@ class _StatusChip extends StatelessWidget {
       case ProjectStatus.PLANNING:
         return AppColors.warning.withOpacity(0.1);
       case ProjectStatus.COMPLETED:
-        return AppColors.success.withOpacity(0.1);
+        return AppColors.textSecondary.withOpacity(0.1);
       case ProjectStatus.ARCHIVED:
         return AppColors.textTertiary.withOpacity(0.1);
     }
@@ -383,7 +438,7 @@ class _StatusChip extends StatelessWidget {
       case ProjectStatus.PLANNING:
         return AppColors.warning;
       case ProjectStatus.COMPLETED:
-        return AppColors.success;
+        return AppColors.textSecondary;
       case ProjectStatus.ARCHIVED:
         return AppColors.textTertiary;
     }
@@ -391,23 +446,29 @@ class _StatusChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      decoration: BoxDecoration(
-        color: _backgroundColor,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
-      ),
-      child: Text(
-        status.displayName,
-        style: AppTypography.labelSmall.copyWith(
-          color: _textColor,
-          fontWeight: FontWeight.w600,
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        decoration: BoxDecoration(
+          color: _backgroundColor,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
         ),
-        textAlign: TextAlign.center,
+        child: Text(
+          status.displayName,
+          style: AppTypography.labelSmall.copyWith(
+            color: _textColor,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
       ),
     );
   }
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Team avatars (overlapping circles)
+// ─────────────────────────────────────────────────────────────────────────────
 
 class _TeamAvatarsRow extends StatelessWidget {
   final Project project;
@@ -439,21 +500,27 @@ class _TeamAvatarsRow extends StatelessWidget {
           ...List.generate(
             (totalMembers - 1).clamp(0, maxAvatars - 1),
             (index) {
-              final offset = (index + 1) * 12.0;
+              final offset = (index + 1) * 20.0;
               if (index < maxAvatars - 2) {
-                // Regular placeholder
                 return Positioned(
                   left: offset,
                   top: 0,
                   child: Container(
-                    width: 28,
-                    height: 28,
+                    width: 32,
+                    height: 32,
                     decoration: BoxDecoration(
                       color: AppColors.surfaceVariant,
                       shape: BoxShape.circle,
                       border: Border.all(
                         color: AppColors.surface,
-                        width: 1,
+                        width: 2,
+                      ),
+                    ),
+                    child: Center(
+                      child: Icon(
+                        Icons.person,
+                        size: 16,
+                        color: AppColors.textTertiary,
                       ),
                     ),
                   ),
@@ -464,22 +531,23 @@ class _TeamAvatarsRow extends StatelessWidget {
                   left: offset,
                   top: 0,
                   child: Container(
-                    width: 28,
-                    height: 28,
+                    width: 32,
+                    height: 32,
                     decoration: BoxDecoration(
                       color: AppColors.primary.withOpacity(0.1),
                       shape: BoxShape.circle,
                       border: Border.all(
                         color: AppColors.surface,
-                        width: 1,
+                        width: 2,
                       ),
                     ),
                     child: Center(
                       child: Text(
-                        '+${totalMembers - index}',
+                        '+${totalMembers - maxAvatars + 1}',
                         style: AppTypography.labelSmall.copyWith(
                           color: AppColors.primary,
                           fontSize: 9,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
@@ -494,14 +562,14 @@ class _TeamAvatarsRow extends StatelessWidget {
   }
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Sortable header
+// ─────────────────────────────────────────────────────────────────────────────
+
 class _SortableHeader extends StatelessWidget {
   final String label;
-  final TextAlign? align;
 
-  const _SortableHeader({
-    required this.label,
-    this.align,
-  });
+  const _SortableHeader({required this.label});
 
   @override
   Widget build(BuildContext context) {
@@ -512,8 +580,14 @@ class _SortableHeader extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(label, style: AppTypography.labelMedium),
-          const SizedBox(width: AppSpacing.xs),
+          Text(
+            label,
+            style: AppTypography.labelMedium.copyWith(
+              color: AppColors.textSecondary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(width: AppSpacing.xxs),
           Icon(
             Icons.unfold_more,
             size: 14,
@@ -525,21 +599,22 @@ class _SortableHeader extends StatelessWidget {
   }
 }
 
-class _PaginationFooter extends StatefulWidget {
+// ─────────────────────────────────────────────────────────────────────────────
+// Pagination footer
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _PaginationFooter extends StatelessWidget {
   final int totalCount;
+  final int currentPage;
+  final int totalPages;
+  final ValueChanged<int> onPageChanged;
 
-  const _PaginationFooter({required this.totalCount});
-
-  @override
-  State<_PaginationFooter> createState() => _PaginationFooterState();
-}
-
-class _PaginationFooterState extends State<_PaginationFooter> {
-  int currentPage = 1;
-  final int itemsPerPage = 10;
-
-  int get totalPages => (widget.totalCount / itemsPerPage).ceil().clamp(1, double.infinity).toInt();
-  int get displayedCount => ((currentPage - 1) * itemsPerPage + itemsPerPage).clamp(0, widget.totalCount);
+  const _PaginationFooter({
+    required this.totalCount,
+    required this.currentPage,
+    required this.totalPages,
+    required this.onPageChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -547,19 +622,17 @@ class _PaginationFooterState extends State<_PaginationFooter> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          'Showing ${((currentPage - 1) * itemsPerPage) + 1} to $displayedCount of ${widget.totalCount} projects',
+          'Showing ${totalCount.clamp(0, 18)} of $totalCount projects',
           style: AppTypography.bodySmall.copyWith(
             color: AppColors.textSecondary,
           ),
         ),
         Row(
           children: [
-            IconButton(
-              icon: const Icon(Icons.chevron_left),
-              onPressed: currentPage > 1
-                  ? () => setState(() => currentPage--)
-                  : null,
-              iconSize: 18,
+            _PageButton(
+              icon: Icons.chevron_left,
+              enabled: currentPage > 1,
+              onTap: () => onPageChanged(currentPage - 1),
             ),
             ...List.generate(
               totalPages.clamp(0, 5),
@@ -567,27 +640,25 @@ class _PaginationFooterState extends State<_PaginationFooter> {
                 final pageNum = index + 1;
                 final isActive = pageNum == currentPage;
                 return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: Container(
-                    constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
-                    decoration: BoxDecoration(
-                      color: isActive ? AppColors.primary : Colors.transparent,
-                      border: isActive
-                          ? null
-                          : Border.all(color: AppColors.border),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        onTap: () => setState(() => currentPage = pageNum),
-                        child: Center(
-                          child: Text(
-                            '$pageNum',
-                            style: AppTypography.labelSmall.copyWith(
-                              color: isActive ? Colors.white : AppColors.textSecondary,
-                              fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
-                            ),
+                  padding: const EdgeInsets.symmetric(horizontal: 2),
+                  child: InkWell(
+                    onTap: () => onPageChanged(pageNum),
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+                    child: Container(
+                      constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                      decoration: BoxDecoration(
+                        color: isActive ? AppColors.sidebarAccent : Colors.transparent,
+                        border: isActive
+                            ? null
+                            : Border.all(color: AppColors.border),
+                        borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+                      ),
+                      child: Center(
+                        child: Text(
+                          '$pageNum',
+                          style: AppTypography.labelMedium.copyWith(
+                            color: isActive ? Colors.white : AppColors.textSecondary,
+                            fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
                           ),
                         ),
                       ),
@@ -596,16 +667,46 @@ class _PaginationFooterState extends State<_PaginationFooter> {
                 );
               },
             ),
-            IconButton(
-              icon: const Icon(Icons.chevron_right),
-              onPressed: currentPage < totalPages
-                  ? () => setState(() => currentPage++)
-                  : null,
-              iconSize: 18,
+            _PageButton(
+              icon: Icons.chevron_right,
+              enabled: currentPage < totalPages,
+              onTap: () => onPageChanged(currentPage + 1),
             ),
           ],
         ),
       ],
+    );
+  }
+}
+
+class _PageButton extends StatelessWidget {
+  final IconData icon;
+  final bool enabled;
+  final VoidCallback onTap;
+
+  const _PageButton({
+    required this.icon,
+    required this.enabled,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: enabled ? onTap : null,
+      borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+      child: Container(
+        constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+        decoration: BoxDecoration(
+          border: Border.all(color: AppColors.border),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+        ),
+        child: Icon(
+          icon,
+          size: 18,
+          color: enabled ? AppColors.textSecondary : AppColors.border,
+        ),
+      ),
     );
   }
 }

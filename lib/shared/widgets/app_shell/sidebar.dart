@@ -143,14 +143,6 @@ class Sidebar extends ConsumerWidget {
                       ),
                     ),
                   _SidebarNavItem(
-                    icon: Icons.dashboard_outlined,
-                    label: 'Dashboard',
-                    isSelected: currentRoute == Routes.dashboard ||
-                        currentRoute.startsWith('/dashboard'),
-                    isCollapsed: isCollapsed,
-                    onTap: () => context.go(Routes.dashboard),
-                  ),
-                  _SidebarNavItem(
                     icon: Icons.bolt_outlined,
                     label: 'Decision Queue',
                     isSelected: currentRoute.startsWith('/decisions'),

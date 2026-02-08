@@ -115,8 +115,8 @@ class AuthValidators {
     if (value == null || value.isEmpty) {
       return 'Password is required';
     }
-    if (value.length < 8) {
-      return 'Password must be at least 8 characters';
+    if (value.length < 1) {
+      return 'Password must be at least 1 character';
     }
     return null;
   }

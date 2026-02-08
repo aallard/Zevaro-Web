@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:zevaro_flutter_sdk/zevaro_flutter_sdk.dart';
 
@@ -8,7 +9,7 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../shared/widgets/common/avatar.dart';
 
-class ProjectCard extends StatelessWidget {
+class ProjectCard extends ConsumerWidget {
   final Project project;
 
   const ProjectCard({super.key, required this.project});
@@ -24,11 +25,14 @@ class ProjectCard extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
-        onTap: () => context.go(Routes.projectById(project.id)),
+        onTap: () {
+          ref.read(selectedProjectIdProvider.notifier).select(project.id);
+          context.go(Routes.dashboard);
+        },
         child: Container(
           decoration: BoxDecoration(
             color: AppColors.surface,
@@ -117,13 +121,40 @@ class ProjectCard extends StatelessWidget {
                             const SizedBox(height: AppSpacing.md),
 
                             // Stats row
-                            Text(
-                              '${project.decisionCount} Decisions · ${project.outcomeCount} Outcomes · ${project.hypothesisCount} Hypotheses',
-                              style: AppTypography.labelSmall.copyWith(
-                                color: AppColors.textTertiary,
-                              ),
+                            RichText(
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
+                              text: TextSpan(
+                                style: AppTypography.labelSmall.copyWith(
+                                  color: AppColors.textTertiary,
+                                ),
+                                children: [
+                                  TextSpan(
+                                    text: '${project.decisionCount}',
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.textPrimary,
+                                    ),
+                                  ),
+                                  const TextSpan(text: ' Decisions · '),
+                                  TextSpan(
+                                    text: '${project.outcomeCount}',
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.textPrimary,
+                                    ),
+                                  ),
+                                  const TextSpan(text: ' Outcomes · '),
+                                  TextSpan(
+                                    text: '${project.hypothesisCount}',
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.textPrimary,
+                                    ),
+                                  ),
+                                  const TextSpan(text: ' Hypotheses'),
+                                ],
+                              ),
                             ),
 
                             const Spacer(),
@@ -225,6 +256,7 @@ class _StatusBadge extends StatelessWidget {
       decoration: BoxDecoration(
         color: backgroundColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+        border: _getBorder(),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -252,26 +284,36 @@ class _StatusBadge extends StatelessWidget {
   Color _getBackgroundColor() {
     switch (status) {
       case ProjectStatus.ACTIVE:
-        return AppColors.success.withOpacity(0.1);
+        return AppColors.success;
       case ProjectStatus.PLANNING:
-        return AppColors.warning.withOpacity(0.1);
       case ProjectStatus.COMPLETED:
-        return AppColors.success.withOpacity(0.1);
       case ProjectStatus.ARCHIVED:
-        return AppColors.textTertiary.withOpacity(0.1);
+        return AppColors.surface;
     }
   }
 
   Color _getTextColor() {
     switch (status) {
       case ProjectStatus.ACTIVE:
-        return AppColors.success;
+        return Colors.white;
       case ProjectStatus.PLANNING:
         return AppColors.warning;
       case ProjectStatus.COMPLETED:
-        return AppColors.success;
+        return AppColors.textPrimary;
       case ProjectStatus.ARCHIVED:
         return AppColors.textTertiary;
+    }
+  }
+
+  Border? _getBorder() {
+    switch (status) {
+      case ProjectStatus.ACTIVE:
+        return null;
+      case ProjectStatus.PLANNING:
+        return Border.all(color: AppColors.warning);
+      case ProjectStatus.COMPLETED:
+      case ProjectStatus.ARCHIVED:
+        return Border.all(color: AppColors.textTertiary);
     }
   }
 }

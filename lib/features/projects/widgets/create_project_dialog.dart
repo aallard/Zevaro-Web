@@ -55,8 +55,9 @@ class _CreateProjectDialogState extends ConsumerState<CreateProjectDialog> {
         );
 
     if (project != null && mounted) {
+      ref.read(selectedProjectIdProvider.notifier).select(project.id);
       Navigator.pop(context);
-      context.go(Routes.projectById(project.id));
+      context.go(Routes.dashboard);
     }
   }
 

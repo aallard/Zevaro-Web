@@ -48,7 +48,7 @@ GoRouter appRouter(Ref ref) {
 
   return GoRouter(
     refreshListenable: authNotifier,
-    initialLocation: Routes.dashboard,
+    initialLocation: Routes.projects,
     debugLogDiagnostics: true,
     redirect: authGuard.redirect,
     routes: [

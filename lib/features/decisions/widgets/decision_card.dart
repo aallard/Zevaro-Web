@@ -23,14 +23,18 @@ class DecisionCard extends StatelessWidget {
         return const Color(0xFF3B82F6); // Blue
       case DecisionType.TECHNICAL:
         return const Color(0xFF6B7280); // Gray
-      case DecisionType.DESIGN:
+      case DecisionType.UX:
         return const Color(0xFFEC4899); // Pink
-      case DecisionType.BUSINESS:
+      case DecisionType.STRATEGIC:
         return const Color(0xFFF59E0B); // Amber
-      case DecisionType.PROCESS:
+      case DecisionType.OPERATIONAL:
         return const Color(0xFF14B8A6); // Teal
       case DecisionType.RESOURCE:
         return const Color(0xFF8B5CF6); // Purple
+      case DecisionType.SCOPE:
+        return const Color(0xFF059669); // Emerald
+      case DecisionType.TIMELINE:
+        return const Color(0xFFDC2626); // Red
     }
   }
 

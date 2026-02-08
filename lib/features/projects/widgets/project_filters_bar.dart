@@ -15,39 +15,8 @@ class ProjectFiltersBar extends ConsumerWidget {
     final filters = ref.watch(projectFiltersProvider);
 
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        // Search
-        SizedBox(
-          width: 240,
-          child: TextField(
-            decoration: InputDecoration(
-              hintText: 'Search projects...',
-              hintStyle: AppTypography.bodySmall,
-              prefixIcon: const Icon(Icons.search, size: 18),
-              isDense: true,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.sm,
-                vertical: AppSpacing.xs,
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                borderSide: const BorderSide(color: AppColors.border),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                borderSide: const BorderSide(color: AppColors.border),
-              ),
-            ),
-            onChanged: (value) {
-              ref.read(projectFiltersProvider.notifier).setSearch(
-                    value.isEmpty ? null : value,
-                  );
-            },
-          ),
-        ),
-
-        const SizedBox(width: AppSpacing.sm),
-
         // Status filter chips
         _FilterChip(
           label: 'All',
@@ -103,7 +72,7 @@ class _FilterChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // "All" uses primary color (indigo)
-    final chipColor = label == 'All' ? AppColors.primary : (color ?? AppColors.textSecondary);
+    final chipColor = label == 'All' ? AppColors.sidebarAccent : (color ?? AppColors.textSecondary);
 
     if (label == 'All') {
       // "All" - filled indigo when active, outlined when inactive
@@ -112,19 +81,19 @@ class _FilterChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
         child: Container(
           padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.sm,
-            vertical: AppSpacing.xxs,
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.xs,
           ),
           decoration: BoxDecoration(
-            color: isSelected ? AppColors.primary : Colors.transparent,
+            color: isSelected ? AppColors.sidebarAccent : Colors.transparent,
             borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
             border: Border.all(
-              color: isSelected ? AppColors.primary : AppColors.border,
+              color: isSelected ? AppColors.sidebarAccent : AppColors.border,
             ),
           ),
           child: Text(
             label,
-            style: AppTypography.labelSmall.copyWith(
+            style: AppTypography.labelMedium.copyWith(
               color: isSelected ? Colors.white : AppColors.textSecondary,
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
             ),
@@ -138,8 +107,8 @@ class _FilterChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
         child: Container(
           padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.sm,
-            vertical: AppSpacing.xxs,
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.xs,
           ),
           decoration: BoxDecoration(
             color: isSelected ? chipColor.withOpacity(0.1) : Colors.transparent,
@@ -150,7 +119,7 @@ class _FilterChip extends StatelessWidget {
           ),
           child: Text(
             label,
-            style: AppTypography.labelSmall.copyWith(
+            style: AppTypography.labelMedium.copyWith(
               color: isSelected ? chipColor : AppColors.textSecondary,
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
             ),

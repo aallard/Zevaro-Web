@@ -1,1114 +1,738 @@
 # Zevaro-Web Comprehensive Audit
 
-**Project:** Zevaro COE Platform - Web Client
-**Version:** 1.0.0
-**Audit Date:** 2026-01-31
-**Auditor:** Engineer (Claude Opus 4.5)
-**Audit Type:** Full codebase review with verification
+**Audit Date:** 2026-02-08
+**Source Files:** 153 non-generated `.dart` files (~24,071 lines)
+**Generated Files:** 12 `.g.dart` files (Riverpod code generation)
 
 ---
 
-## Executive Summary
+## 1. Project Overview
 
-Zevaro-Web is a Flutter web client for the Zevaro Continuous Outcome Engineering (COE) platform. The codebase follows a well-organized feature-based architecture with clean separation of concerns, Riverpod for state management, and GoRouter for navigation.
+Zevaro-Web is a **Flutter web application** that serves as the primary browser-based UI for the Zevaro Continuous Outcome Engineering (COE) platform. It connects to the Zevaro-Core backend (Spring Boot, port 8080) via REST APIs exposed through the Zevaro-Flutter-SDK.
 
-### Key Metrics
-
-| Metric | Value |
-|--------|-------|
-| Total Dart Files | 126 |
-| Estimated Lines of Code | ~8,000 |
-| Feature Modules | 8 |
-| Screen Components | 16+ |
-| Provider Files | 9 |
-| Test Coverage | <1% |
-| Critical Issues | 6 |
-| TODO Items | 18 |
-
-### Overall Assessment: B+ (7.2/10)
-
-| Category | Score | Notes |
-|----------|-------|-------|
-| Architecture | 9/10 | Excellent feature-based modular structure |
-| Code Quality | 8/10 | Clean, consistent patterns throughout |
-| Maintainability | 8/10 | Good separation, clear naming conventions |
-| Security | 6/10 | Debug prints in production, client-side checks |
-| Testing | 2/10 | Minimal coverage, only 2 trivial tests |
-| Documentation | 4/10 | Sparse comments, basic README |
-| Completeness | 7/10 | 18 TODOs remaining, some placeholder screens |
-
-**Status: DEVELOPMENT/MVP READY - Not production ready**
+| Property | Value |
+|---|---|
+| Package Name | `zevaro_web` |
+| Version | 1.0.0+1 |
+| Dart SDK | `>=3.2.0 <4.0.0` |
+| State Management | Riverpod 2.x (flutter_riverpod + riverpod_annotation + riverpod_generator) |
+| Routing | GoRouter 17.x |
+| API Layer | Zevaro-Flutter-SDK (local path dependency at `../Zevaro-Flutter-SDK`) |
+| Design System | Material 3 with custom theme |
+| Default API URL | `http://localhost:8080/api/v1` |
+| Default Port | 3000 (Flutter web dev server) |
 
 ---
 
-## Table of Contents
+## 2. Architecture
 
-1. [Project Structure](#1-project-structure--organization)
-2. [Dependencies Analysis](#2-dependencies-analysis)
-3. [Application Architecture](#3-application-architecture)
-4. [UI Components & Theming](#4-ui-components--theming)
-5. [Routing & Navigation](#5-routing--navigation)
-6. [State Management](#6-state-management)
-7. [API Integration](#7-api-integration)
-8. [Features & Screens](#8-features--screens)
-9. [Code Quality](#9-code-quality--testing)
-10. [Security Analysis](#10-security-analysis)
-11. [Performance](#11-performance-considerations)
-12. [Issues & Observations](#12-issues--observations)
-13. [Recommendations](#13-recommendations)
-14. [Appendices](#appendices)
-
----
-
-## 1. Project Structure & Organization
-
-**Rating: 9/10 - EXCELLENT**
-
-### Directory Hierarchy
+### Directory Structure
 
 ```
 lib/
-├── main.dart                    # Entry point with SDK configuration
-├── app.dart                     # Root widget with routing & theming
-├── core/
-│   ├── router/                  # Navigation & routing
-│   │   ├── app_router.dart     # GoRouter configuration (189 lines)
-│   │   ├── app_router.g.dart   # Generated
-│   │   ├── routes.dart         # Route constants (29 lines)
-│   │   └── guards/
-│   │       └── auth_guard.dart # Auth redirect logic (37 lines)
-│   ├── theme/                   # Design system
-│   │   ├── app_theme.dart      # Material theme (153 lines)
-│   │   ├── app_colors.dart     # Color palette (57 lines)
-│   │   ├── app_typography.dart # Font styles (108 lines)
-│   │   └── app_spacing.dart    # Spacing scale (35 lines)
-│   └── constants/
-│       └── app_constants.dart  # App-wide constants (20 lines)
-├── features/                    # Feature modules (8 total)
-│   ├── auth/                    # Authentication (~600 lines)
-│   ├── dashboard/               # Main dashboard (~500 lines)
-│   ├── decisions/               # Decision queue - CORE (~2,500 lines)
-│   ├── outcomes/                # OKR outcomes (~1,500 lines)
-│   ├── hypotheses/              # Hypothesis testing (~1,800 lines)
-│   ├── teams/                   # Team management (~800 lines)
-│   ├── stakeholders/            # Stakeholder management (~500 lines)
-│   └── settings/                # User preferences (~800 lines)
-└── shared/                      # Reusable components (~600 lines)
-    ├── widgets/
-    │   ├── app_shell/          # Main layout (sidebar, header)
-    │   └── common/             # Avatar, Badge, Loading, Error
-    ├── providers/              # Shared providers
-    └── extensions/             # Dart extensions
+  main.dart                          # Entry point, SDK config, ProviderScope
+  app.dart                           # ZevaroApp - MaterialApp.router setup
+  core/
+    constants/
+      app_constants.dart             # App name, version, animation durations, breakpoints, pagination
+    router/
+      app_router.dart                # GoRouter configuration, AuthChangeNotifier, ShellRoute
+      routes.dart                    # Route path constants and helper methods
+      guards/
+        auth_guard.dart              # Auth redirect logic
+    theme/
+      app_breakpoints.dart           # Responsive breakpoints + ResponsiveBuilder widget
+      app_colors.dart                # Complete color palette (brand, status, urgency, kanban, chart)
+      app_spacing.dart               # 4px base unit spacing + sidebar/header dimensions
+      app_theme.dart                 # Light + Dark ThemeData with no-transition pages
+      app_typography.dart            # Inter font family, heading/body/label/metric styles
+      theme_exports.dart             # Barrel export
+  features/
+    auth/                            # Authentication flow
+    dashboard/                       # Project dashboard with metrics
+    decisions/                       # Decision queue (kanban + list views)
+    experiments/                     # Experiment tracking
+    hypotheses/                      # Hypothesis lifecycle management
+    outcomes/                        # Outcome + Key Results (OKR-like)
+    projects/                        # Project listing and selection
+    settings/                        # User, org, notification settings
+    stakeholders/                    # Stakeholder engagement tracking
+    teams/                           # Team management + member CRUD
+  shared/
+    extensions/                      # (empty - unused directory)
+    providers/
+      shell_providers.dart           # SidebarCollapsed, CurrentNavIndex
+    widgets/
+      app_shell/                     # AppShell, Sidebar, Header, UserMenu
+      common/                        # 16 reusable widgets (avatar, badge, kanban, etc.)
 ```
 
-### Feature Module Pattern
+### Pattern
 
-Each feature follows a consistent structure:
+Each feature module follows a consistent structure:
 
 ```
-feature/
-├── feature.dart           # Barrel export
-├── screens/               # Full-page widgets
-│   ├── feature_screen.dart
-│   └── feature_detail_screen.dart
-├── widgets/               # Feature-specific widgets
-│   ├── feature_card.dart
-│   ├── feature_list.dart
-│   └── feature_filters.dart
-└── providers/             # Riverpod state
-    ├── feature_providers.dart
-    └── feature_providers.g.dart
+features/<name>/
+  <name>.dart          # Barrel file exporting screens, widgets, providers
+  providers/
+    <name>_providers.dart     # Riverpod notifiers, filter states, CRUD actions
+    <name>_providers.g.dart   # Generated code
+  screens/
+    <name>_screen.dart        # List/main screen
+    <name>_detail_screen.dart # Detail screen (where applicable)
+  widgets/
+    *.dart                    # Feature-specific UI widgets
 ```
-
-### Strengths
-
-- **Modular Architecture** - Self-contained feature modules
-- **Clear Separation** - Core, features, and shared layers
-- **Consistent Patterns** - All features follow same structure
-- **Barrel Exports** - Clean public APIs per feature
-- **SDK Integration** - Backend abstracted through Zevaro-Flutter-SDK
 
 ---
 
-## 2. Dependencies Analysis
+## 3. Dependencies
 
-**Rating: 8/10 - VERY GOOD**
+### Runtime Dependencies
 
-### pubspec.yaml
+| Package | Version | Purpose |
+|---|---|---|
+| `zevaro_flutter_sdk` | local path | API client, models, Riverpod providers for all Zevaro services |
+| `flutter_riverpod` | ^2.4.10 | State management |
+| `riverpod_annotation` | ^2.3.4 | Code generation annotations for Riverpod |
+| `go_router` | ^17.0.1 | Declarative routing with auth guards |
+| `flutter_svg` | ^2.0.10 | SVG rendering (imported but no SVGs in assets) |
+| `cached_network_image` | ^3.3.1 | Cached image loading (imported but not directly used in code) |
+| `shimmer` | ^3.0.0 | Loading placeholder animations |
+| `intl` | ^0.19.0 | Date/number formatting |
+| `url_launcher` | ^6.2.4 | External URL launching (docs link in settings) |
+| `shared_preferences` | ^2.2.2 | Local storage for theme mode and notification preferences |
 
-```yaml
-name: zevaro_web
-version: 1.0.0+1
-environment:
-  sdk: '>=3.2.0 <4.0.0'
-```
+### Dev Dependencies
 
-### Runtime Dependencies (11 packages)
-
-| Package | Version | Purpose | Status |
-|---------|---------|---------|--------|
-| flutter | SDK | Framework | Required |
-| zevaro_flutter_sdk | local | Backend integration | Current |
-| flutter_riverpod | ^2.4.10 | State management | Current |
-| riverpod_annotation | ^2.3.4 | Provider annotations | Current |
-| go_router | ^13.2.0 | Declarative routing | Current |
-| flutter_svg | ^2.0.10 | SVG rendering | Current |
-| cached_network_image | ^3.3.1 | Image caching | Current |
-| shimmer | ^3.0.0 | Loading effects | Current |
-| intl | ^0.19.0 | Internationalization | Current |
-| url_launcher | ^6.2.4 | External links | Current |
-| shared_preferences | ^2.2.2 | Local storage | Current |
-
-### Dev Dependencies (4 packages)
-
-| Package | Version | Purpose | Status |
-|---------|---------|---------|--------|
-| flutter_test | SDK | Testing | Required |
-| flutter_lints | ^3.0.1 | Linting | Current |
-| build_runner | ^2.4.8 | Code generation | Current |
-| riverpod_generator | ^2.3.11 | Provider generation | Current |
-
-### Issues Found
-
-**Issue #1: Missing Font Declaration**
-- **Status:** AppTypography uses `Inter` font but NOT declared in pubspec.yaml
-- **Impact:** Falls back to system font in production
-- **Location:** `app_typography.dart` line 5
-
-**Issue #2: Missing Testing Libraries**
-- **Status:** No `mockito`, `mocktail`, or integration test packages
-- **Impact:** Cannot write comprehensive tests
-
-**Issue #3: Missing Error Monitoring**
-- **Status:** No `sentry`, `firebase_crashlytics`, or similar
-- **Impact:** Production errors not tracked
-
-### Positive Observations
-
-- Modern, maintained packages
-- Focused dependency list (11 runtime)
-- Clean separation of concerns
-- Local SDK reference for tight integration
+| Package | Version | Purpose |
+|---|---|---|
+| `flutter_test` | SDK | Testing framework |
+| `flutter_lints` | ^6.0.0 | Static analysis linting |
+| `build_runner` | ^2.4.8 | Code generation runner |
+| `riverpod_generator` | ^2.3.11 | Generates Riverpod provider code |
 
 ---
 
-## 3. Application Architecture
+## 4. Routing
 
-**Rating: 9/10 - EXCELLENT**
+### Route Definitions (`lib/core/router/routes.dart`)
 
-### Architecture Pattern
+| Route Path | Name | Screen | Detail Route |
+|---|---|---|---|
+| `/login` | login | LoginScreen | - |
+| `/register` | register | RegisterScreen | - |
+| `/forgot-password` | forgotPassword | ForgotPasswordScreen | - |
+| `/reset-password` | resetPassword | ResetPasswordScreen | `?token=` query param |
+| `/projects` | projects | ProjectsScreen | `/projects/:id` |
+| `/` | dashboard | DashboardScreen | - |
+| `/decisions` | decisions | DecisionsScreen | `/decisions/:id` |
+| `/outcomes` | outcomes | OutcomesScreen | `/outcomes/:id` |
+| `/hypotheses` | hypotheses | HypothesesScreen | `/hypotheses/:id` |
+| `/experiments` | experiments | ExperimentsScreen | `/experiments/:id` |
+| `/teams` | teams | TeamsScreen | `/teams/:id` |
+| `/stakeholders` | stakeholders | StakeholdersScreen | `/stakeholders/:id` |
+| `/settings` | settings | SettingsScreen | - |
+| `/settings/organization` | organizationSettings | OrganizationSettingsScreen | - |
+| `/profile` | profile | ProfileScreen | - |
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                      Presentation Layer                      │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────────┐ │
-│  │ Screens  │  │ Widgets  │  │ Dialogs  │  │ App Shell    │ │
-│  └────┬─────┘  └────┬─────┘  └────┬─────┘  └──────────────┘ │
-│       │             │             │                          │
-│       └─────────────┴─────────────┘                          │
-│                      │                                       │
-│              ┌───────┴───────┐                               │
-│              │   Providers   │  (Riverpod State Management)  │
-│              └───────┬───────┘                               │
-└──────────────────────┼──────────────────────────────────────┘
-                       │
-┌──────────────────────┼──────────────────────────────────────┐
-│                      │         Domain Layer                  │
-│              ┌───────┴───────┐                               │
-│              │  Zevaro SDK   │  (Models, Services, Enums)   │
-│              └───────┬───────┘                               │
-└──────────────────────┼──────────────────────────────────────┘
-                       │
-┌──────────────────────┼──────────────────────────────────────┐
-│              ┌───────┴───────┐         Data Layer           │
-│              │  HTTP Client  │  (Dio, Interceptors)         │
-│              └───────────────┘                               │
-└─────────────────────────────────────────────────────────────┘
-```
+### Router Configuration
 
-### Entry Points
+- **Initial location:** `/projects` (not `/` dashboard -- this is intentional, projects is the entry point)
+- **Auth guard:** `AuthGuard` class checks `authStateProvider` and redirects unauthenticated users to `/login?redirect=<path>`
+- **Auth change notifier:** `AuthChangeNotifier` listens to `authStateProvider` and triggers router refresh
+- **Page transitions:** All transitions disabled (`NoTransitionPage`) for web-like SPA feel
+- **Shell route:** All authenticated routes are nested under a `ShellRoute` that wraps content in `AppShell` (sidebar + header)
+- **Error page:** `NotFoundScreen` shown for unknown routes
+- **Title derivation:** AppShell title is derived from the current route path in the `ShellRoute.builder` callback
 
-**main.dart (34 lines)**
-```dart
-void main() {
-  WidgetsFlutterBinding.ensureInitialized();
-  runApp(
-    ProviderScope(
-      overrides: [
-        sdkConfigNotifierProvider.overrideWith(
-          () => SdkConfigNotifier()
-            ..setConfig(const SdkConfig(
-              baseUrl: String.fromEnvironment(
-                'API_BASE_URL',
-                defaultValue: 'http://localhost:8080/api',
-              ),
-              enableLogging: bool.fromEnvironment(
-                'ENABLE_LOGGING',
-                defaultValue: true,
-              ),
-            )),
-        ),
-      ],
-      child: const ZevaroApp(),
-    ),
-  );
-}
-```
+### Auth Guard Behavior
 
-**app.dart (23 lines)**
-```dart
-class ZevaroApp extends ConsumerWidget {
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final router = ref.watch(appRouterProvider);
-    return MaterialApp.router(
-      title: 'Zevaro',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.light,
-      darkTheme: AppTheme.dark,
-      themeMode: ThemeMode.light, // TODO: User preference
-      routerConfig: router,
-    );
-  }
-}
-```
-
-### Layer Responsibilities
-
-| Layer | Responsibility | Implementation |
-|-------|---------------|----------------|
-| Presentation | UI rendering, user interaction | Screens, Widgets, Dialogs |
-| State | Application state, business logic | Riverpod Providers |
-| Domain | Data models, service interfaces | Zevaro-Flutter-SDK |
-| Data | HTTP communication, storage | SDK HTTP client, SharedPreferences |
+1. Unauthenticated + protected route -> redirect to `/login?redirect=<current_path>`
+2. Authenticated + auth route -> redirect to `/projects`
+3. Loading + protected route -> redirect to login (will bounce back after auth resolves)
+4. Otherwise -> no redirect
 
 ---
 
-## 4. UI Components & Theming
+## 5. Features
 
-**Rating: 8/10 - VERY GOOD**
+### 5.1 Auth (`lib/features/auth/`)
 
-### Design System
+**Screens (4):**
+- `LoginScreen` - Email/password form, error handling, redirect support via query param
+- `RegisterScreen` - Full registration with "New organization" vs "I have an invite" toggle
+- `ForgotPasswordScreen` - Email submission with success state showing "Check your email"
+- `ResetPasswordScreen` - Token-based password reset with confirmation
 
-#### Colors (`app_colors.dart` - 57 definitions)
+**Widgets (4):**
+- `AuthHeader` - Logo ("Z" box + "Zevaro" text), title, subtitle
+- `AuthFormField` - Label + TextFormField with password toggle support
+- `AuthButton` - Full-width ElevatedButton or OutlinedButton with loading spinner
+- `SocialAuthButton` - Outlined button with icon (prepared but not currently used in any screen)
 
-**Brand Colors:**
-```dart
-primary = Color(0xFF3B82F6);      // Blue
-primaryDark = Color(0xFF1D4ED8);
-primaryLight = Color(0xFF93C5FD);
-secondary = Color(0xFF8B5CF6);    // Purple
-```
+**Providers:**
+- `LoginFormState` - Async notifier calling `authStateProvider.notifier.login()`
+- `RegisterFormState` - Calls `authService.register()`
+- `ForgotPasswordFormState` - Calls `authService.forgotPassword()`
+- `ResetPasswordFormState` - Calls `authService.resetPassword()`
+- `AuthValidators` - Static validation methods (email regex, password, confirmPassword, required)
 
-**Status Colors:**
-```dart
-success = Color(0xFF10B981);      // Green
-warning = Color(0xFFF59E0B);      // Amber
-error = Color(0xFFEF4444);        // Red
-info = Color(0xFF06B6D4);         // Cyan
-```
+### 5.2 Dashboard (`lib/features/dashboard/`)
 
-**Decision Urgency Colors:**
-```dart
-urgencyBlocking = Color(0xFFEF4444);  // Red (4h SLA)
-urgencyHigh = Color(0xFFF59E0B);      // Amber (8h SLA)
-urgencyNormal = Color(0xFF3B82F6);    // Blue (24h SLA)
-urgencyLow = Color(0xFF9CA3AF);       // Gray (72h SLA)
-```
+**Screens (1):**
+- `DashboardScreen` - Shows "Select a project" if none selected; otherwise loads `ProjectDashboard` from SDK
 
-**Hypothesis Status Colors:**
-```dart
-hypothesisDraft = Color(0xFF9CA3AF);
-hypothesisReady = Color(0xFF3B82F6);
-hypothesisBlocked = Color(0xFFEF4444);
-hypothesisBuilding = Color(0xFF8B5CF6);
-hypothesisDeployed = Color(0xFFF59E0B);
-hypothesisMeasuring = Color(0xFF06B6D4);
-hypothesisValidated = Color(0xFF10B981);
-hypothesisInvalidated = Color(0xFF6B7280);
-```
+**Widgets (8):**
+- `MetricCard` - Stat card with icon, value, subtitle, trend indicator
+- `DecisionQueuePanel` - Shows pending decisions in a panel
+- `DecisionQueuePreview` - Compact decision queue preview
+- `DecisionVelocityChart` - Chart panel for decision metrics over time
+- `OutcomesProgressPanel` - Shows outcome progress bars
+- `ActivityFeedPanel` - Recent activity timeline
+- `MyPendingResponses` - User's pending decision responses
+- `QuickActions` - Action shortcuts
+- `StatCard` - Simple stat display
 
-#### Typography (`app_typography.dart` - 12 styles)
+**Providers:**
+- `dashboardStats` - Aggregates data from multiple SDK providers (decisions, blocking decisions, pending responses, outcomes, hypotheses)
+- `DashboardStats` - Local data class with `hasUrgentItems` computed property
 
-| Style | Size | Weight | Use Case |
-|-------|------|--------|----------|
-| h1 | 32px | Bold (700) | Page titles |
-| h2 | 24px | SemiBold (600) | Section headers |
-| h3 | 20px | SemiBold (600) | Card titles |
-| h4 | 18px | SemiBold (600) | Subsections |
-| bodyLarge | 16px | Regular (400) | Primary content |
-| bodyMedium | 14px | Regular (400) | Standard text |
-| bodySmall | 12px | Regular (400) | Secondary text |
-| labelLarge | 14px | Medium (500) | Form labels |
-| labelMedium | 12px | Medium (500) | Chip labels |
-| labelSmall | 11px | Medium (500) | Metadata |
-| button | 14px | SemiBold (600) | Button text |
-| code | 13px | Regular (400) | Monospace |
+**Dashboard Layout:**
+- Row 1: Four metric cards (Pending Decisions, Active Outcomes, Running Experiments, Avg Decision Time)
+- Row 2: Decision Queue Panel (3/5 width) + Decision Velocity Chart (2/5 width)
+- Row 3: Outcomes Progress Panel + Activity Feed Panel
+- Responsive: stacks vertically below 900px width
 
-**Font Family:** Inter (JetBrains Mono for code)
+### 5.3 Projects (`lib/features/projects/`)
 
-#### Spacing (`app_spacing.dart` - 15 constants)
+**Screens (1):**
+- `ProjectsScreen` - Card grid or list view with search, filter pills (by status), sort dropdown, and "New Project" button
 
-```dart
-// Base 4px unit
-xxs = 4;    xs = 8;    sm = 12;   md = 16;
-lg = 24;    xl = 32;   xxl = 48;  xxxl = 64;
+**Widgets (4):**
+- `ProjectCard` - Project card with color accent, stats summary
+- `ProjectListView` - Table/list view of projects
+- `ProjectFiltersBar` - Status filter pills
+- `CreateProjectDialog` - Dialog for creating a new project
 
-// Border Radius
-radiusSm = 4;   radiusMd = 8;   radiusLg = 12;
-radiusXl = 16;  radiusFull = 9999;
+**Providers:**
+- `ProjectViewModeNotifier` - Toggles between `card` and `list` view
+- `ProjectFilters` - Status and search filter state
+- `filteredProjects` - Fetches from `projectServiceProvider` with filter application
+- `CreateProject` - Async action calling `projectService.createProject()`
 
-// Layout
-sidebarWidth = 256;
-sidebarCollapsedWidth = 72;
-headerHeight = 64;
-```
+### 5.4 Decisions (`lib/features/decisions/`)
 
-### Reusable Widgets
+**Screens (2):**
+- `DecisionsScreen` - Board (kanban) or list view with filter pills (All Types, My Decisions, Blocking), search bar, sort, view toggle, and "New Decision" button
+- `DecisionDetailScreen` - Two-column layout (wide) or single column (narrow) with back button, header, description, votes, comments, sidebar panel, and resolve button
 
-**Common Components (`shared/widgets/common/`):**
+**Widgets (16):**
+- `CreateDecisionDialog` - Form for new decisions
+- `DecisionBoard` - Kanban board view using `DraggableKanban`
+- `DecisionColumn` - Individual kanban column
+- `DecisionCard` - Card shown in board/list
+- `DecisionList` - List view of decisions
+- `DecisionListItem` - Row in the list view
+- `DecisionFilters` - Filter bar for decisions
+- `DecisionHeader` - Title, urgency badge, SLA, escalate button
+- `DecisionDescription` - Markdown/text description panel
+- `DecisionSidebarPanel` - Metadata sidebar (assignee, team, dates, type)
+- `DecisionVotes` - Vote summary and voting interface
+- `DecisionComments` - Comment thread with reply support
+- `DecisionResolution` - Resolution dialog/form
+- `UrgencyBadge` - Color-coded urgency indicator
+- `SlaIndicator` - SLA countdown/breach indicator
+- `VoteCard` / `CommentCard` - Individual vote and comment display
 
-| Widget | Purpose |
-|--------|---------|
-| `Avatar` | User avatar with initials fallback |
-| `Badge` | Status badges with colors |
-| `LoadingIndicator` | Centered spinner with message |
-| `ErrorView` | Error display with retry button |
-| `ErrorScreen` | Full-page error state |
-| `NotFoundScreen` | 404 error page |
+**Providers:**
+- `DecisionViewMode` - Board vs List toggle
+- `DecisionFilters` / `DecisionFilterState` - Urgency, type, team, search filters with `copyWith` and clear support
+- `decisionsByStatus` - Groups decisions by status (NEEDS_INPUT, UNDER_DISCUSSION, DECIDED) with filter application
+- `CreateDecision` - Creates decision and invalidates related providers
+- `decisionDetail` - Fetches single decision with details
+- `VoteOnDecision` - Vote action with provider invalidation
+- `ResolveDecisionAction` - Resolve action
+- `AddDecisionComment` - Comment action
 
-**Shell Components (`shared/widgets/app_shell/`):**
+### 5.5 Outcomes (`lib/features/outcomes/`)
 
-| Widget | Purpose |
-|--------|---------|
-| `AppShell` | Responsive main layout |
-| `Sidebar` | Collapsible navigation (256px/72px) |
-| `AppHeader` | Top bar with title, search, user menu |
-| `UserMenu` | Profile dropdown |
+**Screens (2):**
+- `OutcomesScreen` - List view with filters
+- `OutcomeDetailScreen` - Detail view with key results
 
-### Responsive Breakpoints
+**Widgets (10):**
+- `CreateOutcomeDialog` - New outcome form
+- `AddKeyResultDialog` - Add key result to an outcome
+- `OutcomeCard` / `OutcomeCardEnhanced` - Outcome display cards (two variants)
+- `OutcomeList` - List layout
+- `OutcomeFilters` - Filter bar
+- `OutcomeStatusBadge` - Status indicator
+- `OutcomeKeyResults` - Key results section
+- `KeyResultCard` - Individual key result display
+- `KeyResultProgress` - Progress bar for key results
 
-```dart
-// AppConstants
-static const double mobileBreakpoint = 640;
-static const double tabletBreakpoint = 1024;
-static const double desktopBreakpoint = 1280;
-```
+**Providers:**
+- `OutcomeFilters` / `OutcomeFilterState` - Status, priority, team, search filters
+- `filteredOutcomes` - Fetches with server-side filters + client-side search
+- `outcomeDetail` - Single outcome with key results
+- `outcomeHypotheses` - Hypotheses linked to an outcome
+- `CreateOutcome` - Create action
+- `UpdateOutcomeStatus` - Status transition
+- `UpdateKeyResultProgress` - Progress update
+- `AddKeyResult` - Add key result to outcome
 
-| Breakpoint | Layout |
-|------------|--------|
-| <640px | Mobile - drawer navigation |
-| 640-1024px | Tablet - collapsible sidebar |
-| 1024-1280px | Desktop - persistent sidebar |
-| >1280px | Wide - full sidebar with extra space |
+### 5.6 Hypotheses (`lib/features/hypotheses/`)
 
----
+**Screens (2):**
+- `HypothesesScreen` - List/kanban view with filters
+- `HypothesisDetailScreen` - Detail view with workflow, blocking info
 
-## 5. Routing & Navigation
+**Widgets (10):**
+- `CreateHypothesisDialog` - New hypothesis form
+- `HypothesisCard` / `HypothesisCardEnhanced` - Two card variants
+- `HypothesisList` - List layout
+- `HypothesisKanban` - Kanban board view grouped by lifecycle status
+- `HypothesisFilters` - Filter bar
+- `HypothesisStatusBadge` - Status indicator
+- `HypothesisEffortImpact` - Effort/impact scoring display
+- `HypothesisBlocking` - Shows blocking decision information
+- `HypothesisWorkflow` - Status transition workflow visualization
 
-**Rating: 8/10 - VERY GOOD**
+**Providers:**
+- `HypothesisFilters` / `HypothesisFilterState` - Status, outcome, team, blocked-only, search
+- `filteredHypotheses` - Fetches and filters, sorts by priority score
+- `hypothesisDetail` - Single hypothesis with metrics
+- `TransitionHypothesisStatus` - Status transition action
+- `ValidateHypothesis` - Terminal success state
+- `InvalidateHypothesis` - Terminal failure state
+- `CreateHypothesis` - Create action
+- `hypothesisList` - For kanban board
+- `hypothesis` - Simple single fetch
+- `hypothesisExperiments` - Stub (returns empty list, marked TODO)
 
-### Route Definitions (`routes.dart`)
+### 5.7 Experiments (`lib/features/experiments/`)
 
-```dart
-class Routes {
-  // Auth routes (unprotected)
-  static const login = '/login';
-  static const register = '/register';
-  static const forgotPassword = '/forgot-password';
-  static const resetPassword = '/reset-password';
+**Screens (2):**
+- `ExperimentsScreen` - List view with tab filters (Running, Completed, Draft)
+- `ExperimentDetailScreen` - Detail view
 
-  // Main routes (protected)
-  static const dashboard = '/';
-  static const decisions = '/decisions';
-  static const decisionDetail = '/decisions/:id';
-  static const outcomes = '/outcomes';
-  static const outcomeDetail = '/outcomes/:id';
-  static const hypotheses = '/hypotheses';
-  static const hypothesisDetail = '/hypotheses/:id';
-  static const teams = '/teams';
-  static const teamDetail = '/teams/:id';
-  static const stakeholders = '/stakeholders';
-  static const stakeholderDetail = '/stakeholders/:id';
-  static const settings = '/settings';
-  static const profile = '/profile';
-}
-```
+**Widgets (1):**
+- `ExperimentCard` - Experiment display card
 
-### Router Configuration (`app_router.dart` - 189 lines)
+**Providers:**
+- `ExperimentFilterNotifier` - Tab state (running/completed/draft)
+- `filteredExperiments` - Fetches by status and selected project
+- `allExperiments` - All experiments for summary stats
+- `experimentDetail` - Single experiment fetch
 
-**Structure:**
-```
-GoRouter
-├── Auth Routes (redirect: AuthGuard)
-│   ├── /login → LoginScreen
-│   ├── /register → RegisterScreen
-│   ├── /forgot-password → ForgotPasswordScreen
-│   └── /reset-password → ResetPasswordScreen
-└── ShellRoute (builder: AppShell)
-    ├── / → DashboardScreen
-    ├── /decisions → DecisionsScreen
-    ├── /decisions/:id → DecisionDetailScreen
-    ├── /outcomes → OutcomesScreen
-    ├── /outcomes/:id → OutcomeDetailScreen
-    ├── /hypotheses → HypothesesScreen
-    ├── /hypotheses/:id → HypothesisDetailScreen
-    ├── /teams → TeamsScreen
-    ├── /teams/:id → TeamDetailScreen
-    ├── /stakeholders → StakeholdersScreen
-    ├── /stakeholders/:id → StakeholderDetailScreen
-    ├── /settings → SettingsScreen
-    └── /profile → ProfileScreen
-```
+### 5.8 Teams (`lib/features/teams/`)
 
-### Auth Guard (`auth_guard.dart` - 37 lines)
+**Screens (2):**
+- `TeamsScreen` - Team listing
+- `TeamDetailScreen` - Team detail with member management
 
-**Logic:**
-1. Check authentication state from SDK
-2. Unauthenticated users → redirect to `/login`
-3. Authenticated users on auth routes → redirect to `/`
-4. Preserve `?redirect=` query parameter for post-login navigation
+**Widgets (8):**
+- `CreateTeamDialog` - New team form
+- `InviteMemberDialog` - Add member to team
+- `TeamCard` - Team display card
+- `TeamList` - List of teams (exported as `TeamListWidget`)
+- `TeamMemberCard` - Individual team member
+- `MemberTable` - Tabular member display
+- `StakeholderScorecard` - Stakeholder metrics card
+- `WorkloadMatrix` - Team workload visualization
 
-**Issue Found:**
-```dart
-// Lines 17-47 contain 8 print() statements
-print('[AUTH_GUARD] Checking route: ${state.matchedLocation}');
-print('[AUTH_GUARD] Auth state: $authState');
-// ... more debug prints
-```
-**Risk:** Debug info visible in browser console in production
+**Providers:**
+- `teamsList` - All visible teams
+- `teamDetail` - Team with members
+- `AddTeamMember` - Add member action
+- `UpdateMemberRole` - Role change action
+- `RemoveTeamMember` - Remove action
+- `CreateTeam` - Create action
+- `availableUsers` - Users not yet in a team (for invite dialog)
+- `teamMembersWithStats` - Members with statistics (uses first team only)
+- `teamStakeholders` - Stakeholders associated with team
+
+### 5.9 Stakeholders (`lib/features/stakeholders/`)
+
+**Screens (2):**
+- `StakeholdersScreen` - Stakeholder overview/leaderboard
+- `StakeholderDetailScreen` - Individual stakeholder detail
+
+**Widgets (6):**
+- `StakeholderLeaderboard` - Ranked list of stakeholders by engagement
+- `LeaderboardEntry` - Individual leaderboard row
+- `SlowRespondersCard` - Highlights slow responders
+- `StakeholderStatsCard` - Engagement statistics
+- `PendingResponsesCard` - Pending response list
+- `ResponseHistoryCard` - Past response timeline
+
+**Providers:**
+- `LeaderboardPeriod` - Period selection (default "30d")
+- `stakeholderDetail` - Stakeholder with stats
+- `myStakeholderProfile` - Current user's stakeholder profile
+- `SendReminder` - Reminder action
+- `stakeholderPendingResponses` - Pending responses for a stakeholder
+- `stakeholderResponseHistory` - Completed responses
+
+### 5.10 Settings (`lib/features/settings/`)
+
+**Screens (3):**
+- `SettingsScreen` - Main settings page with sections: Account, Appearance, Notifications, Organization (admin only), About, Danger Zone
+- `ProfileScreen` - Profile editing form
+- `OrganizationSettingsScreen` - Org info, SLA settings, security settings, billing (placeholder), delete org
+
+**Widgets (6):**
+- `SettingsSection` - Section header with child tiles
+- `SettingsTile` - Individual setting row with icon, title, subtitle, tap handler, destructive style
+- `ThemeSelector` - Theme mode picker (Light/Dark/System)
+- `NotificationSettingsWidget` - Toggle switches for email/push notifications
+- `ProfileForm` - Name, email, avatar editing form
+- `FeedbackDialog` - Send feedback dialog
+
+**Providers:**
+- `ThemeModeSetting` - Persisted to SharedPreferences, defaults to `ThemeMode.light`
+- `NotificationSettings` / `NotificationPrefs` - Four toggle preferences persisted to SharedPreferences
+- `UpdateProfile` - Calls `userService.updateProfile()`
+- `ChangePassword` - Calls `authService.changePassword()`
 
 ---
 
 ## 6. State Management
 
-**Rating: 9/10 - EXCELLENT**
-
 ### Provider Architecture
 
-Uses **Riverpod 2.x** with code generation (`@riverpod` annotations).
+The app uses **Riverpod 2.x** with code generation (`@riverpod` annotations). State flows in this hierarchy:
 
-### Provider Inventory
+1. **SDK Providers** (from `zevaro_flutter_sdk`) - These are the foundation:
+   - `authStateProvider` / `authServiceProvider` - Authentication
+   - `currentUserProvider` / `userServiceProvider` - User data
+   - `currentTenantProvider` - Tenant/organization data
+   - `selectedProjectIdProvider` / `selectedProjectProvider` - Current project context
+   - `decisionQueueProvider` / `decisionServiceProvider` - Decision CRUD
+   - `blockingDecisionsProvider` - Blocking decisions alert
+   - `myPendingResponsesProvider` - User's pending responses
+   - `myOutcomesProvider` / `outcomeServiceProvider` - Outcome CRUD
+   - `myHypothesesProvider` / `hypothesisServiceProvider` - Hypothesis CRUD
+   - `blockedHypothesesProvider` - Blocked hypotheses
+   - `experimentServiceProvider` - Experiment CRUD
+   - `teamServiceProvider` / `myTeamsProvider` - Team CRUD
+   - `stakeholderServiceProvider` - Stakeholder CRUD
+   - `projectServiceProvider` - Project CRUD
+   - `projectDashboardProvider` - Dashboard data
+   - `decisionActionsProvider` - Decision workflow actions
+   - `sdkConfigNotifierProvider` - SDK configuration
 
-| Feature | File | Purpose |
-|---------|------|---------|
-| Shell | `shell_providers.dart` | Sidebar collapse state |
-| Auth | `auth_form_providers.dart` | Login/register form state |
-| Dashboard | `dashboard_providers.dart` | Stats, pending items |
-| Decisions | `decisions_providers.dart` | Queue, filters, CRUD |
-| Outcomes | `outcomes_providers.dart` | List, key results |
-| Hypotheses | `hypotheses_providers.dart` | Workflow, transitions |
-| Teams | `teams_providers.dart` | Members, invitations |
-| Stakeholders | `stakeholders_providers.dart` | Leaderboard, responses |
-| Settings | `settings_providers.dart` | Theme, notifications |
+2. **Feature Providers** (Web-specific) - Filter states, view modes, action notifiers:
+   - Each feature has filter state notifiers (e.g., `DecisionFilters`, `OutcomeFilters`)
+   - View mode toggles (e.g., `DecisionViewMode`, `ProjectViewModeNotifier`)
+   - CRUD action notifiers that call SDK services and invalidate related providers
+   - Computed/aggregated providers (e.g., `decisionsByStatus`, `filteredOutcomes`)
 
-### Provider Patterns
+3. **Shell Providers** - UI state:
+   - `SidebarCollapsed` - Sidebar expand/collapse
+   - `CurrentNavIndex` - Navigation highlight index
 
-**Async Data Provider:**
-```dart
-@riverpod
-Future<List<Decision>> decisionQueue(Ref ref) async {
-  final service = ref.watch(decisionServiceProvider);
-  return service.getPendingDecisions();
-}
+### State Flow Pattern
+
+```
+User Action -> Widget calls ref.read(actionProvider.notifier).doThing()
+           -> Action notifier sets loading state
+           -> Calls SDK service method
+           -> On success: invalidates related data providers, returns result
+           -> On failure: sets error state
+           -> Watchers of data providers automatically re-fetch and rebuild UI
 ```
 
-**Stateful Notifier:**
-```dart
-@riverpod
-class DecisionFilters extends _$DecisionFilters {
-  @override
-  DecisionFilterState build() => const DecisionFilterState();
+### Provider Configuration
 
-  void setUrgency(DecisionUrgency? urgency) {
-    state = state.copyWith(urgency: urgency);
-  }
-
-  void clear() {
-    state = const DecisionFilterState();
-  }
-}
-```
-
-**Action Provider:**
-```dart
-@riverpod
-class VoteOnDecision extends _$VoteOnDecision {
-  @override
-  FutureOr<void> build() {}
-
-  Future<bool> vote(String decisionId, String vote, {String? comment}) async {
-    state = const AsyncLoading();
-    try {
-      final service = ref.read(decisionServiceProvider);
-      await service.vote(decisionId, vote, comment: comment);
-      ref.invalidate(decisionDetailProvider(decisionId));
-      ref.invalidate(decisionQueueProvider);
-      state = const AsyncData(null);
-      return true;
-    } catch (e, st) {
-      state = AsyncError(e, st);
-      return false;
-    }
-  }
-}
-```
-
-### SDK Integration
-
-```dart
-// Access SDK services via providers
-final authService = ref.read(authServiceProvider);
-final decisionService = ref.read(decisionServiceProvider);
-final outcomeService = ref.read(outcomeServiceProvider);
-
-// Watch auth state
-final authState = ref.watch(authStateProvider);
-final currentUser = ref.watch(currentUserProvider);
-```
+The SDK's `sdkConfigNotifierProvider` is overridden in `main.dart` with a `_ConfiguredSdkConfigNotifier` that returns environment-specific `SdkConfig` (API base URL, logging flag). The `ProviderScope` wraps the entire app.
 
 ---
 
-## 7. API Integration
+## 7. Theme
 
-**Rating: 8/10 - VERY GOOD**
+### Color System (`AppColors`)
 
-### Backend Connection
+**Brand:**
+- Primary: `#3B82F6` (Blue) with dark/light variants
+- Secondary: `#8B5CF6` (Purple) with dark/light variants
+- Accent (used in buttons/sidebar): `#4F46E5` (Deep Indigo) -- Note: this differs from `primary`
 
-**Configuration:**
+**Status:**
+- Success: `#10B981` (Green)
+- Warning: `#F59E0B` (Amber)
+- Error: `#EF4444` (Red)
+- Info: `#06B6D4` (Cyan)
+
+**Decision Urgency:** Blocking (Red) > High (Amber) > Normal (Blue) > Low (Gray)
+
+**Hypothesis Status:** 8 distinct colors for lifecycle states (Draft gray, Ready blue, Blocked red, Building purple, Deployed amber, Measuring cyan, Validated green, Invalidated gray)
+
+**Neutrals:** Background `#F9FAFB`, Surface `#FFFFFF`, Border `#E5E7EB`, Text Primary `#111827`, Text Secondary `#6B7280`, Text Tertiary `#9CA3AF`
+
+**Sidebar:** Dark charcoal background `#1F2937` with hover `#374151`, indigo accent `#4F46E5`
+
+**Specialty:** Kanban column backgrounds (very subtle tints), chart colors (5 colors), project accent colors (8 colors), experiment type colors (4 colors)
+
+### Typography (`AppTypography`)
+
+- **Font Family:** Inter (primary), JetBrains Mono (code)
+- **Headings:** h1 (32px/700), h2 (24px/600), h3 (20px/600), h4 (18px/600)
+- **Body:** bodyLarge (16px/400), bodyMedium (14px/400), bodySmall (12px/400)
+- **Labels:** labelLarge (14px/500), labelMedium (12px/500), labelSmall (11px/500)
+- **Special:** button (14px/600), code (13px/400 JetBrains Mono), caption (11px/400), metric (28px/700), metricSmall (20px/600)
+
+### Spacing (`AppSpacing`)
+
+- **Base unit:** 4px
+- **Scale:** xxs(4), xs(8), sm(12), md(16), lg(24), xl(32), xxl(48), xxxl(64)
+- **Border Radius:** sm(4), md(8), lg(12), xl(16), full(9999)
+- **Layout:** sidebarWidth(256), sidebarCollapsedWidth(72), headerHeight(64), pagePadding(24)
+
+### Breakpoints (`AppBreakpoints` + `AppConstants`)
+
+Two overlapping breakpoint systems exist:
+
+`AppBreakpoints` class: mobile(600), tablet(900), desktop(1200), wideDesktop(1440)
+`AppConstants` class: mobile(640), tablet(1024), desktop(1280)
+
+The `AppShell` uses `AppConstants.tabletBreakpoint` (1024) for mobile/desktop layout switching.
+The `AppBreakpoints` class includes a `ResponsiveBuilder` widget and `gridColumns()` helper.
+
+### Theme Variants
+
+Both light and dark `ThemeData` are defined in `AppTheme`. The dark theme is fully specified with custom colors for all components. However, `app.dart` forces `themeMode: ThemeMode.light` regardless of the `themeModeSettingProvider` value, so dark mode is effectively disabled at the app level.
+
+---
+
+## 8. Shared Widgets
+
+### App Shell (`lib/shared/widgets/app_shell/`)
+
+- **`AppShell`** - Main layout wrapper. Desktop: persistent sidebar + header + content. Mobile (<1024px): Drawer-based sidebar with AppBar.
+- **`Sidebar`** - Dark-themed navigation with: Logo, project selector, nav items (Projects, Decision Queue, Outcomes, Hypotheses, Experiments, Team), settings, user profile at bottom. Supports collapsed state (72px) with icons only.
+- **`AppHeader`** - Top header bar with page title, blocking decisions alert badge, and user menu.
+- **`UserMenu`** - Dropdown with Profile, Settings, Sign Out options. Shows user avatar, name, and role.
+- **`SidebarItem`** - Standalone sidebar navigation item with badge support (appears unused -- `_SidebarNavItem` is used instead inline in `Sidebar`).
+- **`SidebarSection`** - Group header for sidebar items (appears unused in current sidebar implementation).
+
+### Common Widgets (`lib/shared/widgets/common/`)
+
+| Widget | Purpose |
+|---|---|
+| `ZAvatar` | Circular avatar with image URL fallback to initials |
+| `ZBadge` | Numeric badge (max "99+") with color customization |
+| `ColorDot` | Small colored circle indicator |
+| `DraggableKanban<T>` | Generic kanban board with drag-and-drop (`Draggable`/`DragTarget`), column configuration, responsive widths |
+| `EmptyState` | Empty state display with icon, title, subtitle, action button; supports compact mode |
+| `ErrorScreen` | Full-page error with retry + go home buttons |
+| `NotFoundScreen` | 404 page with path display |
+| `ErrorView` | Inline error display with retry |
+| `FilterBar` | Pill-style filter chips with optional search field |
+| `InfoRow` | Key-value row for detail panels |
+| `LoadingIndicator` | Centered spinner with optional message |
+| `PageScaffold` | Page wrapper with title, subtitle, actions, body |
+| `ProgressRing` | Custom-painted circular progress with percentage label |
+| `SectionHeader` | Section title with optional icon and trailing widget |
+| `ShimmerCard` / `ShimmerCardList` / `ShimmerCardGrid` / `ShimmerText` | Shimmer loading placeholders |
+| `StatRow` / `StatChip` | Dot-separated stat text and labeled stat chip |
+| `StatusBadge` / `PriorityBadge` | Generic status/priority badges with color from hex strings |
+
+---
+
+## 9. API Integration
+
+### SDK Connection
+
+The app connects to Zevaro-Core exclusively through the `zevaro_flutter_sdk` package (local path dependency). No direct HTTP calls are made from the web app.
+
+**Configuration (`main.dart`):**
 ```dart
-// Environment-based API URL
-final baseUrl = String.fromEnvironment(
-  'API_BASE_URL',
-  defaultValue: 'http://localhost:8080/api',
+const config = SdkConfig(
+  baseUrl: String.fromEnvironment('API_BASE_URL', defaultValue: 'http://localhost:8080/api/v1'),
+  enableLogging: bool.fromEnvironment('ENABLE_LOGGING', defaultValue: true),
 );
 ```
 
-**Build Command:**
-```bash
-flutter build web --dart-define=API_BASE_URL=https://api.zevaro.com
-```
+The SDK config is injected by overriding `sdkConfigNotifierProvider` with a custom `_ConfiguredSdkConfigNotifier`.
 
 ### SDK Services Used
 
-| Service | Operations |
-|---------|------------|
-| `AuthService` | login, register, logout, resetPassword |
-| `DecisionService` | list, create, vote, resolve, comment |
-| `OutcomeService` | list, create, updateKeyResult |
-| `HypothesisService` | list, create, transition, validate |
-| `TeamService` | list, create, addMember, updateRole |
-| `UserService` | profile, update |
-| `StakeholderService` | list, leaderboard |
+| SDK Provider | Used For |
+|---|---|
+| `authStateProvider` | Auth state monitoring (router refresh) |
+| `authServiceProvider` | Login, register, forgot/reset password, logout, change password |
+| `currentUserProvider` | Current user info (sidebar, header, settings) |
+| `currentTenantProvider` | Organization settings |
+| `selectedProjectIdProvider` | Global project context |
+| `selectedProjectProvider` | Selected project details |
+| `projectServiceProvider` | Project CRUD |
+| `projectDashboardProvider` | Dashboard data |
+| `decisionServiceProvider` | Decision CRUD + comments |
+| `decisionQueueProvider` | Decision queue listing |
+| `blockingDecisionsProvider` | Blocking decisions count (header alert) |
+| `decisionActionsProvider` | Vote, resolve, escalate actions |
+| `myPendingResponsesProvider` | User's pending responses |
+| `outcomeServiceProvider` | Outcome + Key Result CRUD |
+| `myOutcomesProvider` | User's outcomes |
+| `hypothesisServiceProvider` | Hypothesis CRUD + transitions |
+| `myHypothesesProvider` | User's hypotheses |
+| `blockedHypothesesProvider` | Blocked hypotheses |
+| `experimentServiceProvider` | Experiment listing + detail |
+| `teamServiceProvider` | Team CRUD + member management |
+| `myTeamsProvider` | User's teams |
+| `stakeholderServiceProvider` | Stakeholder management + reminders |
+| `userServiceProvider` | User listing + profile update |
 
-### Authentication Flow
+### Data Flow
 
-```
-1. User → LoginScreen → Enter credentials
-2. loginFormState.submit() → authService.login()
-3. SDK stores tokens → authStateProvider updates
-4. AuthGuard detects change → redirect to dashboard
-5. Subsequent requests include Bearer token (SDK handles)
-```
-
-### Error Handling Pattern
-
-```dart
-asyncValue.when(
-  data: (data) => SuccessWidget(data: data),
-  loading: () => const LoadingIndicator(),
-  error: (e, _) => ErrorView(message: e.toString()),
-);
-```
-
-**Issue:** Error messages shown as raw exception strings to users.
-
----
-
-## 8. Features & Screens
-
-**Rating: 8/10 - VERY GOOD**
-
-### Screen Inventory
-
-| Screen | Location | Lines | Status |
-|--------|----------|-------|--------|
-| **Auth** | | | |
-| LoginScreen | `auth/screens/login_screen.dart` | ~180 | Complete |
-| RegisterScreen | `auth/screens/register_screen.dart` | ~200 | Complete |
-| ForgotPasswordScreen | `auth/screens/forgot_password_screen.dart` | ~120 | Complete |
-| ResetPasswordScreen | `auth/screens/reset_password_screen.dart` | ~150 | Complete |
-| **Dashboard** | | | |
-| DashboardScreen | `dashboard/screens/dashboard_screen.dart` | ~150 | Complete |
-| **Decisions** | | | |
-| DecisionsScreen | `decisions/screens/decisions_screen.dart` | ~180 | Complete |
-| DecisionDetailScreen | `decisions/screens/decision_detail_screen.dart` | ~350 | Complete |
-| **Outcomes** | | | |
-| OutcomesScreen | `outcomes/screens/outcomes_screen.dart` | ~150 | Complete |
-| OutcomeDetailScreen | `outcomes/screens/outcome_detail_screen.dart` | ~280 | Complete |
-| **Hypotheses** | | | |
-| HypothesesScreen | `hypotheses/screens/hypotheses_screen.dart` | ~180 | Complete |
-| HypothesisDetailScreen | `hypotheses/screens/hypothesis_detail_screen.dart` | ~280 | Complete |
-| **Teams** | | | |
-| TeamsScreen | `teams/screens/teams_screen.dart` | ~120 | Complete |
-| TeamDetailScreen | `teams/screens/team_detail_screen.dart` | ~267 | Complete |
-| **Stakeholders** | | | |
-| StakeholdersScreen | `stakeholders/screens/stakeholders_screen.dart` | ~100 | Basic |
-| StakeholderDetailScreen | - | - | **TODO** |
-| **Settings** | | | |
-| SettingsScreen | `settings/screens/settings_screen.dart` | ~246 | Complete |
-| ProfileScreen | `settings/screens/profile_screen.dart` | ~42 | Basic |
-
-### Feature Widgets
-
-**Decisions (Core Feature):**
-- `DecisionBoard` - Kanban view by status
-- `DecisionColumn` - Status column with cards
-- `DecisionCard` - Compact decision display
-- `DecisionFilters` - Search, urgency, type filters
-- `DecisionVotes` - Vote breakdown
-- `DecisionComments` - Threaded comments
-- `DecisionResolutionDialog` - Resolve form
-- `UrgencyBadge` - SLA indicator
-- `SlaIndicator` - Countdown display
-
-**Hypotheses:**
-- `HypothesisCard` - Statement and status
-- `HypothesisStatusBadge` - Color-coded status
-- `HypothesisEffortImpact` - T-shirt size matrix
-- `HypothesisWorkflow` - Status stepper
-- `HypothesisBlocking` - Blocking decisions list
-
-**Outcomes:**
-- `OutcomeCard` - Title and progress
-- `OutcomeStatusBadge` - Status indicator
-- `KeyResultCard` - Individual KR display
-- `KeyResultProgress` - Progress bar
+1. SDK providers fetch data from the backend API
+2. Feature providers watch SDK providers, apply client-side filters/grouping
+3. Widgets watch feature providers and display data
+4. Write operations go through action notifiers which call SDK services, then invalidate cached data
 
 ---
 
-## 9. Code Quality & Testing
+## 10. Code Quality Observations
 
-**Rating: 5/10 - NEEDS IMPROVEMENT**
+### Architecture Strengths
 
-### Null Safety
+1. **Clean feature-based organization** - Each feature is self-contained with clear barrel exports
+2. **Consistent provider patterns** - All CRUD operations follow the same async notifier pattern with loading/success/error states and provider invalidation
+3. **Good separation of concerns** - SDK handles API communication, web app handles UI and local state
+4. **Comprehensive color system** - Well-organized color palette covering all use cases
+5. **Reusable common widgets** - Good widget library (DraggableKanban, FilterBar, StatusBadge, etc.)
+6. **No-transition page strategy** - Appropriate for web SPA feel
 
-**Status: FULL NULL SAFETY**
+### Issues and Concerns
 
-- All files use non-nullable types by default
-- Proper use of `?` for nullable fields
-- 35+ `context.mounted` checks for async safety
+#### Critical
 
-### Documentation
-
-**Rating: 4/10 - MINIMAL**
-
-**Present:**
-- Basic README with setup instructions
-- Some inline comments in providers
-
-**Missing:**
-- No dartdoc on public APIs
-- No parameter documentation
-- No usage examples
-- No architecture documentation
-
-### Linting
-
-**File:** `analysis_options.yaml`
-
-```yaml
-include: package:flutter_lints/flutter.yaml
-# All custom rules commented out
-```
-
-**Issues:**
-- `avoid_print` not enabled (8 prints in auth_guard.dart)
-- No strict type checking enabled
-
-### Test Coverage
-
-**Status: <1% COVERAGE**
-
-**Existing Tests (`test/widget_test.dart`):**
-```dart
-group('ZevaroWeb', () {
-  test('SDK config is accessible', () { ... });
-  test('Routes are defined', () { ... });
-});
-```
-
-**Missing Tests:**
-- Authentication flow
-- Decision filtering/sorting
-- Provider state transitions
-- Form validation
-- Router guard behavior
-- Widget rendering
-
----
-
-## 10. Security Analysis
-
-**Rating: 6/10 - CONCERNS**
-
-### Critical Security Issues
-
-**Issue #1: Debug Prints in Auth Guard**
-- **Location:** `lib/core/router/guards/auth_guard.dart` lines 17-47
-- **Severity:** HIGH
-- **Details:** 8 `print()` statements log auth state to browser console
-- **Risk:** Reveals security-relevant information in production
-
-**Issue #2: Client-Side Permission Checks**
-- **Location:** `settings_screen.dart` line 69
-- **Details:** `if (user.role.level >= 5)` for admin UI
-- **Risk:** Relies on client-side check only
-
-### Token Handling
-
-**Status: DELEGATED TO SDK**
-- SDK manages token storage
-- SDK handles token refresh
-- No tokens visible in Web client code
-
-### Input Validation
-
-**Status: PARTIAL**
-
-**Validated:**
-- Email format (regex)
-- Password length (8+ chars)
-- Confirm password match
-
-**Not Validated:**
-- XSS in comment/description fields
-- No input sanitization before display
-
-### Sensitive Data
-
-**Good Practices:**
-- Password fields masked with visibility toggle
-- No credentials logged (except auth guard prints)
-
----
-
-## 11. Performance Considerations
-
-**Rating: 7/10 - GOOD**
-
-### Build Optimization
-
-**Observed Patterns:**
-- `const` constructors used appropriately
-- Widgets decomposed for rebuild optimization
-- `ConsumerWidget` preferred over `Consumer`
-
-**Issues:**
-- No code splitting (single build)
-- No explicit lazy loading
-
-### Asset Handling
-
-**Current Setup:**
-```yaml
-assets:
-  - assets/images/
-  - assets/icons/
-```
-
-**Issues:**
-- Asset directories empty (only .gitkeep)
-- Inter font not declared in pubspec
-
-### Network Optimization
-
-**Observations:**
-- Provider invalidation for cache busting
-- Some client-side filtering after server fetch
-
-**Issues:**
-- No search debouncing
-- No request retry logic visible
-
----
-
-## 12. Issues & Observations
-
-### Critical Issues (Fix Before Production)
-
-| # | Issue | Location | Impact |
-|---|-------|----------|--------|
-| 1 | Debug prints in production | `auth_guard.dart:17-47` | Security leak in console |
-| 2 | Missing font declaration | `pubspec.yaml` | Typography fallback |
-| 3 | Async provider race condition | `settings_providers.dart:16-19` | Theme flash on load |
-| 4 | Empty asset directories | `assets/images/`, `assets/icons/` | No fallback images |
-| 5 | No error categorization | Throughout | Raw exceptions to users |
-| 6 | Web manifest outdated | `web/manifest.json` | Wrong app name/colors |
-
-### Major Issues
-
-| # | Issue | Location | Impact |
-|---|-------|----------|--------|
-| 7 | Minimal test coverage | `test/` | No regression detection |
-| 8 | No error monitoring | - | Production errors untracked |
-| 9 | Missing StakeholderDetailScreen | `app_router.dart:165` | Feature incomplete |
-| 10 | No input debouncing | Filter widgets | Excessive rebuilds |
-| 11 | Client-side permission checks | `settings_screen.dart:69` | Security gap |
-
-### TODO Items (18 Total)
-
-| Priority | Location | Item |
-|----------|----------|------|
-| High | `app.dart:19` | User preference for theme mode |
-| High | `app_router.dart:165` | StakeholderDetailScreen implementation |
-| High | `app_theme.dart:151` | Dark theme implementation |
-| Medium | `teams_screen.dart:30` | Create team dialog |
-| Medium | `team_detail_screen.dart:127` | Invite member dialog |
-| Medium | `hypotheses_screen.dart:33` | Create hypothesis dialog |
-| Medium | `outcome_key_results.dart:39` | Add key result dialog |
-| Medium | `outcome_detail_screen.dart:261` | Create hypothesis for outcome |
-| Medium | `decisions_screen.dart:63` | Create decision dialog |
-| Medium | `outcomes_screen.dart:31` | Create outcome dialog |
-| Medium | `settings_screen.dart:78` | Organization settings navigation |
-| Low | `quick_actions.dart:30` | Create decision modal |
-| Low | `quick_actions.dart:39` | Create outcome modal |
-| Low | `quick_actions.dart:48` | Create hypothesis modal |
-| Low | `quick_actions.dart:57` | Invite user modal |
-| Low | `settings_screen.dart:111` | Documentation URL |
-| Low | `settings_screen.dart:118` | Feedback form |
-| Low | `app_router.dart:187` | ErrorScreen implementation |
-
-### Observations (Not Actioned)
-
-```yaml
-observations:
-  - file: "auth_guard.dart"
-    lines: 17-47
-    observation: "8 print() statements logging auth state to console"
-    actioned: false
-    severity: critical
-
-  - file: "app_typography.dart"
-    line: 5
-    observation: "Inter font family used but not declared in pubspec"
-    actioned: false
-    severity: high
-
-  - file: "settings_providers.dart"
-    line: 16-19
-    observation: "_loadFromPrefs() called without await in build()"
-    actioned: false
-    severity: high
-
-  - file: "settings_screen.dart"
-    line: 69
-    observation: "Client-side role check for admin UI"
-    actioned: false
-    severity: medium
-
-  - file: "web/manifest.json"
-    line: 1-10
-    observation: "Generic placeholder values for PWA manifest"
-    actioned: false
-    severity: medium
-```
-
----
-
-## 13. Recommendations
-
-### Priority 1: Critical (Before Production)
-
-1. **Remove Debug Prints**
-   - File: `auth_guard.dart`
-   - Action: Replace `print()` with conditional logging
+1. **Password validator accepts 1-character passwords** (`auth_form_providers.dart:118`):
    ```dart
-   import 'dart:developer' as developer;
-   if (kDebugMode) {
-     developer.log('[AUTH_GUARD] ...', name: 'auth');
+   if (value.length < 1) {
+     return 'Password must be at least 1 character';
    }
    ```
+   The hint text says "At least 8 characters" but the validator allows length >= 1.
 
-2. **Add Font Declaration**
-   - File: `pubspec.yaml`
-   - Action: Add Inter font files and declaration
-   ```yaml
-   fonts:
-     - family: Inter
-       fonts:
-         - asset: assets/fonts/Inter-Regular.ttf
-         - asset: assets/fonts/Inter-Bold.ttf
-           weight: 700
+2. **Debug print statements in production code** (`auth_guard.dart:17-48`): Six `print()` statements with `[AUTH_GUARD]` prefix are left in the auth guard. These will appear in the browser console in production.
+
+#### Important
+
+3. **Dark mode is forced off** (`app.dart:21`):
+   ```dart
+   themeMode: ThemeMode.light, // Force light theme
    ```
+   The `themeModeSettingProvider` is watched but its value is completely ignored. The ThemeSelector in Settings appears functional but changes have no effect.
 
-3. **Fix Async Provider Load**
-   - File: `settings_providers.dart`
-   - Action: Use FutureProvider or defer loading
+4. **Duplicate breakpoint definitions** - `AppConstants` defines mobile(640)/tablet(1024)/desktop(1280) while `AppBreakpoints` defines mobile(600)/tablet(900)/desktop(1200)/wideDesktop(1440). Different parts of the app use different systems, leading to inconsistent responsive behavior.
 
-4. **Update Web Manifest**
-   - File: `web/manifest.json`
-   - Action: Set correct app name, colors, description
+5. **Conventions file is outdated** - `Zevaro-Web-CONVENTIONS.md` describes a `screens/` + `widgets/` directory structure that does not match the actual `features/` organization. It also references `fl_chart`, `zevaro_sdk` (Git dependency), and screen names that do not exist.
 
-5. **Add Error Handling**
-   - Action: Create `AppException` with user-friendly messages
+6. **`SidebarItem` and `SidebarSection` widgets are unused** - The sidebar implements its own `_SidebarNavItem` and manual sections. The exported `SidebarItem` and `SidebarSection` widgets in `app_shell_exports.dart` appear to be dead code.
 
-6. **Enable Strict Linting**
-   - File: `analysis_options.yaml`
-   - Action: Enable `avoid_print`, `unawaited_futures`
+7. **Primary color inconsistency** - `AppColors.primary` is `#3B82F6` (Blue), but `AppTheme` and buttons use `Color(0xFF4F46E5)` (Deep Indigo) as the actual primary accent. These are different colors used in different contexts.
 
-### Priority 2: High (v1.1.0)
+8. **`dashboardStats` provider uses non-existent extensions** (`dashboard_providers.dart:22-23`):
+   ```dart
+   myOutcomes.where((o) => o.status.isActive).length,
+   myHypotheses.where((h) => h.status.isActive).length,
+   ```
+   These rely on `.isActive` extensions that must come from the SDK. If these are not defined, this will fail at runtime.
 
-7. **Add Test Coverage**
-   - Target: 60%+ for critical paths
-   - Focus: Auth, decision filtering, providers
+#### Minor
 
-8. **Add Error Monitoring**
-   - Package: Sentry or Firebase Crashlytics
-   - Track production errors
+9. **Empty directories** - `lib/shared/extensions/` exists but contains no files.
 
-9. **Implement StakeholderDetailScreen**
-   - Complete the feature module
+10. **Empty asset directories** - Both `assets/images/` and `assets/icons/` are empty, yet declared in `pubspec.yaml`.
 
-10. **Add Input Debouncing**
-    - Package: `rxdart` or custom debounce
-    - Apply to search filters
+11. **`flutter_svg` and `cached_network_image` dependencies** are declared but not directly used in any source file (may be used transitively by the SDK).
 
-### Priority 3: Medium (v1.2.0)
+12. **Sort functionality is stubbed** - Multiple sort dropdowns have `onSelected` handlers that are empty or contain `// TODO: Implement sorting` comments (e.g., `decisions_screen.dart:164`, `projects_screen.dart:142-146`).
 
-11. **Implement Dark Theme**
-    - Currently placeholder only
+13. **"My Decisions" filter is stubbed** (`decisions_screen.dart:62-63`):
+    ```dart
+    onTap: () {
+      // TODO: Implement "My Decisions" filter
+    },
+    ```
 
-12. **Add Form Validation**
-    - Comprehensive validation across all forms
+14. **Hypothesis experiments provider returns empty list** (`hypotheses_providers.dart:253-255`):
+    ```dart
+    Future<List<Experiment>> hypothesisExperiments(...) async {
+      // TODO: SDK does not yet expose getHypothesisExperiments
+      return [];
+    }
+    ```
 
-13. **Complete Create Dialogs**
-    - All 18 TODO items for CRUD operations
+15. **Login redirect goes to dashboard** (`login_screen.dart:43`): After login, if there is no redirect query param, the user goes to `Routes.dashboard` (which is `/`). But the initial location is `/projects`. This could cause confusion.
 
-14. **Add Accessibility Labels**
-    - Semantic labels for screen readers
+16. **`teamMembersWithStats` only fetches first team** (`teams_providers.dart:141`): `teams.first` is used, which only shows members from the first team, not all teams.
 
-### Priority 4: Polish (Future)
+17. **Duplicate sort dropdowns in ProjectsScreen** - There are two sort PopupMenuButtons in Row 2 of the projects screen (one labeled "Sort." and another labeled "Sort: Recent"), both with empty `onSelected` handlers.
 
-15. **Internationalization (l10n)**
-    - Add language selector
-    - Extract all strings
+18. **`MaterialState` deprecated** (`app_theme.dart:326-337`): The dark theme's `SwitchThemeData` uses `MaterialState` and `MaterialStateProperty`, which are deprecated in favor of `WidgetState` and `WidgetStateProperty` in newer Flutter versions.
 
-16. **PWA Features**
-    - Offline support
-    - Push notifications
-
-17. **Analytics Integration**
-    - Track feature usage
-
-18. **Real-Time Updates**
-    - WebSocket for live decision updates
+19. **`withOpacity` usage** - Multiple files use `Color.withOpacity()` which is deprecated in favor of `Color.withValues()` in newer Flutter/Dart versions.
 
 ---
 
-## Rating Summary
+## 11. Known Issues
 
-### Category Ratings
+### Functional Issues
 
-| Category | Rating | Notes |
-|----------|--------|-------|
-| Architecture | 9/10 | Excellent feature-based modular structure |
-| Dependencies | 8/10 | Good choices, missing font/testing packages |
-| UI/Theming | 8/10 | Comprehensive design system |
-| Routing | 8/10 | Clean GoRouter setup, auth guard works |
-| State Management | 9/10 | Excellent Riverpod patterns |
-| API Integration | 8/10 | Clean SDK usage |
-| Features | 8/10 | Core features complete, some TODOs |
-| Code Quality | 6/10 | Good style, minimal docs |
-| Testing | 2/10 | <1% coverage |
-| Security | 6/10 | Critical debug print issue |
-| Performance | 7/10 | Good practices, some gaps |
+1. **Dark mode does not work** - Theme selector changes are saved to SharedPreferences but the app always renders in light mode due to hardcoded `themeMode: ThemeMode.light`.
 
-### Overall Score: 7.2/10
+2. **Sorting is not implemented** - All sort dropdowns (Projects, Decisions) are non-functional.
 
-### Verdict
+3. **"My Decisions" filter is not implemented** - The filter pill exists in the Decisions screen toolbar but has no effect.
 
-**DEVELOPMENT/MVP READY - Not production ready**
+4. **Hypothesis experiments are not loaded** - The experiments tab on hypothesis detail screens will always show empty because the SDK method is not yet available.
 
-The Zevaro-Web application is a **well-structured Flutter web client** with solid architectural foundations. The use of Riverpod for state management, GoRouter for navigation, and SDK integration demonstrates good design decisions.
+5. **Team members display is limited** - `teamMembersWithStats` only fetches members from the first team, not aggregated across all teams.
 
-**Before Production:**
-1. Fix 6 critical issues
-2. Add basic test coverage
-3. Remove debug prints
-4. Add error monitoring
+6. **Stakeholders link missing from sidebar** - The sidebar navigation includes Projects, Decision Queue, Outcomes, Hypotheses, Experiments, Team, and Settings, but "Stakeholders" is not shown as a nav item even though the route and screens exist. Stakeholders are only accessible via direct URL navigation.
 
----
+7. **Dashboard link missing from sidebar** - The Dashboard screen exists at `/` but there is no sidebar nav item for it. Users can only reach it by clicking the logo or navigating directly to `/`.
 
-## Appendices
+### UI Issues
 
-### Appendix A: Build Commands
+1. **Password hint is misleading** - Register screen says "At least 8 characters" but validation accepts any non-empty password.
 
-```bash
-# Get dependencies
-flutter pub get
+2. **Console noise** - Auth guard prints debug logs on every route change.
 
-# Run code generation
-dart run build_runner build --delete-conflicting-outputs
+3. **No loading shimmer on most screens** - Despite having `ShimmerCard`/`ShimmerCardList`/`ShimmerCardGrid` widgets available, most screens use `LoadingIndicator` (spinner) instead.
 
-# Analyze code
-flutter analyze
+4. **Error messages expose raw exceptions** - The `_formatError` methods only handle a few known exception types; other errors display raw `toString()` output.
 
-# Run tests
-flutter test
+### Missing Features
 
-# Build for web (development)
-flutter build web
-
-# Build for web (production)
-flutter build web --release \
-  --dart-define=API_BASE_URL=https://api.zevaro.com \
-  --dart-define=ENABLE_LOGGING=false
-
-# Run web locally
-flutter run -d chrome
-```
-
-### Appendix B: Environment Variables
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `API_BASE_URL` | `http://localhost:8080/api` | Backend API endpoint |
-| `ENABLE_LOGGING` | `true` | SDK debug logging |
-
-### Appendix C: File Statistics
-
-| Directory | Files | Lines (approx) |
-|-----------|-------|----------------|
-| `core/router/` | 5 | 280 |
-| `core/theme/` | 4 | 350 |
-| `core/constants/` | 1 | 20 |
-| `features/auth/` | 8 | 600 |
-| `features/dashboard/` | 5 | 500 |
-| `features/decisions/` | 15 | 2,500 |
-| `features/outcomes/` | 10 | 1,500 |
-| `features/hypotheses/` | 12 | 1,800 |
-| `features/teams/` | 8 | 800 |
-| `features/stakeholders/` | 5 | 500 |
-| `features/settings/` | 8 | 800 |
-| `shared/` | 10 | 600 |
-| **Total** | **~126** | **~8,000** |
-
-### Appendix D: Feature Completion Status
-
-| Feature | Screens | Widgets | Providers | Tests | Status |
-|---------|---------|---------|-----------|-------|--------|
-| Auth | 4/4 | 3/3 | 4/4 | 0/4 | 90% |
-| Dashboard | 1/1 | 5/5 | 1/1 | 0/1 | 100% |
-| Decisions | 2/2 | 10/10 | 6/6 | 0/6 | 100% |
-| Outcomes | 2/2 | 5/5 | 5/5 | 0/5 | 95% |
-| Hypotheses | 2/2 | 7/7 | 5/5 | 0/5 | 95% |
-| Teams | 2/2 | 4/4 | 5/5 | 0/5 | 90% |
-| Stakeholders | 1/2 | 3/3 | 2/2 | 0/2 | 70% |
-| Settings | 2/2 | 5/5 | 4/4 | 0/4 | 85% |
+1. **No analytics/reporting screen** - The conventions file mentions an analytics dashboard but it does not exist.
+2. **No integrations screen** - Referenced in conventions but not implemented.
+3. **No search across all entities** - No global search functionality.
+4. **No real-time updates** - No WebSocket or polling for live data updates.
+5. **No tests** - The `test/` directory contains only a trivial `widget_test.dart` with two tests (one checks SDK config, one is a no-op assertion).
+6. **No offline support** - No service worker or caching strategy for offline use.
+7. **No pagination** - `AppConstants.defaultPageSize` is defined (20) but no pagination UI is implemented; lists appear to fetch all records.
+8. **No bulk actions** - No ability to select multiple items for batch operations.
+9. **Social auth not connected** - `SocialAuthButton` widget exists but is not used in any auth screen.
+10. **Delete organization is a stub** - Shows a snackbar saying "contact support" instead of actually deleting.
+11. **Billing/Invoices are stubs** - Show "coming soon" snackbars.
 
 ---
 
-*Audit completed by Engineer (Claude Opus 4.5) on 2026-01-31*
+## Summary Statistics
 
-*Verification: File exists, structure verified, content validated*
+| Metric | Count |
+|---|---|
+| Source Files (non-generated) | 153 |
+| Lines of Code | ~24,071 |
+| Feature Modules | 10 |
+| Screens | 20 |
+| Custom Widgets | ~80 |
+| Riverpod Providers | ~55 (Web) + SDK providers |
+| Routes | 18 (4 auth + 14 app) |
+| Test Files | 1 (trivial) |
+| TODOs in Code | 4 |

@@ -400,7 +400,7 @@ class _VariantComparison extends StatelessWidget {
                 const SizedBox(width: AppSpacing.md),
                 _StatBox(
                   label: 'Traffic Split',
-                  value: '${experiment.trafficSplit}%',
+                  value: experiment.trafficSplit,
                   color: AppColors.info,
                 ),
               ],
@@ -548,7 +548,7 @@ class _ConfigSection extends StatelessWidget {
                   : 'Open-ended'),
           _ConfigRow(
               label: 'Traffic Split',
-              value: '${experiment.trafficSplit}% variant'),
+              value: experiment.trafficSplit),
           _ConfigRow(
               label: 'Target Sample',
               value: '${experiment.sampleSizeTarget} users'),
