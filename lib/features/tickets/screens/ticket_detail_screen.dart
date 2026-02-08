@@ -15,6 +15,9 @@ import '../widgets/ticket_status_badge.dart';
 import '../widgets/triage_ticket_dialog.dart';
 import '../widgets/resolve_ticket_dialog.dart';
 import '../providers/tickets_providers.dart';
+import '../../../shared/widgets/comments/comment_section.dart';
+import '../../../shared/widgets/attachments/attachment_section.dart';
+import '../../../shared/widgets/entity_links/entity_link_section.dart';
 
 class TicketDetailScreen extends ConsumerWidget {
   final String id;
@@ -161,6 +164,49 @@ class _DetailContent extends ConsumerWidget {
               },
             ),
           ),
+
+          // Comments
+          const Divider(height: 1),
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.pagePaddingHorizontal,
+              vertical: AppSpacing.sm,
+            ),
+            child: Text('Comments', style: AppTypography.h3),
+          ),
+          CommentSection(
+            parentType: CommentParentType.TICKET,
+            parentId: ticket.id,
+          ),
+
+          // Attachments
+          const Divider(height: 1),
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.pagePaddingHorizontal,
+              vertical: AppSpacing.sm,
+            ),
+            child: Text('Attachments', style: AppTypography.h3),
+          ),
+          AttachmentSection(
+            parentType: AttachmentParentType.TICKET,
+            parentId: ticket.id,
+          ),
+
+          // Links
+          const Divider(height: 1),
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.pagePaddingHorizontal,
+              vertical: AppSpacing.sm,
+            ),
+            child: Text('Links', style: AppTypography.h3),
+          ),
+          EntityLinkSection(
+            entityType: EntityType.TICKET,
+            entityId: ticket.id,
+          ),
+          const SizedBox(height: AppSpacing.xl),
         ],
       ),
     );

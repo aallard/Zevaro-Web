@@ -15,6 +15,8 @@ import '../../specifications/widgets/specification_card.dart';
 import '../../specifications/widgets/create_specification_dialog.dart';
 import '../../tickets/widgets/ticket_card.dart';
 import '../../tickets/widgets/create_ticket_dialog.dart';
+import '../../../shared/widgets/comments/comment_section.dart';
+import '../../../shared/widgets/entity_links/entity_link_section.dart';
 
 class WorkstreamDetailScreen extends ConsumerStatefulWidget {
   final String id;
@@ -34,7 +36,7 @@ class _WorkstreamDetailScreenState
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 5, vsync: this);
   }
 
   @override
@@ -209,9 +211,12 @@ class _DetailContent extends ConsumerWidget {
             labelColor: AppColors.primary,
             unselectedLabelColor: AppColors.textSecondary,
             indicatorColor: AppColors.primary,
+            isScrollable: true,
             tabs: const [
               Tab(text: 'Specifications'),
               Tab(text: 'Tickets'),
+              Tab(text: 'Comments'),
+              Tab(text: 'Links'),
               Tab(text: 'Overview'),
             ],
           ),
@@ -224,6 +229,18 @@ class _DetailContent extends ConsumerWidget {
             children: [
               _SpecificationsTab(workstreamId: workstream.id),
               _TicketsTab(workstreamId: workstream.id),
+              SingleChildScrollView(
+                child: CommentSection(
+                  parentType: CommentParentType.WORKSTREAM,
+                  parentId: workstream.id,
+                ),
+              ),
+              SingleChildScrollView(
+                child: EntityLinkSection(
+                  entityType: EntityType.WORKSTREAM,
+                  entityId: workstream.id,
+                ),
+              ),
               _OverviewTab(workstream: workstream),
             ],
           ),

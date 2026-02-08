@@ -11,6 +11,9 @@ import '../../../shared/widgets/common/loading_indicator.dart';
 import '../../../shared/widgets/common/error_view.dart';
 import '../widgets/requirement_status_badge.dart';
 import '../widgets/requirement_priority_badge.dart';
+import '../../../shared/widgets/comments/comment_section.dart';
+import '../../../shared/widgets/attachments/attachment_section.dart';
+import '../../../shared/widgets/entity_links/entity_link_section.dart';
 
 class RequirementDetailScreen extends ConsumerStatefulWidget {
   final String id;
@@ -30,7 +33,7 @@ class _RequirementDetailScreenState
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 5, vsync: this);
   }
 
   @override
@@ -168,8 +171,12 @@ class _DetailContent extends ConsumerWidget {
             labelColor: AppColors.primary,
             unselectedLabelColor: AppColors.textSecondary,
             indicatorColor: AppColors.primary,
+            isScrollable: true,
             tabs: const [
               Tab(text: 'Details'),
+              Tab(text: 'Comments'),
+              Tab(text: 'Attachments'),
+              Tab(text: 'Links'),
               Tab(text: 'Dependencies'),
             ],
           ),
@@ -181,6 +188,24 @@ class _DetailContent extends ConsumerWidget {
             controller: tabController,
             children: [
               _DetailsTab(requirement: requirement),
+              SingleChildScrollView(
+                child: CommentSection(
+                  parentType: CommentParentType.REQUIREMENT,
+                  parentId: requirement.id,
+                ),
+              ),
+              SingleChildScrollView(
+                child: AttachmentSection(
+                  parentType: AttachmentParentType.REQUIREMENT,
+                  parentId: requirement.id,
+                ),
+              ),
+              SingleChildScrollView(
+                child: EntityLinkSection(
+                  entityType: EntityType.REQUIREMENT,
+                  entityId: requirement.id,
+                ),
+              ),
               _DependenciesTab(requirementId: requirement.id),
             ],
           ),

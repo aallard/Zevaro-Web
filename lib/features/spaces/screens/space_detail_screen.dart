@@ -15,6 +15,9 @@ import '../../documents/widgets/document_tree.dart';
 import '../../documents/widgets/document_status_badge.dart';
 import '../../documents/widgets/create_document_dialog.dart';
 import '../../documents/providers/documents_providers.dart';
+import '../../../shared/widgets/comments/comment_section.dart';
+import '../../../shared/widgets/attachments/attachment_section.dart';
+import '../../../shared/widgets/entity_links/entity_link_section.dart';
 
 class SpaceDetailScreen extends ConsumerWidget {
   final String id;
@@ -262,6 +265,38 @@ class _DocumentContent extends ConsumerWidget {
                   fontStyle: FontStyle.italic,
                 ),
               ),
+
+            const SizedBox(height: AppSpacing.xl),
+            const Divider(),
+
+            // Comments
+            Text('Comments', style: AppTypography.h3),
+            const SizedBox(height: AppSpacing.sm),
+            CommentSection(
+              parentType: CommentParentType.DOCUMENT,
+              parentId: doc.id,
+            ),
+
+            const Divider(),
+
+            // Attachments
+            Text('Attachments', style: AppTypography.h3),
+            const SizedBox(height: AppSpacing.sm),
+            AttachmentSection(
+              parentType: AttachmentParentType.DOCUMENT,
+              parentId: doc.id,
+            ),
+
+            const Divider(),
+
+            // Links
+            Text('Links', style: AppTypography.h3),
+            const SizedBox(height: AppSpacing.sm),
+            EntityLinkSection(
+              entityType: EntityType.DOCUMENT,
+              entityId: doc.id,
+            ),
+            const SizedBox(height: AppSpacing.xl),
           ],
         ),
       ),

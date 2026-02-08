@@ -13,6 +13,9 @@ import '../widgets/specification_status_badge.dart';
 import '../providers/specifications_providers.dart';
 import '../../requirements/widgets/requirement_card.dart';
 import '../../requirements/widgets/create_requirement_dialog.dart';
+import '../../../shared/widgets/comments/comment_section.dart';
+import '../../../shared/widgets/attachments/attachment_section.dart';
+import '../../../shared/widgets/entity_links/entity_link_section.dart';
 
 class SpecificationDetailScreen extends ConsumerStatefulWidget {
   final String id;
@@ -32,7 +35,7 @@ class _SpecificationDetailScreenState
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 5, vsync: this);
   }
 
   @override
@@ -199,8 +202,12 @@ class _DetailContent extends ConsumerWidget {
             labelColor: AppColors.primary,
             unselectedLabelColor: AppColors.textSecondary,
             indicatorColor: AppColors.primary,
+            isScrollable: true,
             tabs: const [
               Tab(text: 'Requirements'),
+              Tab(text: 'Comments'),
+              Tab(text: 'Attachments'),
+              Tab(text: 'Links'),
               Tab(text: 'Overview'),
             ],
           ),
@@ -212,6 +219,24 @@ class _DetailContent extends ConsumerWidget {
             controller: tabController,
             children: [
               _RequirementsTab(specificationId: specification.id),
+              SingleChildScrollView(
+                child: CommentSection(
+                  parentType: CommentParentType.SPECIFICATION,
+                  parentId: specification.id,
+                ),
+              ),
+              SingleChildScrollView(
+                child: AttachmentSection(
+                  parentType: AttachmentParentType.SPECIFICATION,
+                  parentId: specification.id,
+                ),
+              ),
+              SingleChildScrollView(
+                child: EntityLinkSection(
+                  entityType: EntityType.SPECIFICATION,
+                  entityId: specification.id,
+                ),
+              ),
               _OverviewTab(specification: specification),
             ],
           ),
