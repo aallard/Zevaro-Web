@@ -13,6 +13,8 @@ import '../widgets/workstream_status_badge.dart';
 import '../widgets/workstream_mode_badge.dart';
 import '../../specifications/widgets/specification_card.dart';
 import '../../specifications/widgets/create_specification_dialog.dart';
+import '../../tickets/widgets/ticket_card.dart';
+import '../../tickets/widgets/create_ticket_dialog.dart';
 
 class WorkstreamDetailScreen extends ConsumerStatefulWidget {
   final String id;
@@ -32,7 +34,7 @@ class _WorkstreamDetailScreenState
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
   }
 
   @override
@@ -209,6 +211,7 @@ class _DetailContent extends ConsumerWidget {
             indicatorColor: AppColors.primary,
             tabs: const [
               Tab(text: 'Specifications'),
+              Tab(text: 'Tickets'),
               Tab(text: 'Overview'),
             ],
           ),
@@ -220,6 +223,7 @@ class _DetailContent extends ConsumerWidget {
             controller: tabController,
             children: [
               _SpecificationsTab(workstreamId: workstream.id),
+              _TicketsTab(workstreamId: workstream.id),
               _OverviewTab(workstream: workstream),
             ],
           ),
@@ -343,6 +347,107 @@ class _SpecificationsTab extends ConsumerWidget {
       context: context,
       builder: (context) =>
           CreateSpecificationDialog(workstreamId: workstreamId),
+    );
+  }
+}
+
+/// Tickets tab — list of tickets in this workstream
+class _TicketsTab extends ConsumerWidget {
+  final String workstreamId;
+
+  const _TicketsTab({required this.workstreamId});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final ticketsAsync =
+        ref.watch(workstreamTicketsProvider(workstreamId));
+
+    return ticketsAsync.when(
+      data: (tickets) {
+        if (tickets.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.bug_report_outlined,
+                    size: 48, color: AppColors.textTertiary),
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  'No tickets yet',
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.md),
+                FilledButton.icon(
+                  onPressed: () => _showCreateDialog(context),
+                  icon: const Icon(Icons.add, size: 18),
+                  label: const Text('Create Ticket'),
+                ),
+              ],
+            ),
+          );
+        }
+
+        return Column(
+          children: [
+            // Action bar
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.pagePaddingHorizontal,
+                vertical: AppSpacing.sm,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  FilledButton.icon(
+                    onPressed: () => _showCreateDialog(context),
+                    icon: const Icon(Icons.add, size: 18),
+                    label: const Text('New Ticket'),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.sidebarAccent,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.lg,
+                        vertical: AppSpacing.sm,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(AppSpacing.radiusMd),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: ListView.builder(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.pagePaddingHorizontal,
+                ),
+                itemCount: tickets.length,
+                itemBuilder: (context, index) =>
+                    TicketCard(ticket: tickets[index]),
+              ),
+            ),
+          ],
+        );
+      },
+      loading: () =>
+          const LoadingIndicator(message: 'Loading tickets...'),
+      error: (e, _) => ErrorView(
+        message: e.toString(),
+        onRetry: () => ref
+            .invalidate(workstreamTicketsProvider(workstreamId)),
+      ),
+    );
+  }
+
+  void _showCreateDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) =>
+          CreateTicketDialog(workstreamId: workstreamId),
     );
   }
 }

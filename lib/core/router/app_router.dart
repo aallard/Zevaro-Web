@@ -7,6 +7,7 @@ import 'package:zevaro_flutter_sdk/zevaro_flutter_sdk.dart';
 import '../../features/auth/auth.dart';
 import '../../features/dashboard/dashboard.dart';
 import '../../features/decisions/decisions.dart';
+import '../../features/documents/documents.dart';
 import '../../features/experiments/experiments.dart';
 import '../../features/hypotheses/hypotheses.dart';
 import '../../features/outcomes/outcomes.dart';
@@ -14,7 +15,9 @@ import '../../features/portfolios/portfolios.dart';
 import '../../features/programs/programs.dart';
 import '../../features/requirements/requirements.dart';
 import '../../features/settings/settings.dart';
+import '../../features/spaces/spaces.dart';
 import '../../features/specifications/specifications.dart';
+import '../../features/tickets/tickets.dart';
 import '../../features/workstreams/workstreams.dart';
 import '../../features/stakeholders/stakeholders.dart';
 import '../../features/teams/teams.dart';
@@ -108,6 +111,12 @@ GoRouter appRouter(Ref ref) {
             title = 'Specifications';
           } else if (location.startsWith('/requirements')) {
             title = 'Requirements';
+          } else if (location.startsWith('/tickets')) {
+            title = 'Tickets';
+          } else if (location.startsWith('/spaces')) {
+            title = 'Wiki';
+          } else if (location.startsWith('/documents')) {
+            title = 'Documents';
           } else if (location.startsWith('/teams')) {
             title = 'Team';
           } else if (location.startsWith('/stakeholders')) {
@@ -287,6 +296,70 @@ GoRouter appRouter(Ref ref) {
                   final id = state.pathParameters['id']!;
                   return noTransitionPage(RequirementDetailScreen(id: id), state);
                 },
+              ),
+            ],
+          ),
+
+          // Tickets
+          GoRoute(
+            path: Routes.tickets,
+            name: 'tickets',
+            pageBuilder: (context, state) =>
+                noTransitionPage(const Scaffold(body: Center(child: Text('Tickets'))), state),
+            routes: [
+              GoRoute(
+                path: ':id',
+                name: 'ticketDetail',
+                pageBuilder: (context, state) {
+                  final id = state.pathParameters['id']!;
+                  return noTransitionPage(TicketDetailScreen(id: id), state);
+                },
+              ),
+            ],
+          ),
+
+          // Spaces (Wiki)
+          GoRoute(
+            path: Routes.spaces,
+            name: 'spaces',
+            pageBuilder: (context, state) =>
+                noTransitionPage(const SpacesScreen(), state),
+            routes: [
+              GoRoute(
+                path: ':id',
+                name: 'spaceDetail',
+                pageBuilder: (context, state) {
+                  final id = state.pathParameters['id']!;
+                  return noTransitionPage(SpaceDetailScreen(id: id), state);
+                },
+              ),
+            ],
+          ),
+
+          // Documents
+          GoRoute(
+            path: Routes.documents,
+            name: 'documents',
+            pageBuilder: (context, state) =>
+                noTransitionPage(const Scaffold(body: Center(child: Text('Documents'))), state),
+            routes: [
+              GoRoute(
+                path: ':id',
+                name: 'documentDetail',
+                pageBuilder: (context, state) {
+                  final id = state.pathParameters['id']!;
+                  return noTransitionPage(DocumentDetailScreen(id: id), state);
+                },
+                routes: [
+                  GoRoute(
+                    path: 'edit',
+                    name: 'documentEdit',
+                    pageBuilder: (context, state) {
+                      final id = state.pathParameters['id']!;
+                      return noTransitionPage(DocumentEditorScreen(id: id), state);
+                    },
+                  ),
+                ],
               ),
             ],
           ),

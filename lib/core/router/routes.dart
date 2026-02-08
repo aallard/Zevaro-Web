@@ -30,6 +30,13 @@ abstract class Routes {
   static const specificationDetail = '/specifications/:id';
   static const requirements = '/requirements';
   static const requirementDetail = '/requirements/:id';
+  static const tickets = '/tickets';
+  static const ticketDetail = '/tickets/:id';
+  static const spaces = '/spaces';
+  static const spaceDetail = '/spaces/:id';
+  static const documents = '/documents';
+  static const documentDetail = '/documents/:id';
+  static const documentEditPath = '/documents/:id/edit';
   static const settings = '/settings';
   static const organizationSettings = '/settings/organization';
   static const profile = '/profile';
@@ -46,4 +53,8 @@ abstract class Routes {
   static String workstreamById(String id) => '/workstreams/$id';
   static String specificationById(String id) => '/specifications/$id';
   static String requirementById(String id) => '/requirements/$id';
+  static String ticketById(String id) => '/tickets/$id';
+  static String spaceById(String id) => '/spaces/$id';
+  static String documentById(String id) => '/documents/$id';
+  static String documentEdit(String id) => '/documents/$id/edit';
 }

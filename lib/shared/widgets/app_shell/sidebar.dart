@@ -192,6 +192,33 @@ class Sidebar extends ConsumerWidget {
                     isCollapsed: isCollapsed,
                     onTap: () => context.go(Routes.teams),
                   ),
+
+                  const SizedBox(height: AppSpacing.xs),
+                  if (!isCollapsed)
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        left: AppSpacing.sm,
+                        top: AppSpacing.xs,
+                        bottom: AppSpacing.xxs,
+                      ),
+                      child: Text(
+                        'KNOWLEDGE',
+                        style: TextStyle(
+                          color: AppColors.sidebarText.withOpacity(0.5),
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 1.2,
+                        ),
+                      ),
+                    ),
+                  _SidebarNavItem(
+                    icon: Icons.library_books_outlined,
+                    label: 'Wiki',
+                    isSelected: currentRoute.startsWith('/spaces') ||
+                        currentRoute.startsWith('/documents'),
+                    isCollapsed: isCollapsed,
+                    onTap: () => context.go(Routes.spaces),
+                  ),
                 ],
               ),
             ),
