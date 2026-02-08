@@ -21,6 +21,9 @@ import '../../features/tickets/tickets.dart';
 import '../../features/workstreams/workstreams.dart';
 import '../../features/stakeholders/stakeholders.dart';
 import '../../features/teams/teams.dart';
+import '../../features/search/search.dart';
+import '../../features/templates/templates.dart';
+import '../../features/activity/activity.dart';
 import '../../shared/widgets/app_shell/app_shell.dart';
 import '../../shared/widgets/common/error_screen.dart';
 import 'guards/auth_guard.dart';
@@ -117,6 +120,12 @@ GoRouter appRouter(Ref ref) {
             title = 'Wiki';
           } else if (location.startsWith('/documents')) {
             title = 'Documents';
+          } else if (location.startsWith('/search')) {
+            title = 'Search';
+          } else if (location.startsWith('/templates')) {
+            title = 'Templates';
+          } else if (location.startsWith('/activity')) {
+            title = 'Activity';
           } else if (location.startsWith('/teams')) {
             title = 'Team';
           } else if (location.startsWith('/stakeholders')) {
@@ -362,6 +371,30 @@ GoRouter appRouter(Ref ref) {
                 ],
               ),
             ],
+          ),
+
+          // Search
+          GoRoute(
+            path: Routes.search,
+            name: 'search',
+            pageBuilder: (context, state) =>
+                noTransitionPage(const SearchScreen(), state),
+          ),
+
+          // Templates
+          GoRoute(
+            path: Routes.templates,
+            name: 'templates',
+            pageBuilder: (context, state) =>
+                noTransitionPage(const TemplatesScreen(), state),
+          ),
+
+          // Activity
+          GoRoute(
+            path: Routes.activity,
+            name: 'activity',
+            pageBuilder: (context, state) =>
+                noTransitionPage(const ActivityScreen(), state),
           ),
 
           // Teams

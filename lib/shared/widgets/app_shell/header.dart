@@ -39,6 +39,13 @@ class AppHeader extends ConsumerWidget {
 
           const Spacer(),
 
+          // Search
+          IconButton(
+            icon: const Icon(Icons.search, color: AppColors.textSecondary),
+            onPressed: () => context.go(Routes.search),
+            tooltip: 'Search',
+          ),
+
           // Quick actions
           if (actions != null) ...actions!,
 

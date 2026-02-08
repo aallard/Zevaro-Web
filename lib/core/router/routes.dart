@@ -37,6 +37,9 @@ abstract class Routes {
   static const documents = '/documents';
   static const documentDetail = '/documents/:id';
   static const documentEditPath = '/documents/:id/edit';
+  static const search = '/search';
+  static const templates = '/templates';
+  static const activity = '/activity';
   static const settings = '/settings';
   static const organizationSettings = '/settings/organization';
   static const profile = '/profile';

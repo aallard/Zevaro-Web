@@ -219,6 +219,39 @@ class Sidebar extends ConsumerWidget {
                     isCollapsed: isCollapsed,
                     onTap: () => context.go(Routes.spaces),
                   ),
+
+                  const SizedBox(height: AppSpacing.xs),
+                  if (!isCollapsed)
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        left: AppSpacing.sm,
+                        top: AppSpacing.xs,
+                        bottom: AppSpacing.xxs,
+                      ),
+                      child: Text(
+                        'INSIGHTS',
+                        style: TextStyle(
+                          color: AppColors.sidebarText.withOpacity(0.5),
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 1.2,
+                        ),
+                      ),
+                    ),
+                  _SidebarNavItem(
+                    icon: Icons.history_outlined,
+                    label: 'Activity',
+                    isSelected: currentRoute.startsWith('/activity'),
+                    isCollapsed: isCollapsed,
+                    onTap: () => context.go(Routes.activity),
+                  ),
+                  _SidebarNavItem(
+                    icon: Icons.dashboard_customize_outlined,
+                    label: 'Templates',
+                    isSelected: currentRoute.startsWith('/templates'),
+                    isCollapsed: isCollapsed,
+                    onTap: () => context.go(Routes.templates),
+                  ),
                 ],
               ),
             ),

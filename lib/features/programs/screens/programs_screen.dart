@@ -12,6 +12,7 @@ import '../widgets/program_card.dart';
 import '../widgets/program_list_view.dart';
 import '../widgets/create_program_dialog.dart';
 import '../widgets/program_filters_bar.dart';
+import '../../templates/widgets/apply_template_dialog.dart';
 
 class ProgramsScreen extends ConsumerWidget {
   final String? programId;
@@ -95,6 +96,25 @@ class ProgramsScreen extends ConsumerWidget {
               ),
 
               const SizedBox(width: AppSpacing.md),
+
+              // From Template button
+              OutlinedButton.icon(
+                onPressed: () => _showTemplateDialog(context, ref),
+                icon: const Icon(Icons.dashboard_customize_outlined, size: 18),
+                label: const Text('From Template'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.primary,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.lg,
+                    vertical: AppSpacing.sm,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                  ),
+                ),
+              ),
+
+              const SizedBox(width: AppSpacing.sm),
 
               // New program button
               FilledButton.icon(
@@ -238,6 +258,43 @@ class ProgramsScreen extends ConsumerWidget {
       context: context,
       builder: (context) => const CreateProgramDialog(),
     );
+  }
+
+  void _showTemplateDialog(BuildContext context, WidgetRef ref) {
+    final templatesAsync = ref.read(programTemplatesProvider);
+    templatesAsync.whenData((templates) {
+      if (templates.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No templates available. Create one in Templates.')),
+        );
+        return;
+      }
+      // Show a picker for which template to use
+      showDialog(
+        context: context,
+        builder: (_) => SimpleDialog(
+          title: const Text('Select Template'),
+          children: templates
+              .map((t) => SimpleDialogOption(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      showDialog(
+                        context: context,
+                        builder: (_) => ApplyTemplateDialog(template: t),
+                      );
+                    },
+                    child: ListTile(
+                      leading: const Icon(Icons.dashboard_customize),
+                      title: Text(t.name),
+                      subtitle: t.description != null
+                          ? Text(t.description!, maxLines: 1, overflow: TextOverflow.ellipsis)
+                          : null,
+                    ),
+                  ))
+              .toList(),
+        ),
+      );
+    });
   }
 }
 
