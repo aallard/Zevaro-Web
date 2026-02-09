@@ -96,11 +96,11 @@ Future<List<Outcome>> filteredOutcomes(FilteredOutcomesRef ref) async {
   return outcomes;
 }
 
-/// Outcome detail with key results
+/// Outcome detail
 @riverpod
 Future<Outcome> outcomeDetail(OutcomeDetailRef ref, String id) async {
   final outcomeService = ref.watch(outcomeServiceProvider);
-  return outcomeService.getOutcomeWithKeyResults(id);
+  return outcomeService.getOutcome(id);
 }
 
 /// Hypotheses for an outcome
@@ -147,7 +147,10 @@ class UpdateOutcomeStatus extends _$UpdateOutcomeStatus {
 
     try {
       final outcomeService = ref.read(outcomeServiceProvider);
-      await outcomeService.updateStatus(outcomeId, newStatus);
+      await outcomeService.updateOutcome(
+        outcomeId,
+        UpdateOutcomeRequest(status: newStatus),
+      );
 
       ref.invalidate(outcomeDetailProvider(outcomeId));
       ref.invalidate(filteredOutcomesProvider);
@@ -173,7 +176,7 @@ class UpdateKeyResultProgress extends _$UpdateKeyResultProgress {
 
     try {
       final outcomeService = ref.read(outcomeServiceProvider);
-      await outcomeService.updateKeyResultProgress(
+      await outcomeService.recordKeyResultProgress(
           outcomeId, keyResultId, newValue);
 
       ref.invalidate(outcomeDetailProvider(outcomeId));

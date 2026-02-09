@@ -24,7 +24,7 @@ final teamsListProvider = AutoDisposeFutureProvider<List<Team>>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef TeamsListRef = AutoDisposeFutureProviderRef<List<Team>>;
-String _$teamDetailHash() => r'3031a5acf1b351fcfa434c62dd80699fd23ce408';
+String _$teamDetailHash() => r'3fab750a2d905365de97a1c0ebe0c04dae894647';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -47,22 +47,22 @@ class _SystemHash {
   }
 }
 
-/// Team detail with members
+/// Team detail
 ///
 /// Copied from [teamDetail].
 @ProviderFor(teamDetail)
 const teamDetailProvider = TeamDetailFamily();
 
-/// Team detail with members
+/// Team detail
 ///
 /// Copied from [teamDetail].
 class TeamDetailFamily extends Family<AsyncValue<Team>> {
-  /// Team detail with members
+  /// Team detail
   ///
   /// Copied from [teamDetail].
   const TeamDetailFamily();
 
-  /// Team detail with members
+  /// Team detail
   ///
   /// Copied from [teamDetail].
   TeamDetailProvider call(
@@ -97,11 +97,11 @@ class TeamDetailFamily extends Family<AsyncValue<Team>> {
   String? get name => r'teamDetailProvider';
 }
 
-/// Team detail with members
+/// Team detail
 ///
 /// Copied from [teamDetail].
 class TeamDetailProvider extends AutoDisposeFutureProvider<Team> {
-  /// Team detail with members
+  /// Team detail
   ///
   /// Copied from [teamDetail].
   TeamDetailProvider(
@@ -187,7 +187,7 @@ class _TeamDetailProviderElement extends AutoDisposeFutureProviderElement<Team>
   String get id => (origin as TeamDetailProvider).id;
 }
 
-String _$availableUsersHash() => r'82fb2aebdd8d65bddb9e7d0eee6b248ccefd0a17';
+String _$availableUsersHash() => r'b2fc90c560bd6fb8f4bcecd4e77b3098fdbb1718';
 
 /// Users available to invite (not already team members)
 ///
@@ -331,7 +331,7 @@ class _AvailableUsersProviderElement
 }
 
 String _$teamMembersWithStatsHash() =>
-    r'c60d9948c63619695f2ddc0e147d355a8f4f471c';
+    r'366ca4e1ebe43c9957920510eb3720f40dfbf775';
 
 /// Team members with their statistics (for Team & People screen)
 ///
@@ -352,7 +352,7 @@ final teamMembersWithStatsProvider =
 // ignore: unused_element
 typedef TeamMembersWithStatsRef
     = AutoDisposeFutureProviderRef<List<TeamMember>>;
-String _$teamStakeholdersHash() => r'00adcabe095e93abf2d775287bd52ce7c2356a89';
+String _$teamStakeholdersHash() => r'6dde7a9233b1a19527707d9243d502ea5e997133';
 
 /// Team stakeholders (for Team & People screen)
 ///

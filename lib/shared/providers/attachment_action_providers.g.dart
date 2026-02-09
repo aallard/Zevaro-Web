@@ -6,7 +6,7 @@ part of 'attachment_action_providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$attachmentActionsHash() => r'37f8988d9f56c86c8005b9f9163b64b4476927d7';
+String _$attachmentActionsHash() => r'84812124b2dddf1a646852138a944e9aff3067e9';
 
 /// Action provider for attachment upload/delete.
 ///

@@ -156,9 +156,8 @@ class HypothesisKanban extends ConsumerWidget {
     try {
       final actions = ref.read(transitionHypothesisStatusProvider.notifier);
       actions.transition(hypothesis.id, newStatus);
-    } catch (e) {
-      // Fallback: Print error and continue
-      debugPrint('Error updating hypothesis status: $e');
+    } catch (_) {
+      // Transition failed — board will refresh on next provider invalidation
     }
   }
 

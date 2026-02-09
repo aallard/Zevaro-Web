@@ -13,11 +13,11 @@ Future<List<Team>> teamsList(TeamsListRef ref) async {
   return response.content;
 }
 
-/// Team detail with members
+/// Team detail
 @riverpod
 Future<Team> teamDetail(TeamDetailRef ref, String id) async {
   final teamService = ref.watch(teamServiceProvider);
-  return teamService.getTeamWithMembers(id);
+  return teamService.getTeam(id);
 }
 
 /// Add team member
@@ -130,7 +130,7 @@ Future<List<User>> availableUsers(AvailableUsersRef ref, String teamId) async {
   final allUsers = await userService.listUsers();
   final memberUserIds = team.members?.map((m) => m.user.id).toSet() ?? {};
 
-  return allUsers.content.where((u) => !memberUserIds.contains(u.id)).toList();
+  return allUsers.where((u) => !memberUserIds.contains(u.id)).toList();
 }
 
 /// Team members with their statistics (for Team & People screen)
@@ -143,7 +143,7 @@ Future<List<TeamMember>> teamMembersWithStats(TeamMembersWithStatsRef ref) async
     return [];
   }
 
-  final team = await teamService.getTeamWithMembers(teams.first.id);
+  final team = await teamService.getTeam(teams.first.id);
   return team.members ?? [];
 }
 
@@ -152,6 +152,5 @@ Future<List<TeamMember>> teamMembersWithStats(TeamMembersWithStatsRef ref) async
 Future<List<Stakeholder>> teamStakeholders(TeamStakeholdersRef ref) async {
   final stakeholderService = ref.watch(stakeholderServiceProvider);
   // Fetch stakeholders (in a real implementation, this might be filtered by team)
-  final response = await stakeholderService.listStakeholders();
-  return response.content;
+  return stakeholderService.listStakeholders();
 }

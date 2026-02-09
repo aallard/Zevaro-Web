@@ -43,7 +43,7 @@ final registerFormStateProvider =
 
 typedef _$RegisterFormState = AutoDisposeNotifier<AsyncValue<void>>;
 String _$forgotPasswordFormStateHash() =>
-    r'b1a1942c422426f05ce04dd35015a6d2cdedbbba';
+    r'4ed61644b3807ede88464d4aa50510d9d6270662';
 
 /// Forgot password form state
 ///
@@ -62,7 +62,7 @@ final forgotPasswordFormStateProvider = AutoDisposeNotifierProvider<
 
 typedef _$ForgotPasswordFormState = AutoDisposeNotifier<AsyncValue<void>>;
 String _$resetPasswordFormStateHash() =>
-    r'4211e9212aa709e846dccda4450fcb864c03310f';
+    r'1c46c8031c84747a7ab8aa9d9da1335e6ae7b9f7';
 
 /// Reset password form state
 ///

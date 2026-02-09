@@ -26,7 +26,7 @@ final filteredOutcomesProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef FilteredOutcomesRef = AutoDisposeFutureProviderRef<List<Outcome>>;
-String _$outcomeDetailHash() => r'b2697881a3eb51d3032175fe0d02fa7e70bfb74f';
+String _$outcomeDetailHash() => r'ef9866905ac0c02d0543759451aa84be93647837';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -49,22 +49,22 @@ class _SystemHash {
   }
 }
 
-/// Outcome detail with key results
+/// Outcome detail
 ///
 /// Copied from [outcomeDetail].
 @ProviderFor(outcomeDetail)
 const outcomeDetailProvider = OutcomeDetailFamily();
 
-/// Outcome detail with key results
+/// Outcome detail
 ///
 /// Copied from [outcomeDetail].
 class OutcomeDetailFamily extends Family<AsyncValue<Outcome>> {
-  /// Outcome detail with key results
+  /// Outcome detail
   ///
   /// Copied from [outcomeDetail].
   const OutcomeDetailFamily();
 
-  /// Outcome detail with key results
+  /// Outcome detail
   ///
   /// Copied from [outcomeDetail].
   OutcomeDetailProvider call(
@@ -99,11 +99,11 @@ class OutcomeDetailFamily extends Family<AsyncValue<Outcome>> {
   String? get name => r'outcomeDetailProvider';
 }
 
-/// Outcome detail with key results
+/// Outcome detail
 ///
 /// Copied from [outcomeDetail].
 class OutcomeDetailProvider extends AutoDisposeFutureProvider<Outcome> {
-  /// Outcome detail with key results
+  /// Outcome detail
   ///
   /// Copied from [outcomeDetail].
   OutcomeDetailProvider(
@@ -370,7 +370,7 @@ final createOutcomeProvider =
 
 typedef _$CreateOutcome = AutoDisposeAsyncNotifier<void>;
 String _$updateOutcomeStatusHash() =>
-    r'3c3b4545153fe37ae5ff96433a84d6389291f78a';
+    r'263f4c59675ce0521f758784b73637584446aaf1';
 
 /// Update outcome status
 ///
@@ -389,7 +389,7 @@ final updateOutcomeStatusProvider =
 
 typedef _$UpdateOutcomeStatus = AutoDisposeAsyncNotifier<void>;
 String _$updateKeyResultProgressHash() =>
-    r'67eedd3163f2f6093f9e0df14571214de61f27dc';
+    r'ba1b4337e164247252e33861a8cb8894cba60249';
 
 /// Update key result progress
 ///

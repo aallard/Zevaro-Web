@@ -67,13 +67,12 @@ class ForgotPasswordFormState extends _$ForgotPasswordFormState {
 
   Future<bool> submit({required String email}) async {
     state = const AsyncValue.loading();
-
-    state = await AsyncValue.guard(() async {
-      final authService = ref.read(authServiceProvider);
-      await authService.forgotPassword(email);
-    });
-
-    return !state.hasError;
+    // TODO: Core does not yet expose a forgot-password endpoint
+    state = AsyncValue.error(
+      UnimplementedError('Password reset is not yet available'),
+      StackTrace.current,
+    );
+    return false;
   }
 }
 
@@ -88,13 +87,12 @@ class ResetPasswordFormState extends _$ResetPasswordFormState {
     required String newPassword,
   }) async {
     state = const AsyncValue.loading();
-
-    state = await AsyncValue.guard(() async {
-      final authService = ref.read(authServiceProvider);
-      await authService.resetPassword(token, newPassword);
-    });
-
-    return !state.hasError;
+    // TODO: Core does not yet expose a reset-password endpoint
+    state = AsyncValue.error(
+      UnimplementedError('Password reset is not yet available'),
+      StackTrace.current,
+    );
+    return false;
   }
 }
 

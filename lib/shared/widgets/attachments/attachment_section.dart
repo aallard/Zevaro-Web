@@ -1,3 +1,4 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:zevaro_flutter_sdk/zevaro_flutter_sdk.dart';
@@ -47,7 +48,7 @@ class AttachmentSection extends ConsumerWidget {
                   ),
                   const Spacer(),
                   OutlinedButton.icon(
-                    onPressed: () => _showUploadInfo(context),
+                    onPressed: () => _pickAndUpload(context, ref),
                     icon: const Icon(Icons.upload_outlined, size: 16),
                     label: const Text('Upload'),
                     style: OutlinedButton.styleFrom(
@@ -140,20 +141,32 @@ class AttachmentSection extends ConsumerWidget {
     );
   }
 
-  void _showUploadInfo(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Upload Attachment'),
-        content: const Text(
-            'File upload via the API is available. Use the REST API endpoint POST /attachments with multipart form data to upload files.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
+  Future<void> _pickAndUpload(BuildContext context, WidgetRef ref) async {
+    final result = await FilePicker.platform.pickFiles();
+    if (result == null || result.files.isEmpty) return;
+
+    final file = result.files.first;
+    if (file.bytes == null) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not read file data.')),
+        );
+      }
+      return;
+    }
+
+    final attachment = await ref
+        .read(attachmentActionsProvider.notifier)
+        .uploadFromBytes(parentType, parentId, file.bytes!, file.name);
+
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(attachment != null
+              ? 'Uploaded "${file.name}"'
+              : 'Failed to upload "${file.name}"'),
+        ),
+      );
+    }
   }
 }

@@ -119,7 +119,8 @@ class UpdateProfile extends _$UpdateProfile {
 
     try {
       final userService = ref.read(userServiceProvider);
-      await userService.updateProfile(request);
+      final currentUser = await ref.read(currentUserProvider.future);
+      await userService.updateUser(currentUser.id, request);
 
       ref.invalidate(currentUserProvider);
 
@@ -141,16 +142,11 @@ class ChangePassword extends _$ChangePassword {
   Future<bool> changePassword(
       String currentPassword, String newPassword) async {
     state = const AsyncValue.loading();
-
-    try {
-      final authService = ref.read(authServiceProvider);
-      await authService.changePassword(currentPassword, newPassword);
-
-      state = const AsyncValue.data(null);
-      return true;
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
-      return false;
-    }
+    // TODO: Core does not yet expose a change-password endpoint
+    state = AsyncValue.error(
+      UnimplementedError('Password change is not yet available'),
+      StackTrace.current,
+    );
+    return false;
   }
 }

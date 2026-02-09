@@ -113,11 +113,11 @@ Future<List<Hypothesis>> filteredHypotheses(FilteredHypothesesRef ref) async {
   return hypotheses;
 }
 
-/// Hypothesis detail with metrics
+/// Hypothesis detail
 @riverpod
 Future<Hypothesis> hypothesisDetail(HypothesisDetailRef ref, String id) async {
   final hypothesisService = ref.watch(hypothesisServiceProvider);
-  return hypothesisService.getHypothesisWithMetrics(id);
+  return hypothesisService.getHypothesis(id);
 }
 
 /// Transition hypothesis status
@@ -146,7 +146,7 @@ class TransitionHypothesisStatus extends _$TransitionHypothesisStatus {
   }
 }
 
-/// Validate hypothesis (terminal success state)
+/// Validate hypothesis (terminal success state via conclude)
 @riverpod
 class ValidateHypothesis extends _$ValidateHypothesis {
   @override
@@ -157,7 +157,13 @@ class ValidateHypothesis extends _$ValidateHypothesis {
 
     try {
       final hypothesisService = ref.read(hypothesisServiceProvider);
-      await hypothesisService.validate(hypothesisId, notes: notes);
+      await hypothesisService.concludeHypothesis(
+        hypothesisId,
+        ConcludeHypothesisRequest(
+          conclusionStatus: 'VALIDATED',
+          conclusionNotes: notes,
+        ),
+      );
 
       ref.invalidate(hypothesisDetailProvider(hypothesisId));
       ref.invalidate(filteredHypothesesProvider);
@@ -171,7 +177,7 @@ class ValidateHypothesis extends _$ValidateHypothesis {
   }
 }
 
-/// Invalidate hypothesis (terminal failure state)
+/// Invalidate hypothesis (terminal failure state via conclude)
 @riverpod
 class InvalidateHypothesis extends _$InvalidateHypothesis {
   @override
@@ -182,7 +188,13 @@ class InvalidateHypothesis extends _$InvalidateHypothesis {
 
     try {
       final hypothesisService = ref.read(hypothesisServiceProvider);
-      await hypothesisService.invalidate(hypothesisId, notes: notes);
+      await hypothesisService.concludeHypothesis(
+        hypothesisId,
+        ConcludeHypothesisRequest(
+          conclusionStatus: 'INVALIDATED',
+          conclusionNotes: notes,
+        ),
+      );
 
       ref.invalidate(hypothesisDetailProvider(hypothesisId));
       ref.invalidate(filteredHypothesesProvider);
@@ -233,7 +245,7 @@ Future<List<Hypothesis>> hypothesisList(
     return [];
   }
 
-  final response = await hypothesisService.listHypotheses();
+  final response = await hypothesisService.listHypotheses(programId: programId);
   return response.content;
 }
 

@@ -43,7 +43,7 @@ final notificationSettingsProvider = AutoDisposeNotifierProvider<
 );
 
 typedef _$NotificationSettings = AutoDisposeNotifier<NotificationPrefs>;
-String _$updateProfileHash() => r'3ec906a25912956eb4551b980941412c7601e5f0';
+String _$updateProfileHash() => r'9ea85271c005e36094ef99b8ced5c4ac44a7957a';
 
 /// Update user profile
 ///
@@ -61,7 +61,7 @@ final updateProfileProvider =
 );
 
 typedef _$UpdateProfile = AutoDisposeAsyncNotifier<void>;
-String _$changePasswordHash() => r'84795b48ef68015d126a2afab4f264e285765a6a';
+String _$changePasswordHash() => r'82da28585b856ed7d0878e96d7f1576b24666597';
 
 /// Change password
 ///

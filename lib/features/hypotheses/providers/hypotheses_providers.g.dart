@@ -27,7 +27,7 @@ final filteredHypothesesProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef FilteredHypothesesRef = AutoDisposeFutureProviderRef<List<Hypothesis>>;
-String _$hypothesisDetailHash() => r'f41f7926a6a517f4adeafa2c28a8e72b3905a76a';
+String _$hypothesisDetailHash() => r'dea22b45d150f3b8aaa0f7fe7d400c3fa7ddbd49';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -50,22 +50,22 @@ class _SystemHash {
   }
 }
 
-/// Hypothesis detail with metrics
+/// Hypothesis detail
 ///
 /// Copied from [hypothesisDetail].
 @ProviderFor(hypothesisDetail)
 const hypothesisDetailProvider = HypothesisDetailFamily();
 
-/// Hypothesis detail with metrics
+/// Hypothesis detail
 ///
 /// Copied from [hypothesisDetail].
 class HypothesisDetailFamily extends Family<AsyncValue<Hypothesis>> {
-  /// Hypothesis detail with metrics
+  /// Hypothesis detail
   ///
   /// Copied from [hypothesisDetail].
   const HypothesisDetailFamily();
 
-  /// Hypothesis detail with metrics
+  /// Hypothesis detail
   ///
   /// Copied from [hypothesisDetail].
   HypothesisDetailProvider call(
@@ -100,11 +100,11 @@ class HypothesisDetailFamily extends Family<AsyncValue<Hypothesis>> {
   String? get name => r'hypothesisDetailProvider';
 }
 
-/// Hypothesis detail with metrics
+/// Hypothesis detail
 ///
 /// Copied from [hypothesisDetail].
 class HypothesisDetailProvider extends AutoDisposeFutureProvider<Hypothesis> {
-  /// Hypothesis detail with metrics
+  /// Hypothesis detail
   ///
   /// Copied from [hypothesisDetail].
   HypothesisDetailProvider(
@@ -191,7 +191,7 @@ class _HypothesisDetailProviderElement
   String get id => (origin as HypothesisDetailProvider).id;
 }
 
-String _$hypothesisListHash() => r'9f8dcc434a3da66215d3224852ad91ce1fba89d8';
+String _$hypothesisListHash() => r'9bd5a64d926a60cc7b3ad4d2cc7d3e593674d26b';
 
 /// Hypothesis list provider (for kanban board)
 ///
@@ -664,9 +664,9 @@ final transitionHypothesisStatusProvider =
 
 typedef _$TransitionHypothesisStatus = AutoDisposeAsyncNotifier<void>;
 String _$validateHypothesisHash() =>
-    r'e67b0831e80f311b4d107f685753d65e97e35020';
+    r'945b5d7d32089166134b6e2b8e768f3728fa3950';
 
-/// Validate hypothesis (terminal success state)
+/// Validate hypothesis (terminal success state via conclude)
 ///
 /// Copied from [ValidateHypothesis].
 @ProviderFor(ValidateHypothesis)
@@ -683,9 +683,9 @@ final validateHypothesisProvider =
 
 typedef _$ValidateHypothesis = AutoDisposeAsyncNotifier<void>;
 String _$invalidateHypothesisHash() =>
-    r'a09a6aeb0c29ea0270287a2d6e4d8670c31d1cf7';
+    r'7bbacf3f5f0fba4230f0030b03dee71f2cff169d';
 
-/// Invalidate hypothesis (terminal failure state)
+/// Invalidate hypothesis (terminal failure state via conclude)
 ///
 /// Copied from [InvalidateHypothesis].
 @ProviderFor(InvalidateHypothesis)

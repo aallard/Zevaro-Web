@@ -47,7 +47,7 @@ class _CreateDecisionDialogState extends ConsumerState<CreateDecisionDialog> {
     final hypothesesAsync = ref.watch(myHypothesesProvider);
     final teamsAsync = ref.watch(myTeamsProvider);
     final teamMembersAsync = _selectedTeamId != null
-        ? ref.watch(teamWithMembersProvider(_selectedTeamId!))
+        ? ref.watch(teamProvider(_selectedTeamId!))
         : null;
 
     return Dialog(

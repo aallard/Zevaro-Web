@@ -213,7 +213,7 @@ Future<List<Decision>> v2FilteredDecisions(
   List<Decision> decisions;
 
   if (filters.hasV2Filters) {
-    decisions = await service.listFiltered(
+    final response = await service.listDecisions(
       portfolioId: filters.portfolioId,
       programId: filters.programId,
       workstreamId: filters.workstreamId,
@@ -221,6 +221,7 @@ Future<List<Decision>> v2FilteredDecisions(
       executionMode: filters.executionMode,
       slaStatus: filters.slaStatus,
     );
+    decisions = response.content;
   } else {
     decisions = await service.getPendingDecisions();
   }

@@ -88,16 +88,4 @@ abstract class AppColors {
   static const Color kanbanBuilding = Color(0xFFF5F3FF);  // violet-50
   static const Color kanbanMeasuring = Color(0xFFECFDF5);  // emerald-50
   static const Color kanbanConcluded = Color(0xFFF9FAFB);  // gray-50
-
-  // Card accent colors for programs
-  static const List<Color> programAccentColors = [
-    Color(0xFF4F46E5),  // indigo
-    Color(0xFF10B981),  // emerald
-    Color(0xFFF59E0B),  // amber
-    Color(0xFFEF4444),  // rose
-    Color(0xFF06B6D4),  // cyan
-    Color(0xFF8B5CF6),  // purple
-    Color(0xFFEC4899),  // pink
-    Color(0xFFF97316),  // orange
-  ];
 }

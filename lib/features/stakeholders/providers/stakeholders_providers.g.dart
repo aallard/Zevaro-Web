@@ -6,7 +6,7 @@ part of 'stakeholders_providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$stakeholderDetailHash() => r'662eaa9b022119adff797e4925d43eb3fe1318b8';
+String _$stakeholderDetailHash() => r'e05ef14176b6aa4680b300f354249d1bf24def1a';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -29,22 +29,22 @@ class _SystemHash {
   }
 }
 
-/// Stakeholder detail with stats
+/// Stakeholder detail
 ///
 /// Copied from [stakeholderDetail].
 @ProviderFor(stakeholderDetail)
 const stakeholderDetailProvider = StakeholderDetailFamily();
 
-/// Stakeholder detail with stats
+/// Stakeholder detail
 ///
 /// Copied from [stakeholderDetail].
 class StakeholderDetailFamily extends Family<AsyncValue<Stakeholder>> {
-  /// Stakeholder detail with stats
+  /// Stakeholder detail
   ///
   /// Copied from [stakeholderDetail].
   const StakeholderDetailFamily();
 
-  /// Stakeholder detail with stats
+  /// Stakeholder detail
   ///
   /// Copied from [stakeholderDetail].
   StakeholderDetailProvider call(
@@ -79,11 +79,11 @@ class StakeholderDetailFamily extends Family<AsyncValue<Stakeholder>> {
   String? get name => r'stakeholderDetailProvider';
 }
 
-/// Stakeholder detail with stats
+/// Stakeholder detail
 ///
 /// Copied from [stakeholderDetail].
 class StakeholderDetailProvider extends AutoDisposeFutureProvider<Stakeholder> {
-  /// Stakeholder detail with stats
+  /// Stakeholder detail
   ///
   /// Copied from [stakeholderDetail].
   StakeholderDetailProvider(
@@ -170,27 +170,6 @@ class _StakeholderDetailProviderElement
   String get id => (origin as StakeholderDetailProvider).id;
 }
 
-String _$myStakeholderProfileHash() =>
-    r'452b7c2d3be2420499879674e1c715eff60445dd';
-
-/// My stakeholder profile
-///
-/// Copied from [myStakeholderProfile].
-@ProviderFor(myStakeholderProfile)
-final myStakeholderProfileProvider =
-    AutoDisposeFutureProvider<Stakeholder>.internal(
-  myStakeholderProfile,
-  name: r'myStakeholderProfileProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$myStakeholderProfileHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef MyStakeholderProfileRef = AutoDisposeFutureProviderRef<Stakeholder>;
 String _$stakeholderPendingResponsesHash() =>
     r'da4f07c96b93773568d3cee7763d1816b21267a6';
 
@@ -511,22 +490,5 @@ final leaderboardPeriodProvider =
 );
 
 typedef _$LeaderboardPeriod = AutoDisposeNotifier<String>;
-String _$sendReminderHash() => r'4a91c4b035c8d1d808117c0b07b076458f86cfb6';
-
-/// Send reminder to stakeholder
-///
-/// Copied from [SendReminder].
-@ProviderFor(SendReminder)
-final sendReminderProvider =
-    AutoDisposeAsyncNotifierProvider<SendReminder, void>.internal(
-  SendReminder.new,
-  name: r'sendReminderProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product') ? null : _$sendReminderHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-typedef _$SendReminder = AutoDisposeAsyncNotifier<void>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

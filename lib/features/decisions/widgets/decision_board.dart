@@ -140,7 +140,6 @@ class DecisionBoard extends ConsumerWidget {
 
     // TODO: SDK doesn't yet support arbitrary status transitions via drag.
     // For now, just refresh the board. Wire up resolveDecision / escalate when ready.
-    debugPrint('Decision ${decision.id} dragged to $newStatus — status update not yet wired');
     ref.invalidate(decisionsByStatusProvider);
   }
 
